@@ -1,0 +1,123 @@
+  <!-- ===================== TAB 11 ===================== -->
+  <div id="tab11" class="tab-content">
+
+    <div class="section-title">
+      <h2 style="text-transform:uppercase;letter-spacing:.4px;">Reportes Cajero</h2>
+      <span class="badge badge-amber">Por rol</span>
+    </div>
+
+    <div class="card">
+      <p style="font-size:13px;color:var(--muted);margin:0;">Esta sección corresponde a los <strong>reportes que necesita el rol Cajero</strong>. Es el mismo reporte que consulta el Admin, ya que ambos ven el mismo cierre diario.</p>
+    </div>
+
+    <div class="card" id="rca-reporte-diario">
+      <h2>1. Reporte Diario de Caja <span class="tag">DATOS FIJOS · INTERACTIVO</span></h2>
+      <p style="font-size:13.5px;line-height:1.7;margin-top:0;">
+        Reproduce el mismo orden y los mismos campos que la tirilla/pantallazo del datáfono, para que se pueda comparar línea por línea. Los "+ Detalles" solo aparecen en las líneas de <strong>Terceros y Compensaciones</strong> (donde el cajero no tiene visibilidad propia); las líneas de datáfono puro ya coinciden 1 a 1 con lo impreso y no lo necesitan.
+      </p>
+    </div>
+
+    <div class="card">
+      <h4 style="margin-top:0;">Reporte propuesto para datáfonos Wompi <span class="tag">A PROGRAMAR</span></h4>
+      <p style="font-size:13px;color:var(--muted);margin-top:0;">Este es el contenido enviado desde el rol Cajero (Cambio 2) para el nuevo formato Wompi, documentado aquí porque es donde vive el Reporte Diario de Caja.</p>
+      <div class="cmp" style="margin-top:20px;">
+        <div class="cmp-col">
+          <h4>Reportes datáfonos Wompi <span style="text-transform:none;font-weight:400;">(contexto)</span></h4>
+          <p style="font-size:13px;line-height:1.6;margin-top:0;">Así se ve el cierre diario que entrega el datáfono Wompi: solo transacciones de entrada y salida, con cantidad y monto (quedan en $0 las que no tuvieron movimiento).</p>
+          <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+            <img src="../capturas/punto-8-01.jpg" alt="Cierre diario datáfonos Wompi - transacciones de entrada" style="max-width:260px;width:100%;border:1px solid var(--border);border-radius:10px;">
+            <img src="../capturas/punto-8-02.jpg" alt="Cierre diario datáfonos Wompi - transacciones de salida" style="max-width:260px;width:100%;border:1px solid var(--border);border-radius:10px;">
+          </div>
+        </div>
+        <div class="cmp-col">
+          <h4 class="new">Propuesto</h4>
+          <p style="font-size:13px;line-height:1.6;margin-top:0;">El reporte diario se visualiza en la parte superior igual a lo que el datáfono hoy muestra: Transacciones de entrada y salida y cada bloque con sus totales y el Neto total de ambos bloques. Lo que se busca es que de manera visual el cajero pueda rápidamente comparar que sus movimientos están bien digitados y proceda entonces a realizar su cierre de caja.</p>
+          
+        </div>
+      </div>
+    </div>
+
+
+    <div class="pos-modal-like" style="max-width:560px;margin:0 auto 20px;border:1px solid var(--border);border-radius:16px;overflow:hidden;background:#fff;">
+      <div style="background:var(--navy);color:#fff;padding:16px 22px;font-size:14px;font-weight:700;letter-spacing:.3px;">
+        Reporte diario de caja - CB [12029]
+      </div>
+      <div style="padding:22px;">
+
+        <div style="text-align:center;margin-bottom:16px;">
+          <div style="font-size:14px;font-weight:700;">REPORTE DIARIO DE CAJA</div>
+          <div style="font-size:13px;color:var(--muted);">CB [12029] BARRIO CENTENARIO</div>
+          <div style="font-size:13px;color:var(--muted);">Caja: Soraya Monterrosa</div>
+        </div>
+
+        <div class="two-field-row" style="margin-bottom:10px;">
+          <div>
+            <label style="margin-top:0;">Fecha reporte</label>
+            <input type="date" id="fechaReporteRDC" value="2026-06-29">
+          </div>
+          <div>
+            <label style="margin-top:0;">Fecha de consulta</label>
+            <input type="text" id="fechaConsultaRDC" disabled>
+          </div>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:2px;">
+          <span style="color:var(--muted);">Estado reporte diario caja</span>
+          <span style="font-weight:700;">Abierta</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:16px;">
+          <span style="color:var(--muted);">Saldo inicial</span>
+          <span class="mono">$1.850.000</span>
+        </div>
+
+        <div style="font-size:13px;font-weight:700;margin-bottom:6px;">Transacciones de entrada</div>
+        <table class="setup-table" style="margin-bottom:16px;">
+          <tr><th>Tipo</th><th style="text-align:center;">Cant.</th><th style="text-align:right;">Valor</th></tr>
+          <tr><td>Consignación</td><td style="text-align:center;">10</td><td class="mono" style="text-align:right;">$14.817.683</td></tr>
+          <tr><td>Recarga Nequi</td><td style="text-align:center;">8</td><td class="mono" style="text-align:right;">$11.100.000</td></tr>
+          <tr><td>Recaudos</td><td style="text-align:center;">7</td><td class="mono" style="text-align:right;">$10.729.537</td></tr>
+          <tr><td>Pago de Cartera</td><td style="text-align:center;">0</td><td class="mono" style="text-align:right;">$0</td></tr>
+          <tr><td>Pago Tarjeta de Crédito</td><td style="text-align:center;">0</td><td class="mono" style="text-align:right;">$0</td></tr>
+          <tr class="row-new"><td><strong>Total entradas</strong></td><td style="text-align:center;"><strong>25</strong></td><td class="mono" style="text-align:right;"><strong>$36.647.220</strong></td></tr>
+        </table>
+
+        <div style="font-size:13px;font-weight:700;margin-bottom:6px;">Transacciones de salida</div>
+        <table class="setup-table" style="margin-bottom:16px;">
+          <tr><th>Tipo</th><th style="text-align:center;">Cant.</th><th style="text-align:right;">Valor</th></tr>
+          <tr><td>Avance Tarjeta de Crédito</td><td style="text-align:center;">0</td><td class="mono" style="text-align:right;">$0</td></tr>
+          <tr><td>Retiro Tarjeta Débito</td><td style="text-align:center;">4</td><td class="mono" style="text-align:right;">$11.385.000</td></tr>
+          <tr><td>Retiro Nequi</td><td style="text-align:center;">2</td><td class="mono" style="text-align:right;">$1.745.000</td></tr>
+          <tr><td>Retiro en Efectivo</td><td style="text-align:center;">0</td><td class="mono" style="text-align:right;">$0</td></tr>
+          <tr><td>Otros Retiros</td><td style="text-align:center;">0</td><td class="mono" style="text-align:right;">$0</td></tr>
+          <tr class="row-new"><td><strong>Total salidas</strong></td><td style="text-align:center;"><strong>6</strong></td><td class="mono" style="text-align:right;"><strong>$13.130.000</strong></td></tr>
+        </table>
+
+        <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;margin-bottom:16px;">
+          <span>Neto total</span><span class="mono">$23.517.220</span>
+        </div>
+
+        <div style="font-size:13px;font-weight:700;margin-bottom:6px;">Transacciones de terceros y compensaciones</div>
+        <table class="setup-table" id="tablaTercerosRDC">
+          <tr><th>Tipo</th><th style="text-align:right;">Valor</th><th></th></tr>
+        </table>
+
+        <div style="border-top:1px solid var(--border);margin-top:16px;padding-top:10px;display:flex;justify-content:space-between;">
+          <span style="font-size:14px;font-weight:700;">Caja actual</span>
+          <span class="mono" style="font-size:16px;font-weight:700;">$16.000.000</span>
+        </div>
+
+        <div class="btnbar" style="justify-content:space-between;margin-top:18px;">
+          <button class="btn-dark-small" onclick="cerrarReporteDiarioRDC()">Cerrar</button>
+          <div style="display:flex;gap:8px;">
+            <button class="btn-blue-small" onclick="alert('Simulación: aquí se enviaría a imprimir.')">Imprimir</button>
+            <button class="btn-blue-small" disabled>Excel</button>
+            <button class="btn-blue-small" disabled>PDF</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    
+
+
+  </div>

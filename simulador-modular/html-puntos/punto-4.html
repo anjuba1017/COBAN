@@ -1,0 +1,354 @@
+  <!-- ===================== TAB 7 ===================== -->
+  <div id="tab7" class="tab-content">
+
+    <div class="section-title">
+      <h2 style="text-transform:uppercase;letter-spacing:.4px;">Terceros</h2>
+      <span class="badge badge-amber">Ventana: Terceros</span>
+    </div>
+
+    <div class="card">
+      <p style="font-size:13px;color:var(--muted);margin:0 0 4px;">Cambios propuestos para la ventana de <strong>TERCEROS</strong>. Al igual que en los roles, se va a ir numerando cada punto según la parte de la ventana donde se realiza el cambio — aquí es donde se registran las transacciones que afectan al tercero y a la caja del corresponsal.</p>
+    </div>
+
+    <div class="card">
+      <h2>1. Título de la ventana <span class="tag">AJUSTE REQUERIDO</span></h2>
+      <p style="font-size:13.5px;line-height:1.7;margin-top:0;">El título actual es demasiado complejo y repite información innecesaria:</p>
+      <div style="display:flex;justify-content:center;">
+        <img src="../capturas/punto-4-01.jpg" alt="Título actual de la ventana de Terceros" style="max-width:560px;width:100%;border:1px solid var(--border);border-radius:10px;">
+      </div>
+      <div class="cmp" style="margin-top:16px;">
+        <div class="cmp-col">
+          <h4>Actual</h4>
+          <ul>
+            <li>TERCEROS - [30] [CB BARRIO CENTENARIO] / [CAJA2-YOHANA] [CAJA2-YOHANA] DETALL...</li>
+          </ul>
+        </div>
+        <div class="cmp-col">
+          <h4 class="new">Propuesto</h4>
+          <ul>
+            <li class="new">TERCEROS - [CÓDIGO DEL CB] - NOMBRE DEL CORRESPONSAL - NOMBRE DEL CAJERO</li>
+          </ul>
+        </div>
+      </div>
+      <div class="setup-note">Ejemplo: <strong>TERCEROS - [12029] Barrio Centenario - Yohana Monterrosa</strong></div>
+    </div>
+
+    <div class="card">
+      <h2>2. Información de Terceros <span class="tag">AJUSTE REQUERIDO</span></h2>
+      <p style="font-size:13.5px;line-height:1.7;margin-top:0;">Actualmente, al seleccionar el tercero se muestra su nombre y su número de identificación:</p>
+      <div style="display:flex;justify-content:center;">
+        <img src="../capturas/punto-4-02.jpg" alt="Información actual al seleccionar un tercero (nombre e identificación)" style="max-width:600px;width:100%;border:1px solid var(--border);border-radius:10px;">
+      </div>
+      <div class="cmp" style="margin-top:16px;">
+        <div class="cmp-col">
+          <h4>Actual</h4>
+          <ul>
+            <li>Nombre del tercero</li>
+            <li>Número de identificación</li>
+          </ul>
+        </div>
+        <div class="cmp-col">
+          <h4 class="new">Propuesto</h4>
+          <ul>
+            <li>Nombre del tercero</li>
+            <li class="new">"Saldo - Crédito" en negro si tiene saldo a favor, en rojo si debe. Cupo: valor en negrita.</li>
+            <li class="new">Ejemplo: LILIBETH EL CAMELLO [Saldo: $ 2.500.000 - Crédito: $ 1.000.000]</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>3. Lógica de la transacción "Préstamo de Tercero" según el método de envío <span class="tag">A PROGRAMAR</span></h2>
+      <p style="font-size:13.5px;line-height:1.7;margin-top:0;">En la pestaña de rol admin ya introducimos un nuevo método de envío de terceros de dinero al corresponsal y fue el de <strong>Compensación a otro CB</strong>.</p>
+      <p style="font-size:13.5px;line-height:1.7;margin-top:0;">El cambio de este apartado entonces aplica para las transacciones <strong>"Préstamo de Tercero"</strong>.</p>
+
+      <h3 style="font-size:13.5px;margin-bottom:8px;">1. Destino de los fondos del tercero según el método de envío</h3>
+      <table class="setup-table">
+        <tr><th>Caso</th><th>Método de envío</th><th>Destino del dinero</th></tr>
+        <tr><td>1</td><td>Transferencia</td><td>Cuenta bancaria del CB</td></tr>
+        <tr><td>2</td><td>Consignación en sucursal</td><td>Cuenta bancaria del CB</td></tr>
+        <tr><td>3</td><td>Consignación Cajero</td><td>Cuenta bancaria del CB</td></tr>
+        <tr><td>4</td><td>Consignación CB</td><td>Cuenta bancaria del CB</td></tr>
+        <tr class="row-new"><td>5</td><td>Compensación</td><td>Cupo del corresponsal</td></tr>
+        <tr class="row-new"><td>6</td><td>Compensación a otro CB</td><td>Tercero dueño del CB</td></tr>
+        <tr><td>7</td><td>Entrega en efectivo</td><td>Caja</td></tr>
+      </table>
+      <div class="setup-note">
+        Para los casos 1 a 6 el dinero <strong>nunca</strong> entra a la caja: en los casos 1-4 entra a una cuenta corriente o de ahorros del CB; en el caso 5 el dinero compensa directamente al código del CB; en el caso 6 el dinero compensa directamente al código de un CB <strong>externo</strong>, por lo que aquí se carga como un préstamo a ese tercero. Solo en el caso 7 el dinero <strong>sí entra a la caja</strong>, aumentándola.
+      </div>
+
+      <div class="cmp" style="margin-top:20px;">
+        <div class="cmp-col">
+          <h4>Estado actual del aplicativo</h4>
+          <p style="font-size:13px;line-height:1.6;margin-top:0;"><strong>Casos 1 a 4:</strong> el cajero debe hacer <strong>2 movimientos</strong>: uno como Préstamo de Tercero (aumenta su caja) y luego un Préstamo a Tercero (al tercero cuenta corriente/ahorros del CB), para que la caja vuelva a disminuir.</p>
+          <p style="font-size:13px;line-height:1.6;"><strong>Caso 5:</strong> el cajero debe hacer 2 movimientos: uno como Préstamo de Tercero (aumenta su caja) y luego hacer una Compensación, para que la caja vuelva a disminuir.</p>
+          <p style="font-size:13px;line-height:1.6;"><strong>Caso 6:</strong> el cajero debe hacer 2 movimientos: uno como Préstamo de Tercero (aumenta su caja) y luego hacer un Préstamo a Tercero (al CB externo al que le hicieron la compensación), para que la caja vuelva a disminuir.</p>
+          <ul>
+            <li>Hay un reproceso en los casos 1 al 6: debería ser 1 solo movimiento en vez de 2, sin que la caja se modifique.</li>
+            <li>Hay riesgo de error de tipeo: se puede colocar un valor distinto en cada paso, o hacer el paso 1 y olvidar el paso 2 — quedando la caja con un valor superior al que debería.</li>
+          </ul>
+        </div>
+        <div class="cmp-col">
+          <h4 class="new">Lo que debería hacer el aplicativo</h4>
+          <p style="font-size:13px;line-height:1.6;margin-top:0;"><strong>Casos 1 a 4:</strong> mostrar un nuevo campo debajo de Referencia para seleccionar el destino de los fondos — un tercero que sea cuenta corriente o de ahorros (el CB puede tener más de una: Nequi, Daviplata, Bancolombia, etc., cada una tratada como un tercero más).</p>
+          <ul class="new-list">
+            <li class="new">Resultado: el tercero que presta el dinero — el CB le queda debiendo.</li>
+            <li class="new">Resultado: el tercero que recibe el dinero (Nequi, etc.) — le queda debiendo al CB.</li>
+          </ul>
+          <p style="font-size:13px;line-height:1.6;"><strong>Caso 5 (Compensación):</strong> el formulario queda igual; al registrar la operación, automáticamente se recibe el dinero y se compensa.</p>
+          <ul class="new-list">
+            <li class="new">Resultado: el tercero que presta el dinero — el CB le queda debiendo.</li>
+            <li class="new">Resultado: no hay terceros de por medio; al compensarse, el dinero afecta la deuda al banco, disminuyéndola y por tanto aumentando el cupo.</li>
+          </ul>
+          <p style="font-size:13px;line-height:1.6;"><strong>Caso 6 (Compensación a otro CB):</strong> mostrar un nuevo campo <strong>encima</strong> de Referencia para seleccionar el tercero dueño del CB externo (en este caso puede ser cualquier tercero de los existentes).</p>
+          <ul class="new-list">
+            <li class="new">Resultado: el tercero que presta el dinero — el CB le queda debiendo.</li>
+            <li class="new">Resultado: el tercero que recibe el dinero (tercero dueño del CB externo) — le queda debiendo al CB.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="setup-note">👉 De esta forma ya no habría necesidad de usar la caja como "puente": el dinero fluye directamente del tercero a la cuenta corriente/ahorros correspondiente, o se hace la compensación, o se hace el préstamo a un tercero dueño de un corresponsal externo.</div>
+    </div>
+
+    <div class="section-title" style="margin-top:34px;">
+      <h2 style="text-transform:uppercase;letter-spacing:.4px;font-size:19px;">Simulación del nuevo modelo de préstamo de terceros</h2>
+    </div>
+
+    <div class="card">
+      <p style="font-size:13.5px;line-height:1.7;margin-top:0;">El formulario de Terceros debe ser capaz de procesar en una sola interfaz las transacciones que actualmente se hacen dobles para los casos 1 al 6 explicados arriba.</p>
+      <p style="font-size:13.5px;line-height:1.7;margin-top:0;">Para explicarlo mejor simularemos movimientos de préstamos de tercero así:</p>
+      <ul style="font-size:13.5px;line-height:1.9;padding-left:20px;margin-top:0;margin-bottom:0;list-style:none;">
+        <li><strong>A.</strong> Iniciamos con unos estados iniciales de dos terceros (Nequi como cuenta de banco receptora de fondos y Mauricio Chará como tercero que envía el dinero).</li>
+        <li><strong>B.</strong> Se muestra un resumen financiero del CB para inicio de la simulación.</li>
+        <li><strong>C.</strong> Simularemos en el nuevo formulario de Crear Tercero (solicitado en el Cambio 4 del Rol Admin) cómo se comportaría la app si cambiáramos a nivel de tercero el valor de la comisión bancaria, la dispersión por cada uno de los siete métodos existentes, y la explicación de la opción "Disponible para depósitos/retiros por datáfono".</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>A. Estado inicial de terceros y Resumen Financiero</h2>
+
+      <h3 style="font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);margin:0 0 10px;">Terceros</h3>
+      <table class="setup-table" id="tablaTercerosInicialST">
+        <tr><td><strong>Terceros</strong></td><td style="text-align:right;"><strong>CxPagar a Terceros</strong></td><td style="text-align:right;"><strong id="totalCxPagarTercerosST">$ 2.000.000</strong></td></tr>
+        <tr><td colspan="2">Nequi</td><td style="text-align:right;color:var(--red);">- $ 2.000.000</td></tr>
+        <tr><td colspan="2">Mauricio Chará</td><td style="text-align:right;color:var(--green);">$ 4.000.000</td></tr>
+      </table>
+
+      <h3 style="font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);margin:20px 0 10px;">Caja, deuda y cupo</h3>
+      <div class="pos-form-cols" style="grid-template-columns:1fr 1fr 1fr;">
+        <div>
+          <label style="margin-top:0;">Caja inicial</label>
+          <input type="text" inputmode="numeric" id="cajaInicial_st" value="$ 4.000.000" oninput="formatMoneyInput(this); reiniciarEstadoST();">
+        </div>
+        <div>
+          <label style="margin-top:0;">Deuda al banco</label>
+          <input type="text" inputmode="numeric" id="deudaInicial_st" value="$ 2.000.000" oninput="formatMoneyInput(this); reiniciarEstadoST();">
+        </div>
+        <div>
+          <label style="margin-top:0;">Cupo disponible</label>
+          <input type="text" value="$ 23.000.000" disabled>
+        </div>
+      </div>
+
+      <div class="before-after-note" style="background:var(--blue-bg);color:var(--blue);border-color:#c9d9ff;margin-top:16px;">
+        ⓘ Así se reconcilian estos valores: si <strong>Nequi paga los $2.000.000</strong> que debe, y se suma a lo que ya hay en <strong>caja ($4.000.000)</strong>, quedan <strong>$6.000.000 disponibles</strong> — con eso alcanza para pagarle a <strong>Mauricio Chará los $4.000.000</strong> que se le deben, y pagarle al <strong>banco los $2.000.000</strong> de deuda restante.
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>B. Formulario de Crear Tercero con datos de la simulación <span class="tag">DATOS DE EJEMPLO</span></h2>
+
+      <div class="two-col-form">
+        <div class="form-col left">
+          <h3>Identificación y perfil del tercero</h3>
+
+          <label>Corresponsal</label>
+          <input type="text" value="CB BARRIO CENTENARIO" disabled>
+
+          <label>Nombre del tercero</label>
+          <input type="text" id="terceroNombre_st" value="Mauricio Chará" oninput="syncTerceroNombreST()">
+
+          <div class="two-field-row">
+            <div>
+              <label>Tipo de identificación</label>
+              <select id="tipoIdentificacion_st">
+                <option value="">Selecciona...</option>
+                <option value="CC" selected>Cédula de Ciudadanía</option>
+                <option value="CE">Cédula de Extranjería</option>
+                <option value="NIT">NIT</option>
+                <option value="PA">Pasaporte</option>
+              </select>
+            </div>
+            <div>
+              <label>Número de identificación</label>
+              <input type="text" id="numeroIdentificacion_st" value="1.017.034.235">
+            </div>
+          </div>
+
+          <div class="two-field-row">
+            <div>
+              <label>Correo electrónico</label>
+              <input type="text" id="correoTercero_st" value="mauricio@maobits.com">
+            </div>
+            <div>
+              <label>Celular</label>
+              <input type="text" id="celularTercero_st" value="315 3774638">
+            </div>
+          </div>
+
+          <label>Dirección</label>
+          <input type="text" id="direccionTercero_st" value="Calle 20 56-20">
+
+          <div class="saldo-box">
+            <label>Crédito disponible</label>
+            <input type="text" inputmode="numeric" id="creditoDisponible_st" value="$ 0" oninput="formatMoneyInput(this); sincronizarCreditoTerceroST(); syncTerceroNombreST();">
+
+            <label>Saldo inicial</label>
+            <input type="text" inputmode="numeric" id="saldoInicial_st" value="$ 4.000.000" oninput="formatMoneyInput(this); syncTerceroNombreST();">
+
+            <div class="radio-group">
+              <label><input type="radio" name="tipoRelacion_st" checked> 🪙 Cobrar al corresponsal</label>
+              <label><input type="radio" name="tipoRelacion_st"> 🎁 Pagar al corresponsal</label>
+            </div>
+
+            <label style="margin-top:16px;">
+              <input type="checkbox" id="datafonoTercero_st" checked style="width:auto;margin-right:8px;" oninput="toggleDatafonoTerceroST(this)">
+              Disponible para depósitos/retiros por datáfono
+            </label>
+            <div class="hint" style="margin-bottom:12px;">Si se desmarca, este tercero nunca aparecerá listado como destino en el popup de Depósitos/Retiros (ej. cuentas de otros bancos que no se pueden procesar por datáfono). <strong>Pruébalo:</strong> desmarca esta casilla y luego abre el popup de Depósitos en la pestaña "Simulador de movimientos de caja" — Mauricio Chará dejará de aparecer en la lista de terceros.</div>
+          </div>
+        </div>
+
+        <div class="form-col">
+          <h3>Parametrización de comisión bancaria y dispersión</h3>
+
+          <label>Comisión bancaria</label>
+          <input type="text" inputmode="numeric" id="comisionBancariaTercero_st" value="$ 17.000" oninput="formatMoneyInput(this); actualizarPreviewST();">
+
+          <label style="margin-top:20px;">Dispersión por método de envío</label>
+          <div class="disp-stack" id="dispGrid_st"></div>
+        </div>
+      </div>
+
+      <div class="before-after-note" style="background:var(--blue-bg);color:var(--blue);border-color:#c9d9ff;">
+        ⓘ Los valores colocados directamente en el nuevo formulario propuesto de terceros alimentan al formulario de terceros que aparece abajo. La comisión bancaria y los 7 multiplicadores de dispersión que definas aquí son los que se usan para calcular cada movimiento de este tercero. Los demás campos (identificación, contacto, tipo de relación) son solo de referencia visual.
+      </div>
+    </div>
+
+    <div class="pos-modal" style="max-width:880px;margin:0 auto 20px;">
+      <div class="pos-modal-bar">
+        <span>TERCEROS - [12029] Barrio Centenario - Yohana Monterrosa</span>
+        <span class="pos-modal-close">✕</span>
+      </div>
+      <div class="pos-modal-body">
+
+        <div class="pos-form-cols">
+          <div>
+            <label style="margin-top:0;">Tipo de Transacción</label>
+            <select id="tipoTransaccion_st" onchange="actualizarTipoTransaccionST()">
+              <option value="prestamo_tercero">Préstamo de Tercero</option>
+              <option value="pago_tercero">Pago de Tercero</option>
+              <option value="pago_a_tercero">Pago a Tercero</option>
+              <option value="prestamo_a_tercero">Préstamo a Tercero</option>
+            </select>
+
+            <label>Seleccionar Tercero</label>
+            <select id="tercero_st" disabled>
+              <option value="Mauricio Chará">Mauricio Chará</option>
+            </select>
+
+            <div id="tipoPendienteNote_st" class="note-box" style="display:none;">
+              La lógica de este tipo de transacción todavía no se ha definido en el simulador; por ahora solo <strong>Préstamo de Tercero</strong> calcula el resultado.
+            </div>
+
+            <div class="campos-prestamo-st">
+              <label>Método de envío</label>
+              <select id="metodo_st">
+                <option value="" disabled selected>-- Selecciona un método --</option>
+              </select>
+
+              <div id="cuentaDestinoWrap_st" class="field-conditional" style="display:none;">
+                <label>Cuenta destino de los fondos</label>
+                <select id="cuentaDestino_st">
+                  <option value="Nequi *4567">Nequi *4567</option>
+                  <option value="Daviplata *5678">Daviplata *5678</option>
+                  <option value="Bancolombia *9005">Bancolombia *9005</option>
+                </select>
+              </div>
+
+              <div id="corresponsalDestinoWrap_st" class="field-conditional" style="display:none;">
+                <label>Tercero destino de los fondos (dueño del corresponsal)</label>
+                <select id="corresponsalDestino_st">
+                  <option value="66174- Barrio Pajonal">66174- Barrio Pajonal</option>
+                  <option value="65398-Barrio Caracoli">65398-Barrio Caracoli</option>
+                  <option value="25426-Districol">25426-Districol</option>
+                </select>
+                <div class="hint">Este método no afecta la deuda del CB con el banco: afecta al tercero dueño del corresponsal seleccionado (el dinero compensó allá, no en el código propio).</div>
+              </div>
+
+              <div id="compensaNote_st" class="note-box" style="display:none;">
+                El formulario no cambia para este método: al registrar, el sistema recibe el dinero y lo compensa automáticamente contra la deuda del propio CB con el banco. No requiere cuenta destino ni pasa por caja.
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="campos-prestamo-st">
+              <label style="margin-top:0;">Referencia</label>
+              <input type="text" id="referencia_st" placeholder="Ej: 1015235678 / Nota corta">
+
+              <label>Cantidad</label>
+              <input type="text" inputmode="numeric" id="cantidad_st" placeholder="$ 0" value="$ 5.500.000" oninput="formatMoneyInput(this); actualizarPreviewST();">
+
+              <div class="pos-estado-strip">
+                <div class="pos-estado-item"><span>🟡 En Caja</span><strong id="estCaja_st">$0</strong></div>
+                <div class="pos-estado-item"><span>🏦 Banco</span><strong id="estDeuda_st">$0</strong></div>
+                <div class="pos-estado-item"><span>✅ Cupo</span><strong id="estCupo_st">$0</strong></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pos-modal-footer space-between">
+          <div></div>
+          <div style="display:flex;gap:10px;">
+            <button class="btn-primary-blue" id="btnRegistrarST" onclick="registrarMovimientoST()">REGISTRAR</button>
+            <button class="btn-ghost" onclick="limpiarFormularioST()">CERRAR</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card" style="margin-bottom:0;">
+        <h2>Configuración usada <span class="tag">DESDE EL FORMULARIO DE ARRIBA</span></h2>
+        <div class="preview-row"><span class="lbl">Tercero</span><span class="val" id="cfgTercero_st">—</span></div>
+        <div class="preview-row"><span class="lbl">Comisión bancaria (si aplica)</span><span class="val mono" id="cfgBancaria_st">$0</span></div>
+        <table class="setup-table" id="cfgDispTable_st" style="margin-top:10px;"></table>
+      </div>
+
+      <div class="card" style="margin-bottom:0;">
+        <h2>Vista previa del resultado</h2>
+        <div class="preview-row"><span class="lbl">Movimientos que se generan</span><span class="val" id="pvMovs_st">—</span></div>
+        <div class="preview-row"><span class="lbl">¿Afecta la caja del cajero?</span><span class="val" id="pvCaja_st">—</span></div>
+        <div class="preview-row"><span class="lbl">¿Afecta la deuda del CB con el banco?</span><span class="val" id="pvBanco_st">—</span></div>
+        <div class="preview-row"><span class="lbl">Comisión bancaria</span><span class="val mono" id="pvBancaria_st">$0</span></div>
+        <div class="preview-row"><span class="lbl">Dispersión (redondeada)</span><span class="val mono" id="pvDispersion_st">$0</span></div>
+        <div class="preview-total">
+          <span>Total comisión generada por este tercero</span>
+          <span class="val mono" id="pvTotal_st">$0</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title">
+      <h2>Historial de simulaciones (para revisar con el programador)</h2>
+      <div style="display:flex;gap:8px;">
+        <button class="btn-ghost btn-small" onclick="descargarCSVST()">Descargar CSV</button>
+        <button class="btn-ghost btn-small" onclick="borrarHistorialST()">Borrar historial</button>
+      </div>
+    </div>
+    <div id="historial_st"></div>
+
+  </div>

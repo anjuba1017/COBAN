@@ -1,0 +1,147 @@
+  <!-- ===================== TAB 12 ===================== -->
+  <div id="tab12" class="tab-content">
+
+    <div class="section-title">
+      <h2 style="text-transform:uppercase;letter-spacing:.4px;">Reportes SuperAdmin</h2>
+      <span class="badge badge-amber">Por rol</span>
+    </div>
+
+    <div class="card">
+      <p style="font-size:13px;color:var(--muted);margin:0;">Esta sección corresponde a los <strong>reportes que necesita el rol SuperAdmin</strong>, que no existen en la app actual y permitirían ir viendo cuántos CB existen, cuáles se quedan, a quién contactar antes de que se venza el plan freemium, e ir monitoreando qué adopción hay de la herramienta.</p>
+    </div>
+
+    <div class="card">
+      <h2>1. Listado de Corresponsales <span class="tag">PROPUESTA NUEVA</span></h2>
+      <p style="font-size:13.5px;line-height:1.7;margin-top:0;">
+        No modifica ni reemplaza la pantalla de Gestión de Corresponsales (donde ya se crean/administran los CB) — es un reporte aparte, de solo lectura, para monitorear cuántos corresponsales van entrando y su estado.
+      </p>
+    </div>
+
+    <div class="pos-modal-like" id="panelListadoCorresponsalesRSA" style="max-width:980px;margin:0 auto 20px;border:1px solid var(--border);border-radius:16px;overflow:hidden;background:#fff;">
+      <div style="background:var(--navy);color:#fff;padding:16px 22px;font-size:14px;font-weight:700;letter-spacing:.3px;">
+        Listado de Corresponsales - SuperAdmin
+      </div>
+      <div style="padding:22px;">
+
+        <div class="resumen-cards" style="margin-bottom:18px;">
+          <div class="resumen-card">
+            <div><div class="resumen-label">Total corresponsales</div><div class="resumen-value">4</div></div>
+          </div>
+          <div class="resumen-card">
+            <div><div class="resumen-label">Premium</div><div class="resumen-value">3</div></div>
+          </div>
+          <div class="resumen-card">
+            <div><div class="resumen-label">Freemium</div><div class="resumen-value">1</div></div>
+          </div>
+          <div class="resumen-card">
+            <div><div class="resumen-label">Activos</div><div class="resumen-value">3</div></div>
+          </div>
+        </div>
+
+        <div style="overflow-x:auto;">
+        <table class="setup-table" style="min-width:820px;">
+          <tr>
+            <th>Código</th><th>Nombre</th><th>Administrador</th><th>Ubicación</th>
+            <th>Fecha de alta</th><th style="text-align:center;">Días con uso <span style="font-weight:400;">(con mov. en caja)</span></th>
+            <th>Plan</th><th>Estado</th>
+          </tr>
+          <tr>
+            <td>66174</td><td><strong>CB BARRIO PAJONAL ★</strong></td><td>ADMIN 66174</td><td>ANTIOQUIA, CAUCASIA</td>
+            <td>10/06/2026</td><td style="text-align:center;" class="mono">38</td>
+            <td><span class="tag" style="background:#f0e7ff;color:#6b3fd4;">Premium</span></td>
+            <td><span class="tag" style="background:var(--blue-bg);color:var(--blue);">Activo</span></td>
+          </tr>
+          <tr>
+            <td>CB12029</td><td><strong>CB BARRIO CENTENARIO ★</strong></td><td>EDUARDO JULIAN BARRIOS</td><td>Antioquia, CAUCASIA</td>
+            <td>02/07/2026</td><td style="text-align:center;" class="mono">19</td>
+            <td><span class="tag" style="background:#f0e7ff;color:#6b3fd4;">Premium</span></td>
+            <td><span class="tag" style="background:var(--blue-bg);color:var(--blue);">Activo</span></td>
+          </tr>
+          <tr>
+            <td>CB001</td><td><strong>CB 001 ★</strong></td><td>Samuel Barrios</td><td>Antioquia, Caucasia</td>
+            <td>15/07/2026</td><td style="text-align:center;" class="mono">6</td>
+            <td><span class="tag" style="background:#f0e7ff;color:#6b3fd4;">Premium</span></td>
+            <td><span class="tag" style="background:var(--blue-bg);color:var(--blue);">Activo</span></td>
+          </tr>
+          <tr>
+            <td>12029</td><td><strong>Barrio Centenario</strong></td><td>Samuel Barrios</td><td>Antioquia, Caucasia</td>
+            <td>07/07/2026</td><td style="text-align:center;" class="mono" style="color:var(--muted);">0</td>
+            <td><span class="tag">Freemium</span></td>
+            <td><span class="tag">Inactivo</span></td>
+          </tr>
+        </table>
+        </div>
+
+        <div class="btnbar" style="justify-content:space-between;margin-top:18px;">
+          <button class="btn-dark-small" onclick="document.getElementById('panelListadoCorresponsalesRSA').style.display='none';">Cerrar</button>
+          <div style="display:flex;gap:8px;">
+            <button class="btn-blue-small" disabled>Excel</button>
+            <button class="btn-blue-small" disabled>PDF</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>2. Resumen de Adopción <span class="tag">PROPUESTA NUEVA</span></h2>
+      <p style="font-size:13.5px;line-height:1.7;margin-top:0;">
+        Pensado para actuar rápido: en vez de mostrar el listado completo, solo lista a los corresponsales que <strong>requieren atención</strong> — sin uso reciente, o con el plan freemium por vencer — con un botón directo de WhatsApp al Administrador.
+      </p>
+    </div>
+
+    <div class="pos-modal-like" id="panelResumenAdopcionRSA" style="max-width:760px;margin:0 auto 20px;border:1px solid var(--border);border-radius:16px;overflow:hidden;background:#fff;">
+      <div style="background:var(--navy);color:#fff;padding:16px 22px;font-size:14px;font-weight:700;letter-spacing:.3px;">
+        Resumen de Adopción - SuperAdmin
+      </div>
+      <div style="padding:22px;">
+
+        <div class="resumen-cards" style="margin-bottom:18px;">
+          <div class="resumen-card">
+            <div><div class="resumen-label">Activos</div><div class="resumen-value">3</div></div>
+          </div>
+          <div class="resumen-card">
+            <div><div class="resumen-label">Premium</div><div class="resumen-value">3</div></div>
+          </div>
+          <div class="resumen-card">
+            <div><div class="resumen-label">Freemium</div><div class="resumen-value">1</div></div>
+          </div>
+          <div class="resumen-card">
+            <div><div class="resumen-label">Sin uso &gt;7 días</div><div class="resumen-value" style="color:var(--red);">1</div></div>
+          </div>
+        </div>
+
+        <h3 style="font-size:13px;margin-bottom:6px;">Corresponsales sin movimiento reciente</h3>
+        <p style="font-size:12px;color:var(--muted);margin-top:0;margin-bottom:10px;">Señal de que no están adoptando la herramienta — vale la pena contactarlos.</p>
+        <table class="setup-table" style="margin-bottom:20px;">
+          <tr><th>Corresponsal</th><th>Administrador</th><th style="text-align:center;">Días sin uso</th><th></th></tr>
+          <tr>
+            <td><strong>Barrio Centenario</strong></td><td>Samuel Barrios</td>
+            <td style="text-align:center;" class="mono" style="color:var(--red);">10</td>
+            <td style="text-align:right;"><button class="btn-whatsapp-small" onclick="alert('Simulación: se abriría WhatsApp con Samuel Barrios — mensaje: Hola, notamos que Barrio Centenario no ha tenido movimientos recientes en Coban365...')">WhatsApp</button></td>
+          </tr>
+        </table>
+        <div class="setup-note" style="margin-top:-12px;margin-bottom:20px;">"Días sin uso" = días desde el último movimiento real registrado en caja (no antigüedad del corresponsal).</div>
+
+        <h3 style="font-size:13px;margin-bottom:6px;">Freemium por vencer</h3>
+        <p style="font-size:12px;color:var(--muted);margin-top:0;margin-bottom:2px;">Periodo de 45 días (configurable) — para contactarlos antes de que se venza.</p>
+        <p style="font-size:11.5px;color:var(--muted);margin-top:0;margin-bottom:10px;">Configurable en Rol SuperAdmin → Parámetros del sistema.</p>
+        <table class="setup-table">
+          <tr><th>Corresponsal</th><th>Administrador</th><th style="text-align:center;">Días restantes</th><th></th></tr>
+          <tr>
+            <td><strong>Barrio Centenario</strong></td><td>Samuel Barrios</td>
+            <td style="text-align:center;"><span class="tag" style="background:var(--amber-bg);color:var(--amber);">35</span></td>
+            <td style="text-align:right;"><button class="btn-whatsapp-small" onclick="alert('Simulación: se abriría WhatsApp con Samuel Barrios — mensaje: Hola, tu plan Freemium de Barrio Centenario vence en 35 días...')">WhatsApp</button></td>
+          </tr>
+        </table>
+
+        <div class="btnbar" style="justify-content:space-between;margin-top:18px;">
+          <button class="btn-dark-small" onclick="document.getElementById('panelResumenAdopcionRSA').style.display='none';">Cerrar</button>
+          <div style="display:flex;gap:8px;">
+            <button class="btn-blue-small" disabled>Excel</button>
+            <button class="btn-blue-small" disabled>PDF</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>

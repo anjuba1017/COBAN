@@ -1,0 +1,407 @@
+  <!-- ===================== TAB 4 ===================== -->
+  <div id="tab4" class="tab-content">
+
+    <div class="card">
+      <h2>4. Cambios en la lógica de movimientos de depósitos o retiros solicitados por Terceros</h2>
+      <p style="font-size:13.5px;line-height:1.6;margin-top:0;">
+        En la versión actual de coban365, cuando el cajero registra un movimiento de tipo <strong>Depósito</strong> o de tipo <strong>Retiros</strong> y luego escoge el tipo de transacción, coloca la cantidad y da "Registrar", ese movimiento siempre afecta la caja.
+      </p>
+      <p style="font-size:13.5px;line-height:1.6;">
+        Pero para aquellos casos donde el movimiento solicitado es por un <strong>TERCERO</strong> este valor debe afectar es a la cuenta de ese tercero y no la caja.
+      </p>
+      <img src="../capturas/punto-5-01.png" alt="Formulario actual de depósitos" style="max-width:520px;width:100%;border:1px solid var(--border);border-radius:10px;display:block;margin:0 auto;">
+    </div>
+
+    <div class="card">
+      <h2>Cambio requerido <span class="tag">A PROGRAMAR</span></h2>
+      <p style="font-size:13.5px;line-height:1.6;margin-top:0;">
+        Cuando el movimiento es de tipo <strong>Depósito</strong> y lo solicita un tercero que tenga <strong>balance positivo</strong> (el CB ya le debe a ese tercero) o un <strong>cupo disponible</strong>, resultado:
+      </p>
+      <p style="font-size:13.5px;line-height:1.6;">
+        El valor no debe entrar a caja: debe descontarse del saldo que el CB le debe a ese tercero o del cupo que tiene asignado el tercero.
+      </p>
+      <p style="font-size:13.5px;line-height:1.6;">Para eso se necesita:</p>
+      <ul style="font-size:13.5px;line-height:1.8;">
+        <li>Un selector de <strong>destino del dinero: Caja o Tercero</strong> (recomendación de usabilidad abajo).</li>
+        <li>Si es Tercero: una lista corta (5–10) de terceros con su <strong>estado de saldo</strong> y <strong>cupo</strong>, más un buscador arriba para encontrar cualquier otro que no esté en la lista corta.</li>
+        <li>El botón Registrar solo se activa hacia un tercero si: su <strong>cupo disponible ≥ cantidad</strong>, <strong>o</strong> tiene <strong>saldo a favor</strong> (aunque no tenga cupo). Si no cumple ninguna, la operación debe informar que <strong>NO SE PUEDE REALIZAR</strong>.</li>
+      </ul>
+      <div class="before-after-note" style="background:var(--blue-bg);color:var(--blue);border-color:#c9d9ff;">
+        <strong>Recomendación de usabilidad:</strong> un interruptor tipo "segmented control" (Caja / Tercero) es más claro que un checkbox o un select, porque dejar 2 opciones mutuamente excluyentes y visibles todo el tiempo evita errores de selección. Al elegir "Tercero", se despliega un buscador + lista corta con selección por clic (no un dropdown largo), porque con solo 5–10 terceros frecuentes es más rápido para el cajero que escribir en un combo. Pruébalo abajo.
+      </div>
+    </div>
+
+    <div class="section-title" style="margin-top:34px;">
+      <h2 style="text-transform:uppercase;letter-spacing:.4px;">Propuesta de formulario para movimientos de ingreso/salida desde terceros</h2>
+    </div>
+
+
+    <div class="section-title">
+      <h2 style="text-transform:uppercase;letter-spacing:.4px;">Simulador Dashboard Cajero</h2>
+    </div>
+
+    <div class="card">
+      <p style="font-size:13px;color:var(--muted);margin:0;">Esta es la propuesta final del dashboard del cajero: conservando el diseño actual de los colores, botones y secciones del dashboard que ya existe en producción, en este simulador se muestran los cambios solicitados con anterioridad en otras pestañas.</p>
+      <p style="font-size:13px;color:var(--muted);">En este simulador podemos ver como debería quedar:</p>
+      <ol style="font-size:13px;color:var(--muted);line-height:1.8;padding-left:20px;margin:0;">
+        <li>El título del cajero.</li>
+        <li>Los tooltips solicitados en el Cambio 1 del Rol Cajero.</li>
+        <li>El selector de destino <strong>Caja / Tercero</strong> dentro del popup de movimientos para Depósitos y Retiros.</li>
+        <li>El modal de <strong>Terceros</strong> (idéntico al de la pestaña Terceros (A)).</li>
+      </ol>
+      <p style="font-size:13px;color:var(--muted);">Al ser interactivo podemos hacer movimientos de clientes de caja, movimientos de entrada y salida solicitados por terceros.</p>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:0;">Debajo del formulario se incluye una sección que lleva a cabo la conciliación de los movimientos que se ejecutan en este formulario de cajeros y el historial de transacciones para analizar con el programador.</p>
+    </div>
+
+    <div class="sc-frame">
+    <div class="sc-topbar">
+      <div class="sc-hamburger">☰</div>
+      <div class="sc-corresponsal">
+        <label>Corresponsal</label>
+        <select><option>CB BARRIO CENT...</option></select>
+      </div>
+      <div class="sc-compartir">🔗 Compartir</div>
+      <div class="sc-title">YOHANA MONTERROSA</div>
+      <div class="sc-icons">
+        <span class="sc-icon-wrap"><span class="sc-icon-btn sc-icon-dark">🖨️</span><span class="sc-tooltip">Reporte Diario de Caja</span></span>
+        <span class="sc-icon-wrap"><span class="sc-icon-btn">⊞</span><span class="sc-tooltip">Cierre de Caja</span></span>
+        <span class="sc-icon-wrap"><span class="sc-icon-btn sc-icon-green" onclick="abrirEstadoTercerosDashModal()" style="cursor:pointer;">👥</span><span class="sc-tooltip">Estado de Terceros</span></span>
+        <span class="sc-icon-wrap"><span class="sc-icon-btn" onclick="abrirComisionesTercerosModal()" style="cursor:pointer;">$</span><span class="sc-tooltip">Comisiones de Terceros</span></span>
+        <span class="sc-icon-wrap"><span class="sc-icon-btn" onclick="abrirMovimientosTerceroDashModal()" style="cursor:pointer;">🧾</span><span class="sc-tooltip">Movimientos Tercero</span></span>
+        <span class="sc-icon-wrap"><span class="sc-refresh">🔄</span><span class="sc-tooltip">Actualizar</span></span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 class="dash-title">Resumen financiero</h3>
+      <div class="resumen-cards">
+        <div class="resumen-card"><span class="resumen-icon ic-yellow">🧑</span><div><div class="resumen-label">En caja</div><div class="resumen-value" id="dashCaja">$0</div></div></div>
+        <div class="resumen-card"><span class="resumen-icon ic-orange">🏛️</span><div><div class="resumen-label">Banco</div><div class="resumen-value" id="dashBanco">$0</div></div></div>
+        <div class="resumen-card"><span class="resumen-icon ic-green">💲</span><div><div class="resumen-label">Cupo</div><div class="resumen-value" id="dashCupo">$0</div></div></div>
+      </div>
+
+      <h3 class="dash-title" style="margin-top:26px;">Movimientos</h3>
+      <div class="categoria-pills" id="categoriaPills">
+        <button class="pill-btn active" data-cat="Depósitos" onclick="abrirCategoria('Depósitos')">Depósitos</button>
+        <button class="pill-btn" data-cat="Retiros" onclick="abrirCategoria('Retiros')">Retiros</button>
+        <button class="pill-btn" data-cat="Otros" onclick="abrirCategoria('Otros')">Otros</button>
+        <button class="pill-btn" data-cat="Terceros" onclick="abrirCategoria('Terceros')">Terceros</button>
+        <button class="pill-btn" data-cat="Compensación" onclick="abrirCategoria('Compensación')">Compensación</button>
+        <button class="pill-btn" data-cat="Transferencias" onclick="abrirCategoria('Transferencias')">Transferencias</button>
+      </div>
+
+      <table class="mov-table">
+        <thead>
+          <tr><th>Fecha</th><th>Tipo</th><th>Valor</th><th>Efectivo</th><th>Nota</th><th>Acciones</th></tr>
+        </thead>
+        <tbody id="movimientosTablaBody"></tbody>
+      </table>
+
+      <div class="mov-filtros">
+        <span class="mov-filtros-label">Filtrar por categoría:</span>
+        <select><option>Todas las categorías</option></select>
+        <span class="mov-filtros-label">Valor:</span>
+        <input type="text" placeholder="Min">
+        <input type="text" placeholder="Max">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span class="mov-filtros-label">Filtrar por fecha</span>
+          <input type="text" id="filtroFecha" value="04/07/2026">
+        </div>
+      </div>
+
+      <div class="mov-footer-bar">
+        <span>Elementos por página: <strong>20</strong> ▾</span>
+        <span class="mov-footer-pag">‹&nbsp; <strong id="movPagina">1</strong> &nbsp;›</span>
+        <span id="movMostrando">Mostrando 1 - 2 de 2</span>
+      </div>
+    </div>
+    </div>
+    <div class="card" id="verificacionContableCard">
+      <h2>A. Detalle de la conciliación de los movimientos del simulador del cajero</h2>
+
+      <div class="conc-pilar">
+        <div class="conc-pilar-head"><span>1. Saldo en Caja (efectivo disponible)</span><span class="mono" id="vcCaja">$0</span></div>
+      </div>
+
+      <div class="conc-pilar">
+        <div class="conc-pilar-head"><span>2. Deuda de Terceros</span><span></span></div>
+
+        <div class="conc-sub">
+          <div class="conc-sub-head" style="color:var(--red);"><span>+ Terceros que le deben al CB (CxC)</span><span class="mono" id="vcCxC">$0</span></div>
+          <div id="vcCxCDetalle" class="mini-desglose"></div>
+        </div>
+
+        <div class="conc-sub">
+          <div class="conc-sub-head" style="color:var(--green);"><span>− Terceros a quienes el CB les debe (CxP)</span><span class="mono" id="vcSaldoFavor">$0</span></div>
+          <div id="vcCxPDetalle" class="mini-desglose"></div>
+        </div>
+
+        <div class="conc-sub">
+          <div class="conc-sub-head" style="color:var(--accent-dark);"><span>− Comisiones por pagar (bancaria + dispersión generadas)</span><span class="mono" id="vcComisiones">$0</span></div>
+          <div id="vcComisionesDetalle" class="mini-desglose"></div>
+        </div>
+      </div>
+
+      <div class="conc-pilar" id="vcPilarBanco">
+        <div class="conc-pilar-head"><span>3. Deuda al Banco (actual)</span><span class="mono" id="vcDeuda">$0</span></div>
+        <div class="hint" id="vcBancoNota" style="display:none;"></div>
+      </div>
+
+      <div class="conc-pilar conc-pilar-total">
+        <div class="conc-pilar-head"><span>4. Total Esperado (debe cuadrar con la deuda al banco)</span><span class="mono" id="vcTotal">$0</span></div>
+      </div>
+
+      <div id="vcResultado" class="conc-resultado"></div>
+    </div>
+
+    <div class="section-title" style="margin-top:34px;">
+      <h2>B. Historial de movimientos del simulador del cajero</h2>
+    </div>
+    <div class="setup-note" style="margin-top:-8px;">Cada préstamo de tercero registrado desde el modal de Terceros queda aquí con el detalle de antes/después de caja, banco, cupo, del tercero que envía, del tercero que recibe (si aplica) y de las comisiones generadas — para verificar que coinciden exactamente con lo que se refleja arriba en el Detalle de la Conciliación.</div>
+    <div id="historialTercerosTM"></div>
+
+    <div id="depositoModalOverlay" class="modal-overlay">
+      <div class="pos-modal" style="max-width:600px;width:100%;">
+        <div class="pos-modal-bar">
+          <span id="movModalBar">Depósitos en el corresponsal CB BARRIO CENTENARIO - CAJA2-YOHANA</span>
+          <span class="pos-modal-close" onclick="cerrarDepositoModal()">✕</span>
+        </div>
+        <div class="pos-modal-body">
+
+          <div id="camposNormalesWrap" style="display:flex;flex-direction:column;flex:1;min-height:0;">
+            <div class="pos-modal-fixed-top">
+              <div class="row2">
+                <div>
+                  <label style="margin-top:0;">Tipo de Transacción</label>
+                  <select id="tipoDeposito"></select>
+                </div>
+                <div>
+                  <label style="margin-top:0;">Cantidad</label>
+                  <input type="text" inputmode="numeric" class="cantidad-grande" id="cantidadDeposito" value="$ 0" oninput="formatMoneyInput(this); actualizarDeposito();">
+                </div>
+              </div>
+
+              <div class="pos-estado-strip">
+                <div class="pos-estado-item"><span>🟡 En Caja</span><strong id="posCaja">$0</strong></div>
+                <div class="pos-estado-item"><span>🏦 Banco</span><strong id="posBanco">$0</strong></div>
+                <div class="pos-estado-item"><span>✅ Cupo</span><strong id="posCupo">$0</strong></div>
+              </div>
+
+              <div id="destinoWrap">
+                <label>Destino del dinero</label>
+                <div class="segmented full" id="destinoToggle">
+                  <button type="button" class="segmented-btn active" data-value="caja" onclick="setDestino('caja')">🧑 Caja</button>
+                  <button type="button" class="segmented-btn" data-value="tercero" onclick="setDestino('tercero')">👤 Tercero</button>
+                </div>
+              </div>
+            </div>
+
+            <div id="terceroPickerWrap" style="display:none;margin-top:14px;">
+              <label style="margin-top:0;">Buscar tercero</label>
+              <input type="text" id="buscarTercero" placeholder="Escribe un nombre..." oninput="renderTerceroList()">
+              <div class="tercero-list" id="terceroList"></div>
+              <div class="hint">Solo se listan los terceros habilitados para depósitos/retiros por datáfono (configurado al crear el tercero).</div>
+            </div>
+
+            <div id="terceroWarning" class="note-box" style="display:none;margin-top:14px;"></div>
+          </div>
+        </div>
+
+        <div id="depositoModalFooter" class="pos-modal-footer space-between">
+          <button class="btn-ghost">CALCULADORA POS</button>
+          <div style="display:flex;gap:10px;">
+            <button class="btn-primary-blue" id="btnRegistrarDeposito" onclick="registrarDeposito()">REGISTRAR</button>
+            <button class="btn-ghost" onclick="cerrarDepositoModal()">CERRAR</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="terceroModalOverlay" class="modal-overlay">
+      <div class="pos-modal" style="max-width:880px;width:100%;">
+        <div class="pos-modal-bar">
+          <span>TERCEROS - [12029] Barrio Centenario - Yohana Monterrosa</span>
+          <span class="pos-modal-close" onclick="cerrarTerceroModal()">✕</span>
+        </div>
+        <div class="pos-modal-body">
+
+          <div class="pos-form-cols">
+            <div>
+              <label style="margin-top:0;">Tipo de Transacción</label>
+              <select id="tipoTransaccion_tm" onchange="actualizarTipoTransaccionTM()">
+                <option value="prestamo_tercero">Préstamo de Tercero</option>
+                <option value="pago_tercero">Pago de Tercero</option>
+                <option value="pago_a_tercero">Pago a Tercero</option>
+                <option value="prestamo_a_tercero">Préstamo a Tercero</option>
+              </select>
+
+              <label>Seleccionar Tercero</label>
+              <select id="tercero_tm" disabled>
+                <option value="Mauricio Chará">Mauricio Chará</option>
+              </select>
+              <div class="hint">Se hereda del nombre configurado en el formulario de creación de tercero de la pestaña Terceros (normalizado).</div>
+
+              <div id="tipoPendienteNote_tm" class="note-box" style="display:none;">
+                La lógica de este tipo de transacción todavía no se ha definido en el simulador; por ahora solo <strong>Préstamo de Tercero</strong> calcula el resultado.
+              </div>
+
+              <div class="campos-prestamo-tm">
+                <label>Método de envío</label>
+                <select id="metodo_tm">
+                  <option value="" disabled selected>-- Selecciona un método --</option>
+                </select>
+
+                <div id="cuentaDestinoWrap_tm" class="field-conditional" style="display:none;">
+                  <label>Cuenta destino de los fondos</label>
+                  <select id="cuentaDestino_tm">
+                    <option value="Nequi *4567">Nequi *4567</option>
+                    <option value="Daviplata *5678">Daviplata *5678</option>
+                    <option value="Bancolombia *9005">Bancolombia *9005</option>
+                  </select>
+                </div>
+
+                <div id="corresponsalDestinoWrap_tm" class="field-conditional" style="display:none;">
+                  <label>Tercero destino de los fondos (dueño del corresponsal)</label>
+                  <select id="corresponsalDestino_tm">
+                    <option value="66174- Barrio Pajonal">66174- Barrio Pajonal</option>
+                    <option value="65398-Barrio Caracoli">65398-Barrio Caracoli</option>
+                    <option value="25426-Districol">25426-Districol</option>
+                  </select>
+                  <div class="hint">Este método no afecta la deuda del CB con el banco: afecta al tercero dueño del corresponsal seleccionado (el dinero compensó allá, no en el código propio).</div>
+                </div>
+
+                <div id="compensaNote_tm" class="note-box" style="display:none;">
+                  El formulario no cambia para este método: al registrar, el sistema recibe el dinero y lo compensa automáticamente contra la deuda del propio CB con el banco. No requiere cuenta destino ni pasa por caja.
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <div class="campos-prestamo-tm">
+                <label style="margin-top:0;">Referencia</label>
+                <input type="text" id="referencia_tm" placeholder="Ej: 1015235678 / Nota corta">
+
+                <label>Cantidad</label>
+                <input type="text" inputmode="numeric" id="cantidad_tm" placeholder="$ 0" value="$ 0" oninput="formatMoneyInput(this); actualizarPreviewTM();">
+
+                <div class="pos-estado-strip">
+                  <div class="pos-estado-item"><span>🟡 En Caja</span><strong id="tmCaja">$0</strong></div>
+                  <div class="pos-estado-item"><span>🏦 Banco</span><strong id="tmBanco">$0</strong></div>
+                  <div class="pos-estado-item"><span>✅ Cupo</span><strong id="tmCupo">$0</strong></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="terceroModalWarning" class="note-box" style="display:none;"></div>
+        </div>
+
+        <div class="pos-modal-footer space-between">
+          <div></div>
+          <div style="display:flex;gap:10px;">
+            <button class="btn-primary-blue" id="btnRegistrarTM" onclick="registrarTerceroModal()">REGISTRAR</button>
+            <button class="btn-ghost" onclick="cerrarTerceroModal()">CERRAR</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="estadoTercerosModalOverlay" class="modal-overlay">
+      <div class="pos-modal" style="max-width:520px;width:100%;">
+        <div class="pos-modal-bar">
+          <span>Estado de terceros - CB [12029]</span>
+          <span class="pos-modal-close" onclick="cerrarEstadoTercerosDashModal()">✕</span>
+        </div>
+        <div class="pos-modal-body">
+          <div style="position:relative;margin-bottom:14px;">
+            <input type="text" id="buscarEstadoTercerosDash" placeholder="Buscar tercero..." style="width:100%;padding-left:34px;" oninput="renderEstadoTercerosDash()">
+            <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);">🔍</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;padding:0 0 6px;border-bottom:1px solid var(--border);">
+            <span>Tercero</span>
+            <span>Estado de cuenta</span>
+          </div>
+          <div id="listaEstadoTercerosDash"></div>
+        </div>
+        <div class="pos-modal-footer" style="justify-content:flex-end;">
+          <button class="btn-ghost" onclick="cerrarEstadoTercerosDashModal()">CERRAR</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="comisionesTercerosModalOverlay" class="modal-overlay">
+      <div class="pos-modal" style="max-width:640px;width:100%;">
+        <div class="pos-modal-bar">
+          <span>Comisiones de Terceros - CB [12029]</span>
+          <span class="pos-modal-close" onclick="cerrarComisionesTercerosModal()">✕</span>
+        </div>
+        <div class="pos-modal-body">
+          <input type="text" id="buscarComisionesDash" placeholder="Buscar tercero..." style="width:100%;margin-bottom:6px;" oninput="renderComisionesTercerosDash()">
+          <div id="tablaComisionesDash"></div>
+          <div class="resumen-cards" style="margin-top:16px;">
+            <div class="resumen-card">
+              <div><div class="resumen-label">Terceros con saldo</div><div class="resumen-value" id="comisionesDashConteo">0</div></div>
+            </div>
+            <div class="resumen-card">
+              <div><div class="resumen-label">Total comisiones acumuladas</div><div class="resumen-value" id="comisionesDashTotal">$0</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="pos-modal-footer" style="justify-content:flex-end;">
+          <button class="btn-dark-small" onclick="cerrarComisionesTercerosModal()">Cerrar</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="movimientosTerceroDashModalOverlay" class="modal-overlay">
+      <div class="pos-modal" style="max-width:720px;width:100%;">
+        <div class="pos-modal-bar">
+          <span id="mvCajeroDashTituloBar">Movimientos de Terceros - CB [12029]</span>
+          <span class="pos-modal-close" onclick="cerrarMovimientosTerceroDashModal()">✕</span>
+        </div>
+        <div class="pos-modal-body">
+          <div class="two-field-row" style="align-items:flex-end;">
+            <div>
+              <label style="margin-top:0;">Tercero</label>
+              <select id="mvCajeroDashSelector" onchange="seleccionarTerceroMovCajeroDash(this.value)">
+                <option value="">-- Selecciona un tercero --</option>
+              </select>
+            </div>
+            <div>
+              <label style="margin-top:0;">Consulta</label>
+              <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                <input type="date" id="mvCajeroDashDesde" value="2026-06-01" style="max-width:150px;">
+                <span style="color:var(--muted);">—</span>
+                <input type="date" id="mvCajeroDashHasta" value="2026-06-30" style="max-width:150px;">
+                <button class="btn-primary" style="padding:8px 16px;" onclick="buscarMovimientosCajeroDash()">Buscar</button>
+                <button class="btn-ghost btn-small" onclick="limpiarMovimientosCajeroDash()">Limpiar</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="resumen-cards" style="margin:18px 0;">
+            <div class="resumen-card">
+              <div class="resumen-icon ic-green" id="mvCajeroDashIconoSaldo">$</div>
+              <div><div class="resumen-label" id="mvCajeroDashLabelSaldo">Saldo actual</div><div class="resumen-value" id="mvCajeroDashValorSaldo">$0</div></div>
+            </div>
+            <div class="resumen-card">
+              <div class="resumen-icon ic-green">✅</div>
+              <div><div class="resumen-label">Cupo disponible</div><div class="resumen-value" id="mvCajeroDashValorCupo">$0</div></div>
+            </div>
+            <div class="resumen-card">
+              <div class="resumen-icon ic-orange">%</div>
+              <div><div class="resumen-label">Comisión generada (periodo)</div><div class="resumen-value" id="mvCajeroDashValorComision">$0</div></div>
+            </div>
+          </div>
+
+          <div style="overflow-x:auto;">
+            <table class="setup-table" id="mvCajeroDashTabla"></table>
+          </div>
+        </div>
+        <div class="pos-modal-footer" style="justify-content:flex-end;">
+          <button class="btn-dark-small" onclick="cerrarMovimientosTerceroDashModal()">Cerrar</button>
+        </div>
+      </div>
+    </div>
+
+  </div>

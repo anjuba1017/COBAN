@@ -1,0 +1,142 @@
+{
+  "capturas": [
+    {
+      "punto": "2",
+      "archivo": "punto-2-01.png",
+      "tipo": "image/png",
+      "bytes": 35074
+    },
+    {
+      "punto": "2",
+      "archivo": "punto-2-02.png",
+      "tipo": "image/png",
+      "bytes": 49994
+    },
+    {
+      "punto": "2",
+      "archivo": "punto-2-03.png",
+      "tipo": "image/png",
+      "bytes": 36188
+    },
+    {
+      "punto": "3",
+      "archivo": "punto-3-01.jpg",
+      "tipo": "image/jpeg",
+      "bytes": 1413
+    },
+    {
+      "punto": "3",
+      "archivo": "punto-3-02.jpg",
+      "tipo": "image/jpeg",
+      "bytes": 28211
+    },
+    {
+      "punto": "3",
+      "archivo": "punto-3-03.jpg",
+      "tipo": "image/jpeg",
+      "bytes": 42552
+    },
+    {
+      "punto": "3",
+      "archivo": "punto-3-04.jpg",
+      "tipo": "image/jpeg",
+      "bytes": 1597
+    },
+    {
+      "punto": "4",
+      "archivo": "punto-4-01.jpg",
+      "tipo": "image/jpeg",
+      "bytes": 33440
+    },
+    {
+      "punto": "4",
+      "archivo": "punto-4-02.jpg",
+      "tipo": "image/jpeg",
+      "bytes": 21555
+    },
+    {
+      "punto": "5",
+      "archivo": "punto-5-01.png",
+      "tipo": "image/png",
+      "bytes": 74990
+    },
+    {
+      "punto": "1",
+      "archivo": "punto-1-01.png",
+      "tipo": "image/png",
+      "bytes": 9123
+    },
+    {
+      "punto": "1",
+      "archivo": "punto-1-02.png",
+      "tipo": "image/png",
+      "bytes": 73963
+    },
+    {
+      "punto": "1",
+      "archivo": "punto-1-03.png",
+      "tipo": "image/png",
+      "bytes": 78300
+    },
+    {
+      "punto": "1",
+      "archivo": "punto-1-04.png",
+      "tipo": "image/png",
+      "bytes": 14729
+    },
+    {
+      "punto": "1",
+      "archivo": "punto-1-05.png",
+      "tipo": "image/png",
+      "bytes": 42742
+    },
+    {
+      "punto": "1",
+      "archivo": "punto-1-06.png",
+      "tipo": "image/png",
+      "bytes": 11308
+    },
+    {
+      "punto": "1",
+      "archivo": "punto-1-07.png",
+      "tipo": "image/png",
+      "bytes": 72858
+    },
+    {
+      "punto": "1",
+      "archivo": "punto-1-08.png",
+      "tipo": "image/png",
+      "bytes": 11257
+    },
+    {
+      "punto": "1",
+      "archivo": "punto-1-09.png",
+      "tipo": "image/png",
+      "bytes": 8282
+    },
+    {
+      "punto": "7",
+      "archivo": "punto-7-01.png",
+      "tipo": "image/png",
+      "bytes": 19025
+    },
+    {
+      "punto": "7",
+      "archivo": "punto-7-02.png",
+      "tipo": "image/png",
+      "bytes": 35127
+    },
+    {
+      "punto": "8",
+      "archivo": "punto-8-01.jpg",
+      "tipo": "image/jpeg",
+      "bytes": 40646
+    },
+    {
+      "punto": "8",
+      "archivo": "punto-8-02.jpg",
+      "tipo": "image/jpeg",
+      "bytes": 28075
+    }
+  ]
+}

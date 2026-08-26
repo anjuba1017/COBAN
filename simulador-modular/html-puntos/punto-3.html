@@ -1,0 +1,1007 @@
+  <!-- ===================== TAB 6 ===================== -->
+  <div id="tab6" class="tab-content">
+
+    <div class="section-title">
+      <h2 style="text-transform:uppercase;letter-spacing:.4px;">Rol: Cajero</h2>
+      <span class="badge badge-amber">Menú: Gestionar Caja</span>
+    </div>
+
+    <div class="card">
+      <p style="font-size:13px;color:var(--muted);margin:0 0 4px;">Cambios propuestos para el rol <strong>CAJERO</strong>. Al igual que en los otros dos roles, se va a ir numerando cada punto según el menú donde se realiza el cambio.</p>
+    </div>
+
+    <div class="card">
+      <h2>1. Menú: Gestionar Caja <span class="tag">CONTEXTO</span></h2>
+      <p style="font-size:13px;color:var(--muted);margin-top:0;">Todo lo que sigue en esta pestaña es sobre este menú puntual dentro del rol Cajero — encabezado del dashboard con el corresponsal y los iconos de acciones rápidas.</p>
+    </div>
+
+    <div class="card">
+      <h2><span class="tag">CAMBIO 1</span> Tooltips para los iconos del dashboard <span class="tag">A PROGRAMAR</span></h2>
+      <p style="font-size:13.5px;line-height:1.7;margin-top:0;">
+        Actualmente solo hay un tooltip para el reporte de las comisiones de terceros. Hay que agregar el correspondiente tooltip a los otros iconos según la tabla:
+      </p>
+      <table class="setup-table">
+        <tr><th>Icono</th><th>Tooltip a agregar</th></tr>
+        <tr><td>🖨️ (imprimir)</td><td>Reporte Diario de Caja</td></tr>
+        <tr><td>▦ (cuadro gris)</td><td>Cierre de Caja</td></tr>
+        <tr><td>👥 (personas, verde)</td><td>Resumen de Terceros</td></tr>
+        <tr><td>$ (círculo gris)</td><td>Comisiones de Terceros <span style="color:var(--muted);font-size:11.5px;">(ya tiene tooltip)</span></td></tr>
+        <tr class="row-new"><td>🧾 (recibo)</td><td>Movimientos Tercero <span class="tag">NUEVO</span></td></tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>Demo de tooltips de cada menú <span class="tag">DEMO</span></h2>
+      <p style="font-size:13.5px;line-height:1.7;margin-top:0;">Pasa el mouse sobre cada ícono para ver el tooltip funcionando de verdad, tal como quedaría después del Cambio 1:</p>
+      <div class="sc-frame" style="margin-top:14px;">
+        <div class="sc-topbar">
+          <div class="sc-hamburger">☰</div>
+          <div class="sc-corresponsal">
+            <label>Corresponsal</label>
+            <select><option>CB BARRIO CENT...</option></select>
+          </div>
+          <div class="sc-compartir">🔗 Compartir</div>
+          <div class="sc-title">YOHANA MONTERROSA</div>
+          <div class="sc-icons">
+            <span class="sc-icon-wrap"><span class="sc-icon-btn sc-icon-dark">🖨️</span><span class="sc-tooltip">Reporte Diario de Caja</span></span>
+            <span class="sc-icon-wrap"><span class="sc-icon-btn">⊞</span><span class="sc-tooltip">Cierre de Caja</span></span>
+            <span class="sc-icon-wrap"><span class="sc-icon-btn sc-icon-green">👥</span><span class="sc-tooltip">Estado de Terceros</span></span>
+            <span class="sc-icon-wrap"><span class="sc-icon-btn">$</span><span class="sc-tooltip">Comisiones de Terceros</span></span>
+            <span class="sc-icon-wrap"><span class="sc-icon-btn">🧾</span><span class="sc-tooltip">Movimientos Tercero</span></span>
+            <span class="sc-icon-wrap"><span class="sc-refresh">🔄</span><span class="sc-tooltip">Actualizar</span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><span class="tag">CAMBIO 2</span> Actualizar el Reporte Diario de Caja para datáfonos Wompi <span class="tag">A PROGRAMAR</span></h2>
+      <p style="font-size:13.5px;line-height:1.7;margin-top:0;">
+        El cambio consiste en actualizar el formato de cierre de caja para los corresponsales que trabajan con datáfonos <strong>Wompi</strong> (el que está actual solo sirve para Redeban). Ya existe esta nueva propuesta y está explicada en los reportes del admin.
+      </p>
+      <div style="display:flex;justify-content:center;margin-top:10px;">
+        <button class="btn-dark-small" onclick="goToSection('tab11','rca-reporte-diario')">Ver propuesta</button>
+      </div>
+    </div>
+
+        <div class="card">
+            <h2><span class="tag">CAMBIO 3</span> Cierre de Caja - Cierre con diferencias <span class="tag">CONTEXTO</span></h2>
+      <p style="font-size:13.5px;line-height:1.7;margin-top:0;">Hay que hacer dos cambios (3.1 y 3.2) que comparten la misma lógica de fondo.</p>
+      <p style="font-size:13.5px;line-height:1.7;margin:0 0 10px;">Actualmente el cierre de caja solo ocurre si el cajero decide presionar "Cerrar caja" — por distintos motivos ese paso puede no llegar a darse, así que debe existir un cierre diario garantizado, sea manual (lo hace el cajero) o automático (lo hace el sistema si nadie lo hizo). Hoy, además, el cierre solo verifica si el saldo da $0: si no da $0, se muestra una alerta y ahí termina — no queda ningún seguimiento de esa alerta. Se propone hacer seguimiento y control de esos valores, hasta que se resuelvan.</p>
+    </div>
+
+
+    <script>
+    window.NOTIFICACIONES = [];
+
+    window.crearNotificacion = function(rol, cb, tipo, mensaje){
+      window.NOTIFICACIONES.unshift({
+        id: 'n' + Date.now(),
+        rol: rol,
+        cb: cb,
+        tipo: tipo,
+        mensaje: mensaje,
+        leida: false,
+        fecha: new Date().toLocaleString('es-CO')
+      });
+      window.renderNotificaciones();
+    };
+
+    window.marcarNotificacionLeida = function(id){
+      const n = window.NOTIFICACIONES.find(x => x.id === id);
+      if(n) n.leida = true;
+      window.renderNotificaciones();
+    };
+
+    window.renderNotificaciones = function(){
+      const badge = document.getElementById('notifBadge');
+      const lista = document.getElementById('notifLista');
+      if(!badge || !lista) return;
+      const noLeidas = window.NOTIFICACIONES.filter(n => !n.leida);
+      if(noLeidas.length > 0){
+        badge.style.display = 'block';
+        badge.textContent = noLeidas.length;
+      } else {
+        badge.style.display = 'none';
+      }
+      if(window.NOTIFICACIONES.length === 0){
+        lista.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:10px;">No hay notificaciones.</div>';
+        return;
+      }
+      lista.innerHTML = window.NOTIFICACIONES.map(n => `
+        <div style="padding:8px 10px;border-bottom:1px solid var(--border);${n.leida ? 'opacity:.55;' : 'background:#f4f2ff;'}cursor:pointer;" onclick="marcarNotificacionLeida('${n.id}')">
+          <div style="font-size:12px;">${n.mensaje}</div>
+          <div style="font-size:10.5px;color:var(--muted);margin-top:3px;">${n.cb} · ${n.fecha}</div>
+        </div>`).join('');
+    };
+
+    window.toggleNotificacionesDropdown = function(){
+      const dd = document.getElementById('notifDropdown');
+      if(!dd) return;
+      dd.classList.toggle('hidden');
+    };
+
+    window.CATALOGO_CAUSAS = [
+      { id: 'c01', texto: 'Depósito o recarga registrada por valor diferente', ambito: 'efectivo', direccion: 'sobrante', activa: true },
+      { id: 'c02', texto: 'El cliente dejó más efectivo del real', ambito: 'efectivo', direccion: 'sobrante', activa: true },
+      { id: 'c03', texto: 'Se recibieron propinas', ambito: 'efectivo', direccion: 'sobrante', activa: true },
+      { id: 'c04', texto: 'Sobrante sin explicación clara', ambito: 'efectivo', direccion: 'sobrante', activa: true },
+      { id: 'c05', texto: 'Transacción de depósito sin recibir dinero del cliente', ambito: 'efectivo', direccion: 'faltante', activa: true },
+      { id: 'c06', texto: 'Retiro con entrega de más efectivo del solicitado', ambito: 'efectivo', direccion: 'faltante', activa: true },
+      { id: 'c07', texto: 'Tercero solicitado por WhatsApp o teléfono sin registrar', ambito: 'efectivo', direccion: 'faltante', activa: true },
+      { id: 'c08', texto: 'Faltante sin explicación clara', ambito: 'efectivo', direccion: 'faltante', activa: true },
+      { id: 'c09', texto: 'Depósito con voucher que el banco no registró', ambito: 'banco', direccion: 'sobrante', activa: true },
+      { id: 'c10', texto: 'Movimiento sin esclarecer entre datáfono y banco', ambito: 'banco', direccion: 'sobrante', activa: true },
+      { id: 'c11', texto: 'Retiro no procesado por datáfono pero sí por el banco', ambito: 'banco', direccion: 'faltante', activa: true },
+      { id: 'c12', texto: 'Movimiento sin esclarecer entre datáfono y banco', ambito: 'banco', direccion: 'faltante', activa: true },
+      { id: 'c13', texto: 'Compensación enviada con código de CB incorrecto', ambito: 'banco', direccion: 'faltante', activa: false },
+      { id: 'c14', texto: 'Compensación revertida por el banco, dinero retenido en sucursal', ambito: 'banco', direccion: 'faltante', activa: true },
+      { id: 'c15', texto: 'Depósito rechazado en datáfono pero aprobado por el banco', ambito: 'banco', direccion: 'faltante', activa: true }
+    ];
+    let CATALOGO_NEXT_ID = 16;
+
+    window.obtenerCausasCatalogo = function(ambito, direccion){
+      return window.CATALOGO_CAUSAS.filter(c => c.activa && c.ambito === ambito && c.direccion === direccion);
+    };
+
+    window.toggleCausaCatalogo = function(id){
+      const c = window.CATALOGO_CAUSAS.find(x => x.id === id);
+      if(c) c.activa = !c.activa;
+      if(typeof window.renderCatalogoAdminUI === 'function'){
+        window.renderCatalogoAdminUI('catalogoAdminUI');
+        window.renderCatalogoAdminUI('catalogoSuperAdminUI');
+      }
+    };
+
+    window.agregarCausaCatalogo = function(){
+      const ambito = document.getElementById('nuevaCausaAmbito').value;
+      const direccion = document.getElementById('nuevaCausaDireccion').value;
+      const texto = document.getElementById('nuevaCausaTexto').value.trim();
+      if(!texto) return;
+      window.CATALOGO_CAUSAS.push({ id: 'c' + (CATALOGO_NEXT_ID++), texto, ambito, direccion, activa: true });
+      document.getElementById('nuevaCausaTexto').value = '';
+      if(typeof window.renderCatalogoAdminUI === 'function'){
+        window.renderCatalogoAdminUI('catalogoAdminUI');
+        window.renderCatalogoAdminUI('catalogoSuperAdminUI');
+      }
+    };
+
+    window.CAUSAS_SUGERIDAS_PENDIENTES = [
+      { id: 's01', texto: 'El cliente pagó con datáfono propio y aparte me dio el efectivo completo', ambito: 'efectivo', direccion: 'sobrante', cajero: 'Yohana Monterrosa', fecha: '13 ago', veces: 1, estado: 'pendiente' },
+      { id: 's02', texto: 'Se me perdió un billete al organizar la caja fuerte', ambito: 'efectivo', direccion: 'faltante', cajero: 'Soraya Monterrosa', fecha: '12 ago', veces: 3, estado: 'pendiente' },
+      { id: 's03', texto: 'El banco descontó una comisión que no estaba en el contrato', ambito: 'banco', direccion: 'faltante', cajero: 'Anyela Urrutia', fecha: '10 ago', veces: 2, estado: 'pendiente' }
+    ];
+
+    window.renderCausasSugeridasUI = function(){
+      const cont = document.getElementById('causasSugeridasUI');
+      if(!cont) return;
+      const pendientes = window.CAUSAS_SUGERIDAS_PENDIENTES.filter(s => s.estado === 'pendiente');
+      const ordenadas = [...pendientes].sort((a,b) => (a.ambito+a.direccion).localeCompare(b.ambito+b.direccion));
+      if(ordenadas.length === 0){
+        cont.innerHTML = '<div class="setup-note">No hay causas sugeridas pendientes de revisión.</div>';
+        return;
+      }
+      const ambitoTag = a => a === 'efectivo' ? 'background:#e9ecf3;color:#3d4a6b;' : 'background:#eee9ff;color:#534ab7;';
+      const direccionTag = d => d === 'sobrante' ? 'background:#dcefe0;color:#1e6b3a;' : 'background:#fdf3e9;color:#8a5a1e;';
+      cont.innerHTML = `<table class="setup-table"><tr><th>Ámbito</th><th>Dirección</th><th>Texto sugerido</th><th>Cajero / fecha</th><th>Veces</th><th>Acción</th></tr>`
+        + ordenadas.map(s => `<tr>
+            <td><span style="font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:999px;${ambitoTag(s.ambito)}">${s.ambito === 'efectivo' ? 'Efectivo' : 'Banco'}</span></td>
+            <td><span style="font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:999px;${direccionTag(s.direccion)}">${s.direccion === 'sobrante' ? 'Sobrante' : 'Faltante'}</span></td>
+            <td style="font-size:12.5px;">${s.texto}</td>
+            <td style="font-size:11.5px;color:var(--muted);">${s.cajero}<br>${s.fecha}</td>
+            <td style="text-align:center;">${s.veces}</td>
+            <td style="text-align:right;white-space:nowrap;">
+              <button class="btn-dark-small" onclick="incorporarCausaSugerida('${s.id}')">Incorporar</button>
+              <button class="btn-ghost btn-small" onclick="descartarCausaSugerida('${s.id}')">Descartar</button>
+            </td>
+          </tr>`).join('')
+        + `</table>`;
+    };
+
+    window.incorporarCausaSugerida = function(id){
+      const s = window.CAUSAS_SUGERIDAS_PENDIENTES.find(x => x.id === id);
+      if(!s) return;
+      s.estado = 'incorporada';
+      window.CATALOGO_CAUSAS.push({ id: 'c' + (CATALOGO_NEXT_ID++), texto: s.texto, ambito: s.ambito, direccion: s.direccion, activa: true });
+      window.renderCausasSugeridasUI();
+      window.renderCatalogoAdminUI('catalogoAdminUI');
+      window.renderCatalogoAdminUI('catalogoSuperAdminUI');
+    };
+
+    window.descartarCausaSugerida = function(id){
+      const s = window.CAUSAS_SUGERIDAS_PENDIENTES.find(x => x.id === id);
+      if(s) s.estado = 'descartada';
+      window.renderCausasSugeridasUI();
+    };
+
+    if(document.readyState === 'loading'){
+      document.addEventListener('DOMContentLoaded', window.renderCausasSugeridasUI);
+    } else {
+      window.renderCausasSugeridasUI();
+    }
+    </script>
+
+    <div class="card">
+      <h2><span class="tag">CAMBIO 3.1</span> Cierre automático obligatorio de caja <span class="tag">A PROGRAMAR</span></h2>
+      <p style="font-size:13.5px;line-height:1.7;margin-top:0;">Hoy el cajero puede dejar la caja abierta sin cerrarla — el botón "Cerrar caja" depende de que él decida presionarlo. Se propone que el sistema cierre automáticamente cualquier caja que siga abierta, sin esperar a que el cajero lo haga.</p>
+      <table class="setup-table">
+        <tr><th>Antes (actual)</th><th>Después (a programar)</th></tr>
+        <tr>
+          <td>El cierre solo ocurre si el cajero presiona "Cerrar caja". Si no lo hace, la caja queda abierta indefinidamente.</td>
+          <td>A <strong>medianoche</strong> (00:00), el sistema cierra automáticamente cualquier caja que siga abierta, tomando los datos que tenga registrados hasta ese momento.</td>
+        </tr>
+        <tr>
+          <td>No existe diferencia entre un cierre hecho por el cajero y uno hecho por el sistema.</td>
+          <td>El cierre queda marcado con un estado: <strong>Cierre manual</strong> (lo hizo el cajero) o <strong>Cierre automático</strong> (lo hizo el sistema a medianoche).</td>
+        </tr>
+      </table>
+      <div class="setup-note" style="margin-top:12px;">Ejemplo: Yohana Monterrosa se fue de urgencia a las 6:00pm sin cerrar caja. A las 00:00 el sistema cierra automáticamente con lo que tenía registrado hasta ese momento y queda marcada como "Cierre automático — sin verificación de efectivo".</div>
+    </div>
+
+    <div class="card">
+      <h2><span class="tag">CAMBIO 3.2</span> Registro de diferencias en el cierre de caja <span class="tag">A PROGRAMAR</span></h2>
+      <p style="font-size:13.5px;line-height:1.7;margin-top:0;">Al cierre del turno, el cajero solo compara el efectivo contado vs Reporte Diario de la app, ahora vamos a registrar las diferencias que pueden ocurrir en el cierre de los sobrantes o faltantes existentes.</p>
+      <table class="setup-table">
+        <tr><th>Antes (actual)</th><th>Después (a programar)</th></tr>
+        <tr>
+          <td>El saldo de apertura del día siguiente es el mismo saldo teórico que arrojó el cierre de la app (no se distingue si hubo faltante o sobrante).</td>
+          <td>El saldo de apertura del día siguiente es el <strong>efectivo real contado</strong> el día anterior — si hubo faltante, la caja abre por debajo del valor esperado (puede abrir en negativo); si hubo sobrante, abre por encima.</td>
+        </tr>
+        <tr>
+          <td>No existe registro histórico de sobrantes/faltantes.</td>
+          <td>Queda registrado en la tabla creada para este propósito y que se consulta en los Parámetros del sistema del SuperAdmin. Visible para el cajero (solo lo suyo) y para el Admin (de todos los cajeros) en Reportes Admin.</td>
+        </tr>
+      </table>
+
+    </div>
+
+    <div class="card" id="demo-cierre-caja">
+      <h2>Simulación interactiva: Cierre de Caja <span class="tag">DEMO</span></h2>
+      <p style="font-size:13.5px;line-height:1.7;margin-top:0;">Formulario horizontal con billetes/fajos/monedas en 3 columnas, comparación en vivo contra Coban365 y contra el Datáfono, catálogo de causas filtrado, historial con Resumen del período, y vista previa del ticket para impresora POS.</p>
+
+      <style>#cdv2Wrap{
+  --navy:#141b33; --navy2:#1d2748; --accent:#6d4aff; --accent-dark:#5637d1;
+  --bg:#f3f4f8; --card:#ffffff; --border:#e2e4ec; --text:#171a26; --muted:#6b7080;
+  --green:#1e6b3a; --green-bg:#dcefe0; --amber:#8a5a1e; --amber-bg:#fdf3e9; --red:#c0392b; --red-bg:#fbe4e1;
+  background:var(--bg);color:var(--text);padding:16px;border-radius:14px;
+}
+#cdv2Wrap *{box-sizing:border-box;}#cdv2Wrap{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,'Segoe UI',Inter,Arial,sans-serif;padding:24px;}#cdv2Wrap .wrap{max-width:1040px;margin:0 auto;}#cdv2Wrap h1{font-size:18px;margin:0 0 4px;}#cdv2Wrap .lead{font-size:13px;color:var(--muted);margin-bottom:18px;}#cdv2Wrap .tag{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.4px;background:#eee9ff;color:var(--accent-dark);border-radius:5px;padding:2px 7px;margin-left:6px;vertical-align:middle;}#cdv2Wrap .card{border:1px solid var(--border);border-radius:14px;background:var(--card);margin-bottom:16px;overflow:hidden;}#cdv2Wrap .card-head{background:var(--navy);color:#fff;padding:14px 20px;font-size:14px;font-weight:700;letter-spacing:.3px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;}#cdv2Wrap .card-body{padding:18px 20px;}#cdv2Wrap select, #cdv2Wrap input[type=text], #cdv2Wrap input[type=number]{border:1px solid #d8d8e2;border-radius:8px;padding:7px 10px;font-size:13px;font-family:inherit;}#cdv2Wrap label{font-size:11.5px;color:var(--muted);display:block;margin-bottom:4px;}#cdv2Wrap .btn-dark{background:var(--navy);color:#fff;border:none;font-size:12.5px;font-weight:700;padding:9px 18px;border-radius:9px;cursor:pointer;}#cdv2Wrap .btn-dark:disabled{opacity:.4;cursor:not-allowed;}#cdv2Wrap .btn-ghost{background:none;border:1px solid #d8d8e2;color:#333;font-size:12.5px;font-weight:600;padding:8px 16px;border-radius:9px;cursor:pointer;}#cdv2Wrap .cols3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}#cdv2Wrap .colcard{background:#fafafe;border:1px solid var(--border);border-radius:10px;padding:12px;display:flex;flex-direction:column;}#cdv2Wrap .colcard .t{font-size:12px;font-weight:700;color:#3d4a6b;margin-bottom:8px;}#cdv2Wrap #billRows, #cdv2Wrap #bundleRows, #cdv2Wrap #coinRows{min-height:135px;}#cdv2Wrap .col-header{display:grid;grid-template-columns:1fr 56px 74px;gap:6px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;color:var(--muted);padding-bottom:6px;border-bottom:1px solid var(--border);margin-bottom:2px;}#cdv2Wrap .col-header span:nth-child(2){text-align:center;}#cdv2Wrap .col-header span:nth-child(3){text-align:right;}#cdv2Wrap .row{display:grid;grid-template-columns:1fr 56px 74px;align-items:center;gap:6px;font-size:12px;padding:4px 0;border-bottom:1px solid #f0f0f5;}#cdv2Wrap .row span:first-child{color:var(--text);}#cdv2Wrap .row input{width:100%;text-align:center;padding:3px 2px;font-size:12px;}#cdv2Wrap .row .sub{text-align:right;font-variant-numeric:tabular-nums;font-weight:600;}#cdv2Wrap .subtotal{border-top:1px solid var(--border);margin-top:auto;padding-top:6px;font-size:12px;font-weight:700;display:flex;justify-content:space-between;}#cdv2Wrap .resumen3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:16px;}#cdv2Wrap .resitem{background:#fafafe;border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:center;}#cdv2Wrap .resitem .lbl{font-size:11px;color:var(--muted);margin-bottom:4px;}#cdv2Wrap .resitem .val{font-size:16px;font-weight:700;font-variant-numeric:tabular-nums;}#cdv2Wrap .diffs{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px;}#cdv2Wrap .diffbox{border:1px solid var(--border);border-left:4px solid var(--border);border-radius:10px;padding:12px 14px;}#cdv2Wrap .diffbox.ok{border-left-color:var(--green);}#cdv2Wrap .diffbox.warn{border-left-color:var(--amber);}#cdv2Wrap .diffbox.bad{border-left-color:var(--red);}#cdv2Wrap .diffbox small{display:block;font-size:11px;color:var(--muted);font-weight:600;margin-bottom:4px;}#cdv2Wrap .diffbox strong{display:block;font-size:19px;font-variant-numeric:tabular-nums;}#cdv2Wrap .diffbox span{display:block;font-size:12px;font-weight:700;margin-top:2px;}#cdv2Wrap .diffbox.ok span{color:var(--green);}#cdv2Wrap .diffbox.warn span{color:var(--amber);}#cdv2Wrap .diffbox.bad span{color:var(--red);}#cdv2Wrap .motivo-panel{background:var(--amber-bg);border:1px solid #f0c88f;border-radius:10px;padding:14px 16px;margin-top:12px;}#cdv2Wrap .motivo-panel .tit{font-size:12.5px;font-weight:700;color:var(--amber);margin-bottom:8px;}#cdv2Wrap .tarjeta{border:1px solid #fff;background:#fff;border-radius:8px;padding:9px 12px;margin-bottom:6px;cursor:pointer;}#cdv2Wrap .tarjeta.sel{border-color:var(--accent-dark);background:#f4f2ff;}#cdv2Wrap .tarjeta .h{font-size:12px;font-weight:600;}#cdv2Wrap .notice{display:flex;gap:10px;margin-top:14px;padding:12px 14px;border:1px solid var(--border);border-radius:10px;background:#fafafe;font-size:12.5px;line-height:1.5;}#cdv2Wrap .notice.ok{border-color:#bfe3c9;background:var(--green-bg);color:var(--green);}#cdv2Wrap .notice.warn{border-color:#f0c88f;background:var(--amber-bg);color:var(--amber);}#cdv2Wrap table{width:100%;border-collapse:collapse;font-size:12.5px;}#cdv2Wrap th{text-align:left;color:var(--muted);font-weight:500;padding:8px 6px;border-bottom:1px solid var(--border);font-size:11px;text-transform:uppercase;letter-spacing:.3px;}#cdv2Wrap td{padding:10px 6px;border-bottom:1px solid #f0f0f5;}#cdv2Wrap .pill{display:inline-block;font-size:11px;font-weight:700;padding:2px 9px;border-radius:999px;}#cdv2Wrap .pill.ok{background:var(--green-bg);color:var(--green);}#cdv2Wrap .pill.warn{background:var(--amber-bg);color:var(--amber);}#cdv2Wrap .pill.bad{background:var(--red-bg);color:var(--red);}#cdv2Wrap .hidden{display:none !important;}#cdv2Wrap .tabbar{display:flex;gap:8px;margin-bottom:16px;}#cdv2Wrap .tabbtn{background:none;border:1px solid var(--border);border-radius:9px;padding:8px 16px;font-size:12.5px;font-weight:600;cursor:pointer;color:var(--text);}#cdv2Wrap .tabbtn.active{background:var(--navy);color:#fff;border-color:var(--navy);}#cdv2Wrap .setup-note{font-size:11.5px;color:var(--muted);background:#f4f4f7;border-radius:8px;padding:8px 10px;margin-top:8px;}
+</style>
+
+      <div id="cdv2Wrap">
+
+<div class="wrap">
+  <div class="tabbar">
+    <button class="tabbtn active" data-tab="cierre" onclick="switchTab('cierre')">Cierre de caja</button>
+    <button class="tabbtn" data-tab="reporte" onclick="switchTab('reporte')">Reporte diario</button>
+  </div>
+
+  <div id="tab-cierre">
+    <div class="card">
+      <div class="card-head">
+        <span>CIERRE DE CAJA - [12029] BARRIO CENTENARIO - SORAYA MONTERROSA</span>
+      </div>
+      <div class="card-body">
+        <label for="caseSelect">Caso de demostración</label>
+        <select id="caseSelect" onchange="loadCase(this.value)" style="width:100%;max-width:360px;"></select>
+
+        <div style="margin-top:12px;">
+          <label for="cantidadCajerosCD">Este CB tiene</label>
+          <select id="cantidadCajerosCD" onchange="cambiarCantidadCajerosCD()" style="width:100%;max-width:220px;">
+            <option value="1">1 cajero</option>
+            <option value="varios">Varios cajeros</option>
+          </select>
+          <div class="setup-note" style="margin-top:6px;">Con 1 cajero, él mismo compara Coban365 contra el saldo real de Bancolombia esa misma noche. Con varios, esa comparación no vive aquí — la hace el Admin, cuando todos los cajeros hayan cerrado.</div>
+        </div>
+
+        <div class="cols3" style="margin-top:16px;">
+          <div class="colcard">
+            <div class="t">BILLETES</div>
+            <div class="col-header"><span>Denominación</span><span>Cantidad</span><span>Total</span></div>
+            <div id="billRows"></div>
+            <div class="subtotal"><span>Subtotal Billetes</span><span id="billSubtotal">$0</span></div>
+          </div>
+          <div class="colcard">
+            <div class="t">FAJOS (100 unid)</div>
+            <div class="col-header"><span>Denominación</span><span>Cantidad</span><span>Total</span></div>
+            <div id="bundleRows"></div>
+            <div class="subtotal"><span>Subtotal Fajos</span><span id="bundleSubtotal">$0</span></div>
+          </div>
+          <div class="colcard">
+            <div class="t">MONEDAS</div>
+            <div class="col-header"><span>Denominación</span><span>Cantidad</span><span>Total</span></div>
+            <div id="coinRows"></div>
+            <div class="subtotal"><span>Subtotal Monedas</span><span id="coinSubtotal">$0</span></div>
+          </div>
+        </div>
+
+        <div class="resumen3" style="grid-template-columns:1fr 1fr 1fr 1fr;">
+          <div class="resitem"><div class="lbl">Total Efectivo</div><div class="val" id="rCash">$0</div></div>
+          <div class="resitem"><div class="lbl">Coban365 (Caja actual)</div><div class="val" id="rApp">$0</div></div>
+          <div class="resitem"><div class="lbl">Datafono (Cuadre de caja)</div><div class="val" id="rBank">$0</div></div>
+          <div class="resitem"><div class="lbl">Coban365 (Neto total)</div><div class="val" id="rNeto">$0</div></div>
+        </div>
+
+        <div class="diffs">
+          <div class="diffbox" id="cashDiffBox">
+            <small>Total Efectivo vs Coban365 (Caja actual)</small>
+            <strong id="cashDiffAmt">$0</strong>
+            <span id="cashDiffLbl">Cuadrado</span>
+          </div>
+          <div class="diffbox" id="bankDiffBox">
+            <small>Datafono vs Coban365 (Neto total)</small>
+            <strong id="bankDiffAmt">$0</strong>
+            <span id="bankDiffLbl">Conciliado</span>
+          </div>
+        </div>
+
+        <div id="unicoCajeroWrap" style="margin-top:12px;">
+          <div style="display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;">
+            <div>
+              <label style="margin-top:0;">Deuda calculada (Neto Total + Compensaciones)</label>
+              <div style="font-size:14px;font-weight:700;padding:7px 0;" id="deudaCalculadaCD">$0</div>
+            </div>
+            <div>
+              <label style="margin-top:0;">Saldo real Bancolombia</label>
+              <input type="text" id="saldoRealBancolombiaCD" value="$ 2.330.000" oninput="formatMoneyInput(this); recalcular();" style="max-width:170px;">
+            </div>
+          </div>
+          <div class="diffs" style="margin-top:10px;">
+            <div class="diffbox" id="bancolombiaDiffBox">
+              <small>Deuda calculada (Neto Total + Compensaciones) vs Saldo real Bancolombia</small>
+              <strong id="bancolombiaDiffAmt">$0</strong>
+              <span id="bancolombiaDiffLbl">Conciliado</span>
+            </div>
+          </div>
+          <div id="motivoBancolombia" class="motivo-panel hidden"></div>
+        </div>
+
+        <div id="variosCajerosWrap" style="display:none;margin-top:12px;background:#f4f4f7;border-radius:10px;padding:12px 14px;">
+          <div style="font-size:12.5px;font-weight:700;margin-bottom:8px;">Los 3 cajeros de este CB (cierra el que quieras, en el orden que quieras):</div>
+          <div id="cajerosMultiCD" style="display:flex;flex-direction:column;gap:6px;"></div>
+          <div class="setup-note" style="margin-top:8px;" id="progresoCierreMultiCD">0 de 3 cajeros han cerrado hoy.</div>
+        </div>
+
+        <div id="motivoEfectivo" class="motivo-panel hidden"></div>
+        <div id="motivoBanco" class="motivo-panel hidden"></div>
+
+        <div id="notice" class="notice"></div>
+
+        <div style="display:flex;gap:10px;margin-top:16px;">
+          <button class="btn-ghost" onclick="loadCase(activeCase)">Regresar</button>
+          <button class="btn-dark" id="btnValidar" onclick="validarCierre()">Cierre de Caja</button>
+          <button class="btn-ghost" onclick="toggleTicket()">Imprimir</button>
+        </div>
+        <div id="resultadoCierre" style="margin-top:12px;"></div>
+        <div id="ticketWrap" class="hidden" style="margin-top:16px;display:flex;flex-direction:column;align-items:center;gap:10px;">
+          <div id="ticketBox" style="width:280px;background:#fff;border:1px solid #ccc;padding:14px 12px;font-family:'Courier New',monospace;font-size:11.5px;line-height:1.5;color:#111;"></div>
+          <button class="btn-dark" onclick="imprimirTicketReal()">🖨️ Imprimir ticket</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-reporte" class="hidden">
+    <div class="card">
+      <div class="card-head"><span>REPORTE DIARIO DE HISTORIAL DE CIERRES - SORAYA MONTERROSA</span></div>
+      <div class="card-body">
+        <p style="font-size:12.5px;color:var(--muted);margin-top:0;">Disponible para el cajero (sus propios cierres) y para el Admin (todos los cajeros). Cada diferencia se conserva por separado — un sobrante no tapa un faltante ni una diferencia de conciliación.</p>
+        <table>
+          <thead><tr>
+            <th>Fecha</th>
+            <th>Efectivo</th>
+            <th>Coban365<br><span style="font-weight:400;text-transform:none;">(Caja actual)</span></th>
+            <th>Datafono</th>
+            <th>Coban365<br><span style="font-weight:400;text-transform:none;">(Neto Total)</span></th>
+            <th>Dif. Efectivo</th>
+            <th>Dif. Banco</th>
+            <th>Estado</th>
+          </tr></thead>
+          <tbody id="reportBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+      </div>
+    </div>
+
+    <script>
+
+const bills = [100000,50000,20000,10000,5000,2000,1000];
+const coins = [1000,500,200,100,50];
+
+// Catálogo de causas — mismo concepto que en el simulador maestro
+const CATALOGO = [
+  { id:'c01', texto:'Depósito, recaudo o recarga registrada por valor diferente', ambito:'efectivo', direccion:'sobrante' },
+  { id:'c02', texto:'El cliente dejó más efectivo del real', ambito:'efectivo', direccion:'sobrante' },
+  { id:'c03', texto:'Se recibieron propinas', ambito:'efectivo', direccion:'sobrante' },
+  { id:'c04', texto:'Se entregó menos dinero al cliente en un retiro', ambito:'efectivo', direccion:'sobrante' },
+  { id:'c05', texto:'Transacción de depósito sin recibir dinero del cliente', ambito:'efectivo', direccion:'faltante' },
+  { id:'c06', texto:'Retiro con entrega de más efectivo del solicitado', ambito:'efectivo', direccion:'faltante' },
+  { id:'c07', texto:'Transacción solicitada por WhatsApp o teléfono sin registrar', ambito:'efectivo', direccion:'faltante' },
+  { id:'c08', texto:'Transacción de depósito recibiendo menos dinero del acordado', ambito:'efectivo', direccion:'faltante' },
+  { id:'c09', texto:'Transacción tipo Transferencia pero se entrega efectivo al cliente', ambito:'efectivo', direccion:'faltante' },
+  { id:'c10', texto:'Depósito con voucher que el banco no registró', ambito:'banco', direccion:'sobrante' },
+  { id:'c11', texto:'Retiro no procesado por datáfono pero sí por el banco', ambito:'banco', direccion:'faltante' },
+  { id:'c12', texto:'Compensación revertida por el banco, dinero retenido en sucursal', ambito:'banco', direccion:'faltante' },
+  { id:'c13', texto:'Depósito rechazado en datáfono pero aprobado por el banco', ambito:'banco', direccion:'faltante' }
+];
+
+const demoCases = [
+  { name:'Caso 0 · Todo cuadra', note:'Datafono = Neto Datáfono · efectivo = Caja actual', app:2450000, bank:2250000, terceros:120000, compensaciones:80000, billQty:[24,1,0,0,0,0,0], bundleQty:[0,0,0,0,0,0,0], coinQty:[0,0,0,0,0], fecha:'14 ago', hour:'6:00 p. m.', cashier:'Soraya Monterrosa' },
+  { name:'Caso 1 · Sobrante', note:'Datafono = Neto Datáfono · efectivo mayor que Caja actual (+$45.000)', app:2450000, bank:2250000, terceros:120000, compensaciones:80000, billQty:[24,1,0,4,1,0,0], bundleQty:[0,0,0,0,0,0,0], coinQty:[0,0,0,0,0], fecha:'13 ago', hour:'6:00 p. m.', cashier:'Soraya Monterrosa' },
+  { name:'Caso 2 · Faltante', note:'Datafono = Neto Datáfono · efectivo menor que Caja actual (-$60.000)', app:3180000, bank:3030000, terceros:100000, compensaciones:50000, billQty:[31,0,1,0,0,0,0], bundleQty:[0,0,0,0,0,0,0], coinQty:[0,0,0,0,0], fecha:'12 ago', hour:'5:45 p. m.', cashier:'Soraya Monterrosa' },
+  { name:'Caso 3 · Dos diferencias (Coban365 registra de más, sobra)', note:'Neto Datáfono > Datafono impreso (+$70.000) · efectivo mayor que Caja actual (+$45.000)', app:4860000, bank:4490000, terceros:180000, compensaciones:120000, billQty:[49,0,0,0,1,0,0], bundleQty:[0,0,0,0,0,0,0], coinQty:[0,0,0,0,0], fecha:'11 ago', hour:'5:30 p. m.', cashier:'Soraya Monterrosa' },
+  { name:'Caso 4 · Dos diferencias (Datafono reporta de más, falta)', note:'Neto Datáfono < Datafono impreso (-$75.000) · efectivo menor que Caja actual (-$40.000)', app:5240000, bank:5065000, terceros:150000, compensaciones:100000, billQty:[52,0,0,0,0,0,0], bundleQty:[0,0,0,0,0,0,0], coinQty:[0,0,0,0,0], fecha:'10 ago', hour:'5:15 p. m.', cashier:'Soraya Monterrosa' }
+];
+
+let activeCase = 0;
+let bancoMotivoSel = null;
+let efectivoMotivoSel = null;
+let bancoOtraTexto = '';
+let bancolombiaMotivoSel = null;
+let bancolombiaOtraTexto = '';
+let bancolombiaChecklist = [false, false, false];
+let cantidadCajerosCD = '1';
+const CAJEROS_MULTI_CD = ['Soraya Monterrosa', 'Yohana Monterrosa', 'Anyela Urrutia'];
+let cierresHoyMultiCD = {};
+
+window.cambiarCantidadCajerosCD = function(){
+  cantidadCajerosCD = document.getElementById('cantidadCajerosCD').value;
+  document.getElementById('unicoCajeroWrap').style.display = cantidadCajerosCD === '1' ? 'block' : 'none';
+  document.getElementById('variosCajerosWrap').style.display = cantidadCajerosCD === 'varios' ? 'block' : 'none';
+  if(cantidadCajerosCD === 'varios') renderCajerosMultiCD();
+  recalcular();
+};
+
+function renderCajerosMultiCD(){
+  const cont = document.getElementById('cajerosMultiCD');
+  if(!cont) return;
+  cont.innerHTML = CAJEROS_MULTI_CD.map(nombre => {
+    const cerrado = !!cierresHoyMultiCD[nombre];
+    return `<div style="display:flex;justify-content:space-between;align-items:center;background:#fff;border:1px solid var(--border);border-radius:8px;padding:8px 12px;">
+      <span style="font-size:12.5px;">${nombre}</span>
+      ${cerrado
+        ? '<span style="font-size:11px;font-weight:700;color:#1e6b3a;">✓ Cerró hoy</span>'
+        : `<button class="btn-ghost btn-small" onclick="cerrarCajaMultiCD('${nombre}')">Cerrar caja</button>`}
+    </div>`;
+  }).join('');
+  const totalCerrados = Object.values(cierresHoyMultiCD).filter(Boolean).length;
+  document.getElementById('progresoCierreMultiCD').textContent = `${totalCerrados} de ${CAJEROS_MULTI_CD.length} cajeros han cerrado hoy.`;
+}
+
+window.cerrarCajaMultiCD = function(nombre){
+  cierresHoyMultiCD[nombre] = true;
+  renderCajerosMultiCD();
+  const totalCerrados = Object.values(cierresHoyMultiCD).filter(Boolean).length;
+  if(totalCerrados === CAJEROS_MULTI_CD.length){
+    crearNotificacion('admin', 'CB Barrio Centenario', 'conciliacion_lista', 'Todos los cajeros de CB Barrio Centenario cerraron hoy — ya puedes conciliar el consolidado contra el banco.');
+  }
+};
+
+let efectivoOtraTexto = '';
+let bancoChecklist = [false, false, false];
+let efectivoChecklist = [false, false, false];
+const PREGUNTAS_CHECKLIST = [
+  '¿Revisaste si el datáfono mostró rechazo en alguna transacción que el banco ya tenía como aprobada (o al revés)?',
+  '¿Comparaste el valor exacto contra el listado de movimientos del banco en línea (no solo el saldo total)?',
+  '¿Descartaste que sea un movimiento de un tercero o una compensación que se te haya pasado por alto?'
+];
+let cerrado = false;
+
+function pesos(v){ const s = Math.round(v||0); return (s<0?'-':'') + '$' + Math.abs(s).toLocaleString('es-CO'); }
+function signed(v){ if(v===0) return '$0'; return (v>0?'+':'-') + pesos(Math.abs(v)).replace('$','$'); }
+
+function inputId(group, i){ return group+'-'+i; }
+
+function pintarFilas(contId, denoms, group, multiplicador, qtys){
+  const cont = document.getElementById(contId);
+  cont.innerHTML = denoms.map((d,i) => `
+    <div class="row">
+      <span>$${d.toLocaleString('es-CO')}</span>
+      <input type="text" inputmode="numeric" id="${inputId(group,i)}" value="${qtys[i]}" oninput="recalcular()">
+      <span class="sub" id="${group}-sub-${i}">${pesos(d*multiplicador*(qtys[i]||0))}</span>
+    </div>`).join('');
+}
+
+function grupoTotal(group, denoms, multiplicador){
+  let total = 0;
+  denoms.forEach((d,i) => {
+    const cant = parseInt((document.getElementById(inputId(group,i))||{}).value) || 0;
+    const sub = d * multiplicador * cant;
+    const el = document.getElementById(group+'-sub-'+i);
+    if(el) el.textContent = pesos(sub);
+    total += sub;
+  });
+  return total;
+}
+
+function tarjetaHTML(c, sel, fn){
+  return `<div class="tarjeta ${sel===c.id?'sel':''}" onclick="${fn}('${c.id}')"><div class="h">${c.texto}</div></div>`;
+}
+
+function panelMotivo(contId, ambito, diff, sel, otraTexto, elegirFn, otraFn, checklist, toggleChecklistFn){
+  const cont = document.getElementById(contId);
+  if(diff === 0){ cont.classList.add('hidden'); cont.innerHTML=''; return; }
+  cont.classList.remove('hidden');
+  const direccion = diff > 0 ? 'sobrante' : 'faltante';
+  const etiqueta = ambito === 'banco' ? '¿Qué pasó con movimientos del banco?' : '¿Qué pasó con el efectivo?';
+  const causas = CATALOGO.filter(c => c.ambito === ambito && c.direccion === direccion);
+  let extra = '';
+  if(sel === 'otra'){
+    extra = `<input type="text" placeholder="Escribe el motivo..." value="${otraTexto}" oninput="${otraFn}(this.value)" style="width:100%;margin-top:6px;">`
+      + `<div style="margin-top:10px;padding-top:10px;border-top:1px dashed #f0c88f;">`
+      + `<div style="font-size:11.5px;font-weight:700;color:#8a5a1e;margin-bottom:6px;">Antes de continuar, confirma:</div>`
+      + PREGUNTAS_CHECKLIST.map((p, i) => `<label style="display:flex;align-items:flex-start;gap:6px;font-size:11.5px;margin-bottom:5px;cursor:pointer;">
+          <input type="checkbox" ${checklist[i] ? 'checked' : ''} onchange="${toggleChecklistFn}(${i})" style="margin-top:2px;">
+          <span>${p}</span>
+        </label>`).join('')
+      + `</div>`;
+  }
+  cont.innerHTML = `<div class="tit">${etiqueta} (${direccion})</div>`
+    + causas.map(c => tarjetaHTML(c, sel, elegirFn)).join('')
+    + `<div class="tarjeta ${sel==='otra'?'sel':''}" onclick="${elegirFn}('otra')"><div class="h">Otra (especificar)</div></div>`
+    + extra;
+}
+
+window.elegirBanco = function(id){ bancoMotivoSel = id; recalcular(); };
+window.escribirOtraBanco = function(txt){ bancoOtraTexto = txt; };
+window.elegirEfectivo = function(id){ efectivoMotivoSel = id; recalcular(); };
+window.escribirOtraEfectivo = function(txt){ efectivoOtraTexto = txt; };
+window.toggleChecklistBanco = function(i){ bancoChecklist[i] = !bancoChecklist[i]; recalcular(); };
+window.toggleChecklistEfectivo = function(i){ efectivoChecklist[i] = !efectivoChecklist[i]; recalcular(); };
+window.elegirBancolombia = function(id){ bancolombiaMotivoSel = id; recalcular(); };
+window.escribirOtraBancolombia = function(txt){ bancolombiaOtraTexto = txt; };
+window.toggleChecklistBancolombia = function(i){ bancolombiaChecklist[i] = !bancolombiaChecklist[i]; recalcular(); };
+
+function recalcular(){
+  if(cerrado) return;
+  const bTotal = grupoTotal('bills', bills, 1);
+  document.getElementById('billSubtotal').textContent = pesos(bTotal);
+  const fTotal = grupoTotal('bundles', bills, 100);
+  document.getElementById('bundleSubtotal').textContent = pesos(fTotal);
+  const cTotal = grupoTotal('coins', coins, 1);
+  document.getElementById('coinSubtotal').textContent = pesos(cTotal);
+
+  const cash = bTotal + fTotal + cTotal;
+  const c = demoCases[activeCase];
+  const app = c.app, datafonoImpreso = c.bank, terceros = c.terceros || 0, compensaciones = c.compensaciones || 0;
+  const netoDatafono = app - terceros - compensaciones;
+  const deudaCalculada = netoDatafono + compensaciones;
+
+  document.getElementById('rCash').textContent = pesos(cash);
+  document.getElementById('rApp').textContent = pesos(app);
+  document.getElementById('rNeto').textContent = pesos(netoDatafono);
+  document.getElementById('rBank').textContent = pesos(datafonoImpreso);
+
+  const bankDiff = netoDatafono - datafonoImpreso;
+  const cashDiff = cash - app;
+
+  const bankBox = document.getElementById('bankDiffBox');
+  bankBox.className = 'diffbox ' + (bankDiff === 0 ? 'ok' : 'bad');
+  document.getElementById('bankDiffAmt').innerHTML = bankDiff < 0 ? `<span style="color:#c0392b;">${signed(bankDiff)}</span>` : signed(bankDiff);
+  document.getElementById('bankDiffLbl').textContent = bankDiff === 0 ? 'Conciliado' : (bankDiff > 0 ? 'Coban365 registra de más vs. banco' : 'Datafono reporta de mas vs Coban');
+
+  const cashBox = document.getElementById('cashDiffBox');
+  cashBox.className = 'diffbox ' + (cashDiff === 0 ? 'ok' : (cashDiff > 0 ? 'warn' : 'bad'));
+  document.getElementById('cashDiffAmt').innerHTML = cashDiff < 0 ? `<span style="color:#c0392b;">${signed(cashDiff)}</span>` : signed(cashDiff);
+  document.getElementById('cashDiffLbl').textContent = cashDiff === 0 ? 'Cuadrado' : (cashDiff > 0 ? 'Sobrante de caja' : 'Faltante de caja');
+
+  if(bankDiff === 0) bancoMotivoSel = null;
+  if(cashDiff === 0) efectivoMotivoSel = null;
+  panelMotivo('motivoBanco', 'banco', bankDiff, bancoMotivoSel, bancoOtraTexto, 'elegirBanco', 'escribirOtraBanco', bancoChecklist, 'toggleChecklistBanco');
+  panelMotivo('motivoEfectivo', 'efectivo', cashDiff, efectivoMotivoSel, efectivoOtraTexto, 'elegirEfectivo', 'escribirOtraEfectivo', efectivoChecklist, 'toggleChecklistEfectivo');
+
+  let bancolombiaDiff = 0;
+  if(cantidadCajerosCD === '1'){
+    const saldoRealEl = document.getElementById('saldoRealBancolombiaCD');
+    const saldoRealRaw = saldoRealEl ? String(saldoRealEl.value).replace(/[^0-9]/g,'') : '';
+    const saldoReal = saldoRealRaw ? parseInt(saldoRealRaw, 10) : 0;
+    document.getElementById('deudaCalculadaCD').textContent = pesos(deudaCalculada);
+    bancolombiaDiff = deudaCalculada - saldoReal;
+    const bcoBox = document.getElementById('bancolombiaDiffBox');
+    bcoBox.className = 'diffbox ' + (bancolombiaDiff === 0 ? 'ok' : 'bad');
+    document.getElementById('bancolombiaDiffAmt').innerHTML = bancolombiaDiff < 0 ? `<span style="color:#c0392b;">${signed(bancolombiaDiff)}</span>` : signed(bancolombiaDiff);
+    document.getElementById('bancolombiaDiffLbl').textContent = bancolombiaDiff === 0 ? 'Conciliado' : (bancolombiaDiff > 0 ? 'Coban365 registra de más vs. Bancolombia' : 'Bancolombia reporta de más vs Coban365');
+    if(bancolombiaDiff === 0) bancolombiaMotivoSel = null;
+    panelMotivo('motivoBancolombia', 'banco', bancolombiaDiff, bancolombiaMotivoSel, bancolombiaOtraTexto, 'elegirBancolombia', 'escribirOtraBancolombia', bancolombiaChecklist, 'toggleChecklistBancolombia');
+  }
+
+  const notice = document.getElementById('notice');
+  const bankIssue = bankDiff !== 0, cashIssue = cashDiff !== 0;
+  if(!bankIssue && !cashIssue){
+    notice.className = 'notice ok';
+    notice.innerHTML = '<strong>Cierre cuadrado.</strong> El efectivo, Coban365 y el datafono coinciden.';
+  } else if(bankIssue && cashIssue){
+    notice.className = 'notice warn';
+    if(cashDiff > 0){
+      notice.innerHTML = '<strong>Hay dos diferencias por validación.</strong> Diferencia de conciliación con el cierre del datafono y sobrante de efectivo. Ninguna transacción se modifica para cuadrar — el sobrante/faltante se registra con la explicación posible de la causa escogida arriba.';
+    } else {
+      notice.innerHTML = '<strong>Hay dos diferencias independientes.</strong> Diferencia de conciliación con el banco y faltante de efectivo. Ninguna transacción se modifica para cuadrar — el sobrante/faltante se registra con la explicación posible de la causa escogida arriba.';
+    }
+  } else if(bankIssue){
+    notice.className = 'notice warn';
+    notice.innerHTML = '<strong>Hay una diferencia.</strong> Diferencia de conciliación con el cierre del datafono. Ninguna transacción se modifica para cuadrar — se registra con la explicación posible de la causa escogida arriba.';
+  } else {
+    notice.className = 'notice warn';
+    if(cashDiff > 0){
+      notice.innerHTML = '<strong>Hay una diferencia.</strong> sobrante de efectivo. Ninguna transacción se modifica para cuadrar — el sobrante se registra tal cual, con la explicación posible de la causa escogida arriba.';
+    } else {
+      notice.innerHTML = '<strong>Hay una diferencia.</strong> Faltante de efectivo. Ninguna transacción se modifica para cuadrar — el faltante se registra tal cual, con la explicación posible de la causa escogida arriba.';
+    }
+  }
+
+  const btn = document.getElementById('btnValidar');
+  const bancoOk = bankDiff === 0 || (bancoMotivoSel && (bancoMotivoSel!=='otra' || bancoOtraTexto.trim()));
+  const efectivoOk = cashDiff === 0 || (efectivoMotivoSel && (efectivoMotivoSel!=='otra' || efectivoOtraTexto.trim()));
+  const bancolombiaOk = cantidadCajerosCD !== '1' || bancolombiaDiff === 0 || (bancolombiaMotivoSel && (bancolombiaMotivoSel!=='otra' || bancolombiaOtraTexto.trim()));
+  btn.disabled = !(bancoOk && efectivoOk && bancolombiaOk);
+
+  return { cash, app, bank: datafonoImpreso, netoDatafono, terceros, bankDiff, cashDiff, bancolombiaDiff };
+}
+
+function loadCase(i){
+  activeCase = Number(i);
+  cerrado = false;
+  bancoMotivoSel = null; efectivoMotivoSel = null; bancoOtraTexto=''; efectivoOtraTexto='';
+  bancoChecklist = [false, false, false]; efectivoChecklist = [false, false, false];
+  bancolombiaMotivoSel = null; bancolombiaOtraTexto = ''; bancolombiaChecklist = [false, false, false];
+  document.getElementById('saldoRealBancolombiaCD').value = '$ 2.330.000';
+  document.getElementById('saldoRealBancolombiaCD').disabled = false;
+  document.getElementById('resultadoCierre').innerHTML = '';
+  const c = demoCases[activeCase];
+  document.getElementById('caseSelect').value = activeCase;
+  pintarFilas('billRows', bills, 'bills', 1, c.billQty);
+  pintarFilas('bundleRows', bills, 'bundles', 100, c.bundleQty);
+  pintarFilas('coinRows', coins, 'coins', 1, c.coinQty);
+  document.querySelectorAll('#billRows input, #bundleRows input, #coinRows input').forEach(el => el.disabled = false);
+  recalcular();
+}
+
+function notaChecklist(checklist){
+  const marcadas = checklist.filter(Boolean).length;
+  if(marcadas === 3) return '';
+  return ` <span style="color:#8a5a1e;">(cerrado sin verificar ${3 - marcadas} de 3 puntos del checklist)</span>`;
+}
+
+function validarCierre(){
+  const r = recalcular();
+  if(document.getElementById('btnValidar').disabled) return;
+  cerrado = true;
+  document.querySelectorAll('#billRows input, #bundleRows input, #coinRows input').forEach(el => el.disabled = true);
+  document.getElementById('btnValidar').disabled = true;
+
+  const causaBanco = r.bankDiff !== 0 ? (bancoMotivoSel==='otra' ? bancoOtraTexto + notaChecklist(bancoChecklist) : CATALOGO.find(c=>c.id===bancoMotivoSel).texto) : null;
+  const causaEfectivo = r.cashDiff !== 0 ? (efectivoMotivoSel==='otra' ? efectivoOtraTexto + notaChecklist(efectivoChecklist) : CATALOGO.find(c=>c.id===efectivoMotivoSel).texto) : null;
+  const causaBancolombia = (cantidadCajerosCD === '1' && r.bancolombiaDiff !== 0) ? (bancolombiaMotivoSel==='otra' ? bancolombiaOtraTexto + notaChecklist(bancolombiaChecklist) : CATALOGO.find(c=>c.id===bancolombiaMotivoSel).texto) : null;
+
+  let html = '<div class="setup-note"><strong>Cierre registrado — ninguna transacción fue modificada.</strong><br>';
+  html += `Total Efectivo: ${pesos(r.cash)} · queda como saldo de apertura del día siguiente.<br>`;
+  if(causaBanco) html += `Diferencia de conciliación guardada: ${signed(r.bankDiff)} — ${causaBanco}<br>`;
+  if(causaEfectivo) html += `Diferencia de caja guardada: ${signed(r.cashDiff)} — ${causaEfectivo}<br>`;
+  if(causaBancolombia) html += `Diferencia con Bancolombia guardada: ${signed(r.bancolombiaDiff)} — ${causaBancolombia}<br>`;
+  if(!causaBanco && !causaEfectivo && !causaBancolombia) html += 'Sin diferencias — cierre cuadrado.<br>';
+
+  html += '</div>';
+  document.getElementById('resultadoCierre').innerHTML = html;
+
+  demoCases[activeCase]._resultado = { cash:r.cash, bankDiff:r.bankDiff, cashDiff:r.cashDiff, causaBanco, causaEfectivo, validado:true };
+  renderReporte();
+}
+
+function signedHTML(v){
+  return v < 0 ? `<span style="color:#c0392b;">${signed(v)}</span>` : signed(v);
+}
+
+function renderReporte(){
+  document.getElementById('reportBody').innerHTML = demoCases.map((c,i) => {
+    const cash = c.billQty.reduce((s,q,j)=>s+q*bills[j],0) + c.bundleQty.reduce((s,q,j)=>s+q*bills[j]*100,0) + c.coinQty.reduce((s,q,j)=>s+q*coins[j],0);
+    const terceros = c.terceros || 0;
+    const compensaciones = c.compensaciones || 0;
+    const netoDatafono = c.app - terceros - compensaciones;
+    const bankDiff = netoDatafono - c.bank;
+    const cashDiff = cash - c.app;
+    let estado = 'ok', texto = 'Cuadrado';
+    if(bankDiff !== 0 || cashDiff !== 0){
+      estado = (bankDiff !== 0 || cashDiff < 0) ? 'bad' : 'warn';
+      texto = c._resultado && c._resultado.validado ? 'Validado, con diferencia' : 'Diferencia pendiente';
+    }
+    return `<tr>
+      <td><strong>${c.fecha}</strong><br><span style="color:var(--muted);font-size:11.5px;">${c.hour}</span></td>
+      <td>${pesos(cash)}</td>
+      <td>${pesos(c.app)}</td>
+      <td>${pesos(c.bank)}</td>
+      <td>${pesos(netoDatafono)}</td>
+      <td>${signedHTML(cashDiff)}</td>
+      <td>${signedHTML(bankDiff)}</td>
+      <td><span class="pill ${estado}">${texto}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+
+function lineaTicket(izq, der){
+  const ancho = 32;
+  const espacio = Math.max(1, ancho - izq.length - der.length);
+  return izq + ' '.repeat(espacio) + der;
+}
+
+function toggleTicket(){
+  const wrap = document.getElementById('ticketWrap');
+  const visible = !wrap.classList.contains('hidden');
+  if(visible){ wrap.classList.add('hidden'); return; }
+  wrap.classList.remove('hidden');
+
+  const c = demoCases[activeCase];
+  const terceros = c.terceros || 0;
+  const compensaciones = c.compensaciones || 0;
+  const netoDatafono = c.app - terceros - compensaciones;
+  const cash = c.billQty.reduce((s,q,j)=>s+q*bills[j],0) + c.bundleQty.reduce((s,q,j)=>s+q*bills[j]*100,0) + c.coinQty.reduce((s,q,j)=>s+q*coins[j],0);
+  const cashDiff = cash - c.app;
+  const bankDiff = netoDatafono - c.bank;
+
+  let L = [];
+  L.push('CIERRE DE CAJA');
+  L.push('[12029] BARRIO CENTENARIO');
+  L.push(c.cashier.toUpperCase());
+  L.push(c.fecha + ' - ' + c.hour);
+  L.push('-'.repeat(32));
+  L.push('BILLETES');
+  bills.forEach((d,i) => { const q = c.billQty[i]; if(q>0) L.push(lineaTicket(`$${d.toLocaleString('es-CO')} x${q}`, pesos(d*q))); });
+  L.push(lineaTicket('Subtotal Billetes', pesos(c.billQty.reduce((s,q,i)=>s+q*bills[i],0))));
+  L.push('-'.repeat(32));
+  L.push('FAJOS (100 unid)');
+  bills.forEach((d,i) => { const q = c.bundleQty[i]; if(q>0) L.push(lineaTicket(`$${d.toLocaleString('es-CO')} x${q}`, pesos(d*100*q))); });
+  L.push(lineaTicket('Subtotal Fajos', pesos(c.bundleQty.reduce((s,q,i)=>s+q*bills[i]*100,0))));
+  L.push('-'.repeat(32));
+  L.push('MONEDAS');
+  coins.forEach((d,i) => { const q = c.coinQty[i]; if(q>0) L.push(lineaTicket(`$${d.toLocaleString('es-CO')} x${q}`, pesos(d*q))); });
+  L.push(lineaTicket('Subtotal Monedas', pesos(c.coinQty.reduce((s,q,i)=>s+q*coins[i],0))));
+  L.push('-'.repeat(32));
+  L.push(lineaTicket('TOTAL EFECTIVO', pesos(cash)));
+  L.push('-'.repeat(32));
+  L.push(lineaTicket('Coban365 (Caja actual)', ''));
+  L.push(lineaTicket('', pesos(c.app)));
+  L.push(lineaTicket('Datafono (Cuadre caja)', ''));
+  L.push(lineaTicket('', pesos(c.bank)));
+  L.push(lineaTicket('Coban365 (Neto total)', ''));
+  L.push(lineaTicket('', pesos(netoDatafono)));
+  L.push('-'.repeat(32));
+  L.push(lineaTicket('Dif. Efectivo', signed(cashDiff)));
+  L.push(lineaTicket('Dif. Banco', signed(bankDiff)));
+  L.push('-'.repeat(32));
+  L.push((cashDiff===0 && bankDiff===0) ? 'CIERRE CUADRADO' : 'CIERRE CON DIFERENCIA');
+  L.push('-'.repeat(32));
+
+  document.getElementById('ticketBox').innerHTML = L.join('<br>');
+}
+
+function imprimirTicketReal(){
+  const contenido = document.getElementById('ticketBox').innerHTML;
+  const ventana = window.open('', 'imprimirTicket', 'width=340,height=600');
+  ventana.document.write(`
+    <html>
+      <head>
+        <title>Ticket de cierre</title>
+        <style>
+          @page { size: 58mm auto; margin: 4mm; }
+          body{ font-family:'Courier New',monospace; font-size:11.5px; line-height:1.5; color:#111; width:52mm; margin:0; }
+        </style>
+      </head>
+      <body onload="window.print(); window.close();">${contenido}</body>
+    </html>
+  `);
+  ventana.document.close();
+}
+
+
+function switchTab(tab){
+  document.getElementById('tab-cierre').classList.toggle('hidden', tab!=='cierre');
+  document.getElementById('tab-reporte').classList.toggle('hidden', tab!=='reporte');
+  document.querySelectorAll('.tabbtn').forEach(b => b.classList.toggle('active', b.dataset.tab===tab));
+}
+
+document.getElementById('caseSelect').innerHTML = demoCases.map((c,i) => `<option value="${i}">${c.name}</option>`).join('');
+loadCase(0);
+renderReporte();
+
+    </script>
+
+
+    <div class="card">
+      <h2><span class="tag">CAMBIO 4</span> Resumen de Terceros <span class="tag">A PROGRAMAR</span></h2>
+      <div style="display:flex;gap:16px;align-items:flex-start;margin-bottom:12px;">
+        <img src="../capturas/punto-3-01.jpg" alt="Icono Resumen de Terceros" style="width:52px;height:52px;border-radius:50%;flex-shrink:0;">
+        <p style="font-size:13.5px;line-height:1.7;margin:0;">
+          La ventana modal que se muestra actualmente no cumple con el propósito que se necesita, es muy confusa, se propone una nueva ventana modal llamada <strong>Estado de Terceros</strong>.
+        </p>
+      </div>
+
+      <div class="cmp">
+        <div class="cmp-col">
+          <h4 style="text-align:center;">Actual</h4>
+          <div style="display:flex;justify-content:center;">
+            <img src="../capturas/punto-3-02.jpg" alt="Modal actual de Resumen de Terceros" style="max-width:320px;width:100%;border:1px solid var(--border);border-radius:10px;">
+          </div>
+        </div>
+        <div class="cmp-col">
+          <h4 class="new">Propuesto</h4>
+          <p style="font-size:13px;line-height:1.6;margin-top:0;">La propuesta de este modal se resuelve reutilizando el reporte <strong>Estado de Terceros</strong> (Reportes Admin), que ya lista los terceros en orden alfabético con su saldo. Ver la propuesta completa allí.</p>
+          <div style="display:flex;justify-content:center;">
+            <button class="btn-dark-small" onclick="goToSection('tab9','rad-estado-terceros')">Ver</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><span class="tag">CAMBIO 5</span> Comisiones de Terceros <span class="tag">AJUSTE REQUERIDO</span></h2>
+      <p style="font-size:13.5px;line-height:1.7;margin-top:0;">
+        El funcionamiento de la ventana modal de Comisiones de Terceros queda igual; solo hay que modificar o retirar algunas opciones que no se necesitan:
+      </p>
+      <ol style="font-size:13.5px;line-height:1.9;padding-left:20px;margin-top:0;">
+        <li>El botón de búsqueda debe ser desplegable, en orden alfabético, con los terceros que tengan comisión pendiente de retirar.</li>
+        <li>Quitar el campo <strong>Mínimo comisión (COP)</strong> y los botones <strong>Aplicar filtros</strong>, <strong>PDF</strong> y <strong>Excel</strong>.</li>
+        <li>En las columnas del reporte, quitar la columna <strong>ID Tercero</strong>, que no es necesario mostrar.</li>
+      </ol>
+      <div style="display:flex;justify-content:center;margin-top:14px;">
+        <img src="../capturas/punto-3-03.jpg" alt="Modal Comisiones de Terceros con los elementos a quitar marcados" style="max-width:640px;width:100%;border:1px solid var(--border);border-radius:10px;">
+      </div>
+      <div class="setup-note">En la imagen: ✓ el campo de búsqueda debe ser desplegable; ✗ marca los elementos a eliminar (Mínimo comisión, Aplicar filtros, PDF, Excel y la columna ID Tercero).</div>
+
+      <h4 style="margin-top:22px;">Cómo debe quedar la ventana (interactivo)</h4>
+      <div class="pos-modal-like" style="max-width:640px;margin:12px auto 0;border:1px solid var(--border);border-radius:16px;overflow:hidden;background:#fff;">
+        <div style="background:var(--navy);color:#fff;padding:16px 22px;font-size:14px;font-weight:700;letter-spacing:.3px;">
+          Comisiones de Terceros - CB [12029]
+        </div>
+        <div style="padding:20px;">
+          <input type="text" id="cmt-buscar" placeholder="Buscar tercero..." style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;margin-bottom:6px;" oninput="filtrarComisionesTerceros()">
+          <div class="setup-note" style="margin:0 0 14px;">Nota para el programador: campo con autocompletar. Por defecto lista, en orden alfabético, todos los terceros con comisión pendiente de retirar; al escribir letras, acota a coincidencias (ej. "Joy" muestra solo a Joyeria Elite).</div>
+          <table class="setup-table">
+            <tr><th>Nombre del tercero</th><th style="text-align:right;">Comisión acumulada</th><th>Última actualización</th><th style="text-align:right;">Acción</th></tr>
+            <tr class="cmt-row" data-nombre="Carlos Jaramillo" data-valor="35000"><td>Carlos Jaramillo</td><td class="mono" style="text-align:right;">$35.000</td><td>2026-06-22 22:47:00</td><td style="text-align:right;"><button class="btn-dark-small">Retirar comisión</button></td></tr>
+            <tr class="cmt-row" data-nombre="Elver Arrieta" data-valor="200000"><td>Elver Arrieta</td><td class="mono" style="text-align:right;">$200.000</td><td>2026-06-26 22:27:28</td><td style="text-align:right;"><button class="btn-dark-small">Retirar comisión</button></td></tr>
+            <tr class="cmt-row" data-nombre="Esteban Orozco" data-valor="720000"><td>Esteban Orozco</td><td class="mono" style="text-align:right;">$720.000</td><td>2026-06-25 21:23:20</td><td style="text-align:right;"><button class="btn-dark-small">Retirar comisión</button></td></tr>
+            <tr class="cmt-row" data-nombre="Joyeria Elite" data-valor="269000"><td>Joyeria Elite</td><td class="mono" style="text-align:right;">$269.000</td><td>2026-06-26 23:25:10</td><td style="text-align:right;"><button class="btn-dark-small">Retirar comisión</button></td></tr>
+            <tr class="cmt-row" data-nombre="Liara Tienda" data-valor="127000"><td>Liara Tienda</td><td class="mono" style="text-align:right;">$127.000</td><td>2026-06-26 13:52:47</td><td style="text-align:right;"><button class="btn-dark-small">Retirar comisión</button></td></tr>
+            <tr class="cmt-row" data-nombre="Michel Munera" data-valor="789000"><td>Michel Munera</td><td class="mono" style="text-align:right;">$789.000</td><td>2026-06-26 20:27:50</td><td style="text-align:right;"><button class="btn-dark-small">Retirar comisión</button></td></tr>
+          </table>
+          <div id="cmt-sin-resultados" class="setup-note" style="display:none;margin-top:8px;">No se encontraron terceros con ese nombre.</div>
+          <div class="resumen-cards" style="margin-top:16px;">
+            <div class="resumen-card">
+              <div class="resumen-label">Terceros con saldo</div>
+              <div class="resumen-value" id="cmt-conteo">6</div>
+            </div>
+            <div class="resumen-card">
+              <div class="resumen-label">Total comisiones acumuladas</div>
+              <div class="resumen-value" id="cmt-total">$2.140.000</div>
+            </div>
+          </div>
+          <div class="btnbar" style="justify-content:flex-end;">
+            <button class="btn-dark-small">Cerrar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><span class="tag">CAMBIO 6</span> Reporte de Movimientos de Terceros <span class="tag">PROPUESTA NUEVA</span></h2>
+      <p style="font-size:13.5px;line-height:1.7;margin-top:0;">
+        Este reporte le permite al cajero detallar los movimientos que le ha hecho a algún tercero en especial, para poder confrontar los movimientos solicitados por ese mismo tercero y que puedan estar originando algún descuadre.
+      </p>
+    </div>
+
+    <div class="pos-modal-like" style="margin:0 0 20px;border:1px solid var(--border);border-radius:16px;overflow:hidden;background:#fff;">
+      <div style="background:var(--navy);color:#fff;padding:16px 22px;font-size:14px;font-weight:700;letter-spacing:.3px;" id="mvCajeroTituloBar">
+        Movimientos de terceros - CB [12029]
+      </div>
+      <div style="padding:22px;">
+
+        <div style="display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;">
+          <div>
+            <label style="margin-top:0;">Tercero</label>
+            <select id="mvCajeroSelector" onchange="seleccionarTerceroMovCajero(this.value)">
+              <option value="">-- Selecciona un tercero --</option>
+            </select>
+          </div>
+          <div>
+            <label style="margin-top:0;">Desde</label>
+            <input type="date" id="mvCajeroDesde" value="2026-06-01" style="max-width:150px;">
+          </div>
+          <div>
+            <label style="margin-top:0;">Hasta</label>
+            <input type="date" id="mvCajeroHasta" value="2026-06-30" style="max-width:150px;">
+          </div>
+          <button class="btn-primary" style="padding:8px 16px;" onclick="buscarMovimientosCajero()">Buscar</button>
+          <button class="btn-ghost btn-small" onclick="limpiarMovimientosCajero()">Limpiar</button>
+        </div>
+
+        <div class="resumen-cards" style="margin:18px 0;">
+          <div class="resumen-card">
+            <div class="resumen-icon ic-green" id="mvCajeroIconoSaldo">$</div>
+            <div><div class="resumen-label" id="mvCajeroLabelSaldo">Saldo actual</div><div class="resumen-value" id="mvCajeroValorSaldo">$0</div></div>
+          </div>
+          <div class="resumen-card">
+            <div class="resumen-icon ic-green">✅</div>
+            <div><div class="resumen-label">Cupo disponible</div><div class="resumen-value" id="mvCajeroValorCupo">$0</div></div>
+          </div>
+          <div class="resumen-card">
+            <div class="resumen-icon ic-orange">%</div>
+            <div><div class="resumen-label">Comisión generada (periodo)</div><div class="resumen-value" id="mvCajeroValorComision">$0</div></div>
+          </div>
+        </div>
+
+        <div style="overflow-x:auto;">
+          <table class="setup-table" id="mvCajeroTabla"></table>
+        </div>
+      </div>
+    </div>
+
+    <script>
+    let terceroActualMovCajero = null;
+    function seleccionarTerceroMovCajero(nombre){
+      const t = tercerosCD.find(x => x.nombre === nombre);
+      if(!t) return;
+      terceroActualMovCajero = t;
+      renderMovimientosTerceroUI(t, 'mvCajero');
+    }
+    function buscarMovimientosCajero(){
+      if(terceroActualMovCajero) renderMovimientosTerceroUI(terceroActualMovCajero, 'mvCajero');
+    }
+    function limpiarMovimientosCajero(){
+      document.getElementById('mvCajeroDesde').value = '2026-06-01';
+      document.getElementById('mvCajeroHasta').value = '2026-06-30';
+      if(terceroActualMovCajero) renderMovimientosTerceroUI(terceroActualMovCajero, 'mvCajero');
+    }
+    if(document.readyState === 'loading'){
+      document.addEventListener('DOMContentLoaded', function(){
+        poblarSelectorMovimientos('mvCajeroSelector', 'Jose Ramirez');
+        seleccionarTerceroMovCajero('Jose Ramirez');
+      });
+    } else {
+      poblarSelectorMovimientos('mvCajeroSelector', 'Jose Ramirez');
+      seleccionarTerceroMovCajero('Jose Ramirez');
+    }
+    </script>
+
+    <div class="card">
+      <h2><span class="tag">CAMBIO 7</span> Sección de Filtros <span class="tag">AJUSTE REQUERIDO</span></h2>
+      <ol style="font-size:13.5px;line-height:1.9;padding-left:20px;margin-top:0;margin-bottom:0;">
+        <li>En el filtro por valor <strong>Mínimo</strong> y <strong>Máximo</strong>, dar formato numérico (separador de miles) a cada campo para que sea más legible.</li>
+        <li>En <strong>Elementos por página</strong>, cambiar las opciones actuales (5, 10, 20 y 50) por <strong>10, 20, 50, 100 y 200</strong>.</li>
+      </ol>
+    </div>
+
+    <div class="section-title" style="margin-top:34px;">
+      <h2 style="text-transform:uppercase;letter-spacing:.4px;">Bugs reportados</h2>
+      <span class="badge badge-red">Rol: Cajero</span>
+    </div>
+
+    <div class="card">
+      <h2>Bug 1: Filtro por Categoría no funciona para algunas categorías <span class="tag">A CORREGIR</span></h2>
+      <p style="font-size:13.5px;line-height:1.6;margin-top:0;">
+        Al filtrar por <strong>Categoría</strong>, para algunas categorías al seleccionar no se muestran resultados. Ejemplo: Categoría <strong>Ingresos</strong>, Subcategoría <strong>Recargas Nequi</strong>.
+      </p>
+      <p style="font-size:13.5px;line-height:1.6;">
+        Además, si se coloca un valor mínimo y máximo, no aplica ningún filtro. Al parecer estos campos solo funcionan si ya hay una categoría y subcategoría seleccionadas.
+      </p>
+      <div class="note-box">
+        Sugerencia para el programador: si el funcionamiento correcto es que Valor mínimo/máximo dependen de tener una categoría y subcategoría ya seleccionadas, sería más intuitivo que esos campos permanezcan deshabilitados (o visualmente inactivos) hasta que se seleccione categoría y subcategoría, para que el cajero entienda por qué no están filtrando.
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Bug 2: Botón sin función identificada junto al nombre del cajero <span class="tag">POR REVISAR</span></h2>
+      <p style="font-size:13.5px;line-height:1.6;margin-top:0;margin-bottom:0;">
+        No se sabe para qué funciona este botón que está en la parte superior, al lado del nombre del cajero:
+      </p>
+      <div style="display:flex;justify-content:center;margin-top:14px;">
+        <img src="../capturas/punto-3-04.jpg" alt="Botón Compartir junto al nombre del cajero" style="border:1px solid var(--border);border-radius:10px;padding:8px 14px;">
+      </div>
+    </div>
+
+  </div>

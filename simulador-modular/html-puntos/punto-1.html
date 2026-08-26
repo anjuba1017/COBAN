@@ -1,0 +1,397 @@
+  <!-- ===================== TAB 5 ===================== -->
+
+  <div id="tab5" class="tab-content">
+
+    <div class="section-title">
+      <h2 style="text-transform:uppercase;letter-spacing:.4px;">Rol: SuperAdmin</h2>
+    </div>
+
+    <div class="card">
+      <p style="font-size:13px;color:var(--muted);margin:0 0 4px;">Cambios de etiquetas, cambios en código y diseño para el ROL SUPERADMIN.</p>
+    </div>
+
+    <div class="card">
+      <h2>1. Menú: Gestionar Transacciones <span class="tag">CONTEXTO</span></h2>
+      <p style="font-size:13px;color:var(--muted);margin-top:0;">Todo lo que sigue en esta pestaña es sobre este menú puntual dentro del rol SuperAdmin — seleccionando lo que vamos a editar:</p>
+      <div style="display:flex;gap:24px;align-items:center;justify-content:center;flex-wrap:wrap;">
+        <img src="../capturas/punto-1-01.png" alt="Ícono Gestionar Transacciones" style="max-width:220px;width:100%;border:1px solid var(--border);border-radius:10px;">
+        <img src="../capturas/punto-1-02.png" alt="Dashboard SuperAdmin - Tus Permisos" style="max-width:380px;width:100%;border:1px solid var(--border);border-radius:10px;">
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Estado actual <span class="tag">ESTADO ACTUAL</span></h2>
+      <p style="font-size:13.5px;line-height:1.6;margin-top:0;">
+        Hoy la pantalla "Tipos de Transacciones" muestra todos los tipos en una sola lista plana, sin agrupar por categoría, y con los botones de editar y eliminar activos en <strong>todas</strong> las filas — incluidas las que ya son parte de la lógica del sistema.
+      </p>
+      <img src="../capturas/punto-1-03.png" alt="Estado actual de Tipos de Transacciones" style="max-width:600px;width:100%;border:1px solid var(--border);border-radius:10px;display:block;margin:0 auto;">
+    </div>
+
+    <div class="section-title" style="margin-top:34px;">
+      <h2 style="text-transform:uppercase;letter-spacing:.4px;">Mejoras a realizar</h2>
+    </div>
+
+    <div class="card">
+      <h2>1.1 Cambios de nombre (renombrar) de algunos tipos de transacciones <span class="tag">A PROGRAMAR</span></h2>
+      <table class="setup-table">
+        <tr><th>Actual</th><th>Etiqueta nueva</th></tr>
+        <tr><td>Abono a tarjeta de crédito</td><td>Pago Tarjeta de Crédito</td></tr>
+        <tr><td>Pago de crédito</td><td>Pago Cartera</td></tr>
+        <tr><td>Retiro con tarjeta</td><td>Retiro Tarjeta Débito</td></tr>
+        <tr><td>Retiro</td><td>Retiro en Efectivo</td></tr>
+        <tr><td>Depósito</td><td>Consignación</td></tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>1.2 Quitar transacciones <span class="tag">A PROGRAMAR</span></h2>
+      <table class="setup-table">
+        <tr><th>Transacción</th><th>Impacto</th><th>Acción</th></tr>
+        <tr><td style="text-decoration:line-through;color:var(--muted);">Ahorro ALM</td><td>Positivo</td><td><span class="badge badge-red">Eliminar</span></td></tr>
+        <tr><td style="text-decoration:line-through;color:var(--muted);">Transacción Prueba</td><td>Positivo</td><td><span class="badge badge-red">Eliminar</span></td></tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>1.3 Agregar transacciones nuevas <span class="tag">A PROGRAMAR</span></h2>
+      <table class="setup-table">
+        <tr><th>Transacción</th><th>Categoría</th><th>Impacto</th></tr>
+        <tr class="row-new"><td>Avance Tarjeta de Crédito</td><td>Retiros</td><td><span class="badge badge-red">Negativo</span></td></tr>
+        <tr class="row-new"><td>Otros Retiros</td><td>Retiros</td><td><span class="badge badge-red">Negativo</span></td></tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>1.4 Nueva propuesta para menú TIPOS DE TRANSACCIONES <span class="tag">A PROGRAMAR</span></h2>
+      <p style="font-size:13.5px;line-height:1.7;margin-top:0;">Se necesita:</p>
+      <ol style="font-size:13.5px;line-height:1.9;padding-left:20px;margin-top:0;">
+        <li><strong>Bloquear edición/eliminación de las transacciones ya programadas</strong> (las de la lógica actual del sistema): sus botones de editar y eliminar deben quedar deshabilitados o no mostrarse, ya que son parte del código.</li>
+        <li><strong>Organizar la tabla por categoría</strong>, con las categorías y transacciones exactamente como quedan en esta nueva propuesta de Tipos de transacciones.</li>
+        <li><strong>Transacciones nuevas</strong> (cuando el banco autorice un nuevo servicio): este tipo de transacciones deben poder crear libremente. Una vez que una transacción nueva ya tenga movimientos registrados con ella, tampoco debería poder editarse ni eliminarse — igual que las del sistema — para no romper la integridad de los movimientos históricos que ya la usaron. Antes de tener movimientos, sí se puede editar o eliminar sin problema.</li>
+      </ol>
+
+      <div class="pos-modal-like" style="max-width:640px;margin:16px auto 0;border:1px solid var(--border);border-radius:16px;overflow:hidden;background:#fff;">
+        <div style="background:var(--navy);color:#fff;padding:16px 22px;font-size:14px;font-weight:700;letter-spacing:.3px;">
+          Tipos de transacciones
+        </div>
+        <div style="padding:22px;">
+
+          <div class="btnbar" style="margin-top:0;justify-content:flex-start;">
+            <button class="btn-primary-blue btn-small">+ Nuevo tipo de transacción</button>
+          </div>
+
+          <table class="mov-table" style="margin-top:16px;">
+            <thead><tr><th>Nombre</th><th>Categoría</th><th>Impacto</th><th>Acciones</th></tr></thead>
+            <tbody>
+              <tr><td colspan="4" style="background:#f4f2ff;font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.3px;color:var(--accent-dark);">Ingresos</td></tr>
+              <tr><td>Consignación</td><td>Ingresos</td><td><span class="badge badge-green">Positivo</span></td><td>🔒 <span style="color:var(--muted);font-size:11.5px;">bloqueado (sistema)</span></td></tr>
+              <tr><td>Pago Cartera</td><td>Ingresos</td><td><span class="badge badge-green">Positivo</span></td><td>🔒 <span style="color:var(--muted);font-size:11.5px;">bloqueado (sistema)</span></td></tr>
+              <tr><td>Pago Tarjeta de Crédito</td><td>Ingresos</td><td><span class="badge badge-green">Positivo</span></td><td>🔒 <span style="color:var(--muted);font-size:11.5px;">bloqueado (sistema)</span></td></tr>
+              <tr><td>Recarga Nequi</td><td>Ingresos</td><td><span class="badge badge-green">Positivo</span></td><td>🔒 <span style="color:var(--muted);font-size:11.5px;">bloqueado (sistema)</span></td></tr>
+              <tr><td>Recaudos</td><td>Ingresos</td><td><span class="badge badge-green">Positivo</span></td><td>🔒 <span style="color:var(--muted);font-size:11.5px;">bloqueado (sistema)</span></td></tr>
+
+              <tr><td colspan="4" style="background:#f4f2ff;font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.3px;color:var(--accent-dark);">Retiros</td></tr>
+              <tr class="row-new"><td>Avance Tarjeta de Crédito</td><td>Retiros</td><td><span class="badge badge-red">Negativo</span></td><td>🔒 <span style="color:var(--muted);font-size:11.5px;">bloqueado</span></td></tr>
+              <tr><td>Retiro Nequi</td><td>Retiros</td><td><span class="badge badge-red">Negativo</span></td><td>🔒 <span style="color:var(--muted);font-size:11.5px;">bloqueado (sistema)</span></td></tr>
+              <tr><td>Retiro Tarjeta Débito</td><td>Retiros</td><td><span class="badge badge-red">Negativo</span></td><td>🔒 <span style="color:var(--muted);font-size:11.5px;">bloqueado (sistema)</span></td></tr>
+              <tr><td>Retiro en Efectivo</td><td>Retiros</td><td><span class="badge badge-red">Negativo</span></td><td>🔒 <span style="color:var(--muted);font-size:11.5px;">bloqueado (sistema)</span></td></tr>
+              <tr class="row-new"><td>Otros Retiros</td><td>Retiros</td><td><span class="badge badge-red">Negativo</span></td><td>🔒 <span style="color:var(--muted);font-size:11.5px;">bloqueado</span></td></tr>
+              <tr><td>Retiro comisiones</td><td>Retiros</td><td><span class="badge badge-red">Negativo</span></td><td>🔒 <span style="color:var(--muted);font-size:11.5px;">bloqueado (sistema)</span></td></tr>
+
+              <tr><td colspan="4" style="background:#f4f2ff;font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.3px;color:var(--accent-dark);">Otros</td></tr>
+              <tr><td>Saldo</td><td>Otros</td><td><span class="badge badge-green">Positivo</span></td><td>🔒 <span style="color:var(--muted);font-size:11.5px;">bloqueado (sistema)</span></td></tr>
+              <tr><td>Transferencia</td><td>Otros</td><td><span class="badge badge-green">Positivo</span></td><td>🔒 <span style="color:var(--muted);font-size:11.5px;">bloqueado (sistema)</span></td></tr>
+
+              <tr><td colspan="4" style="background:#f4f2ff;font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.3px;color:var(--accent-dark);">Terceros</td></tr>
+              <tr><td>Pago de Tercero</td><td>Terceros</td><td><span class="badge badge-green">Positivo</span></td><td>🔒 <span style="color:var(--muted);font-size:11.5px;">bloqueado (sistema)</span></td></tr>
+              <tr><td>Préstamo de Tercero</td><td>Terceros</td><td><span class="badge badge-green">Positivo</span></td><td>🔒 <span style="color:var(--muted);font-size:11.5px;">bloqueado (sistema)</span></td></tr>
+              <tr><td>Pago a Tercero</td><td>Terceros</td><td><span class="badge badge-red">Negativo</span></td><td>🔒 <span style="color:var(--muted);font-size:11.5px;">bloqueado (sistema)</span></td></tr>
+              <tr><td>Préstamo a Tercero</td><td>Terceros</td><td><span class="badge badge-red">Negativo</span></td><td>🔒 <span style="color:var(--muted);font-size:11.5px;">bloqueado (sistema)</span></td></tr>
+
+              <tr><td colspan="4" style="background:#f4f2ff;font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.3px;color:var(--accent-dark);">Compensación</td></tr>
+              <tr><td>Compensación</td><td>Compensación</td><td><span class="badge badge-amber">Neutro/Especial</span></td><td>🔒 <span style="color:var(--muted);font-size:11.5px;">bloqueado (sistema)</span></td></tr>
+
+              <tr><td colspan="4" style="background:#f4f2ff;font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.3px;color:var(--accent-dark);">Transferir a otra Caja</td></tr>
+              <tr><td>Transferir a otra Caja</td><td>Transferir a otra Caja</td><td><span class="badge badge-amber">Neutro/Especial</span></td><td>🔒 <span style="color:var(--muted);font-size:11.5px;">bloqueado (sistema)</span></td></tr>
+            </tbody>
+          </table>
+          <div class="setup-note">🔒 = editar/eliminar deshabilitados (todas quedan bloqueadas: las del sistema y también las nuevas, en cuanto se crean ya se consideran parte de la operación). Las filas en verde son las 2 transacciones nuevas a agregar.</div>
+
+          <div class="btnbar" style="margin-top:18px;">
+            <button class="btn-dark-small">Cerrar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>2. Menú: Gestionar Usuarios <span class="tag">CONTEXTO</span></h2>
+      <p style="font-size:13px;color:var(--muted);margin-top:0;">Todo lo que sigue en esta sección es sobre este menú puntual dentro del rol SuperAdmin:</p>
+      <div style="display:flex;justify-content:center;">
+        <img src="../capturas/punto-1-04.png" alt="Ícono Gestionar Usuarios" style="max-width:220px;width:100%;border:1px solid var(--border);border-radius:10px;">
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Estado actual <span class="tag">ESTADO ACTUAL</span></h2>
+      <p style="font-size:13.5px;line-height:1.6;margin-top:0;">
+        Hoy el formulario "Nuevo Usuario" no obliga a diligenciar el Teléfono, y guarda el Nombre Completo y el Correo tal cual los escribe el SuperAdmin, sin normalizar mayúsculas/minúsculas. Eso permite que queden guardados registros como <strong>"CarLOS PErez"</strong> o <strong>"CARLOSpereZ@gMAIL.com"</strong>.
+      </p>
+      <img src="../capturas/punto-1-05.png" alt="Formulario actual Nuevo Usuario" style="max-width:340px;width:100%;border:1px solid var(--border);border-radius:10px;display:block;margin:0 auto;">
+    </div>
+
+    <div class="card">
+      <h2>Mejoras a realizar <span class="tag">A PROGRAMAR</span></h2>
+      <ol style="font-size:13.5px;line-height:1.9;padding-left:20px;margin-top:0;">
+        <li><strong>Teléfono obligatorio</strong>, con validación de formato telefónico (solo números, longitud válida para Colombia).</li>
+        <li><strong>Normalizar mayúsculas/minúsculas automáticamente al guardar</strong> en los campos de nombre, apellido, ciudad (y similares): la primera letra de cada palabra en mayúscula y el resto en minúscula.</li>
+        <li><strong>Correo siempre en minúsculas</strong>, sin excepción, al momento de guardar.</li>
+      </ol>
+    </div>
+
+    <div class="card">
+      <h2>Cómo debe quedar <span class="tag">NUEVO DISEÑO</span></h2>
+      <p style="font-size:13px;color:var(--muted);margin-top:0;">Mismo formulario, pero al guardar los valores quedan normalizados automáticamente:</p>
+      <div class="row2">
+        <div>
+          <label style="margin-top:0;">Email <span class="badge badge-green" style="margin-left:6px;">minúsculas</span></label>
+          <input type="text" value="carlosperez@gmail.com" disabled>
+        </div>
+        <div>
+          <label style="margin-top:0;">Nombre completo <span class="badge badge-green" style="margin-left:6px;">Capitalizado</span></label>
+          <input type="text" value="Carlos Perez" disabled>
+        </div>
+      </div>
+      <div class="row2" style="margin-top:16px;">
+        <div>
+          <label style="margin-top:0;">Teléfono <span class="badge badge-amber" style="margin-left:6px;">obligatorio</span></label>
+          <input type="text" value="3155325353" disabled>
+        </div>
+        <div>
+          <label style="margin-top:0;">Contraseña</label>
+          <input type="password" value="123456" disabled>
+        </div>
+      </div>
+      <div class="setup-note">Tal como se escribió en el ejemplo ("CarLOS PErez" / "CARLOSpereZ@gMAIL.com"), el sistema corrige y guarda "Carlos Perez" / "carlosperez@gmail.com" sin que el SuperAdmin tenga que corregirlo manualmente.</div>
+    </div>
+
+    <div class="card">
+      <h2>3. Menú: Gestionar Corresponsales <span class="tag">CONTEXTO</span></h2>
+      <p style="font-size:13px;color:var(--muted);margin-top:0;">Todo lo que sigue en esta sección es sobre este menú puntual dentro del rol SuperAdmin:</p>
+      <div style="display:flex;justify-content:center;">
+        <img src="../capturas/punto-1-06.png" alt="Ícono Gestionar Corresponsales" style="max-width:220px;width:100%;border:1px solid var(--border);border-radius:10px;">
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Estado actual <span class="tag">ESTADO ACTUAL</span></h2>
+      <p style="font-size:13.5px;line-height:1.6;margin-top:0;">
+        Así se ve hoy el formulario "Nuevo Corresponsal": los campos de texto no normalizan mayúsculas/minúsculas, el Código acepta cualquier texto, el Tipo de Corresponsal dice "Tipo1", el Operador no tiene un orden definido, y los Tipos de Transacciones se listan en burbujas grises desordenadas con una X para quitar cada una.
+      </p>
+      <img src="../capturas/punto-1-07.png" alt="Formulario actual Nuevo Corresponsal" style="max-width:340px;width:100%;border:1px solid var(--border);border-radius:10px;display:block;margin:0 auto;">
+    </div>
+
+    <div class="card">
+      <h2>Mejoras a realizar <span class="tag">A PROGRAMAR</span></h2>
+      <ol style="font-size:13.5px;line-height:1.9;padding-left:20px;margin-top:0;">
+        <li><strong>Normalizar mayúsculas/minúsculas</strong> al crear un corresponsal, en nombre, apellido, ciudad (y similares): primera letra de cada palabra en mayúscula, resto en minúscula — misma regla que en Gestionar Usuarios.</li>
+        <li><strong>Campo Código: solo numérico</strong> (ej. 12029, 65398).</li>
+        <li><strong>Campo Tipo de Corresponsal</strong>: cambiar "Tipo1" por <strong>"Bancolombia"</strong>. Más adelante se agregarán otros tipos de corresponsales.</li>
+        <li><strong>Campo Operador</strong>: el listado de usuarios disponible debe ordenarse alfabéticamente por nombre, mostrando "NOMBRE (correo)", ej. <em>ABEL PEREZ (abel@gmail.com)</em>, <em>ANTONIO RUIZ (antonio@outlook.com)</em>.</li>
+        <li><strong>Campo Tipos de Transacciones</strong>: cambiar el listado actual (burbujas grises desordenadas con X) por una lista <strong>agrupada por categoría</strong>, en <strong>orden alfabético</strong>, con un <strong>checkbox</strong> que indique si esa transacción está habilitada o no para ese corresponsal.</li>
+      </ol>
+    </div>
+
+    <div class="card">
+      <h2>Cómo debe quedar <span class="tag">NUEVO DISEÑO</span></h2>
+      <p style="font-size:13px;color:var(--muted);margin-top:0;">Mismo formulario "Nuevo Corresponsal", con los campos corregidos:</p>
+      <div class="note-box info">
+        Sugerencia para el nuevo diseño del nuevo formulario: mostrar este formulario en <strong>horizontal</strong> (no vertical) — al ser una aplicación web, no móvil, aprovecha mejor el ancho de pantalla y evita el scroll largo que tiene hoy. Aun así, debe seguir funcionando bien en móvil cuando se necesite; en ese caso los mismos campos se reacomodan en una sola columna.
+      </div>
+    </div>
+
+    <div class="pos-modal-like" style="max-width:760px;margin:0 auto 20px;border:1px solid var(--border);border-radius:16px;overflow:hidden;background:#fff;">
+      <div style="background:var(--navy);color:#fff;padding:16px 22px;font-size:14px;font-weight:700;letter-spacing:.3px;">
+        Nuevo corresponsal
+      </div>
+      <div style="padding:22px;">
+
+      <div class="row2">
+        <div>
+          <label style="margin-top:0;">Código <span class="badge badge-amber" style="margin-left:6px;">solo numérico</span></label>
+          <input type="text" inputmode="numeric" value="12029" disabled>
+        </div>
+        <div>
+          <label style="margin-top:0;">Nombre <span class="badge badge-green" style="margin-left:6px;">Capitalizado</span></label>
+          <input type="text" value="Barrio Centenario" disabled>
+        </div>
+      </div>
+
+      <div class="row2" style="margin-top:16px;">
+        <div>
+          <label style="margin-top:0;">Tipo de Corresponsal</label>
+          <select disabled><option>Bancolombia</option></select>
+        </div>
+        <div>
+          <label style="margin-top:0;">Operador <span class="badge badge-amber" style="margin-left:6px;">orden alfabético</span></label>
+          <select disabled>
+            <option>ABEL PEREZ (abel@gmail.com)</option>
+            <option>ANTONIO RUIZ (antonio@outlook.com)</option>
+            <option>SORAYA MONTERROSA (soraya@gmail.com)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row2" style="margin-top:16px;">
+        <div>
+          <label style="margin-top:0;">Departamento</label>
+          <input type="text" value="Antioquia" disabled>
+        </div>
+        <div>
+          <label style="margin-top:0;">Ciudad <span class="badge badge-green" style="margin-left:6px;">Capitalizado</span></label>
+          <input type="text" value="Caucasia" disabled>
+        </div>
+      </div>
+
+      <label style="margin-top:16px;">Cupo en COP <span class="badge badge-red" style="margin-left:6px;">faltaba, casi invisible en el formulario actual</span></label>
+      <input type="text" value="$ 25.000.000" disabled>
+
+      <label style="margin-top:20px;">Tipos de Transacciones <span class="badge badge-amber" style="margin-left:6px;">agrupadas · alfabético · checkbox</span></label>
+      <div class="cmp" style="grid-template-columns:1fr 1fr 1fr;margin-top:6px;">
+        <div class="cmp-col">
+          <h4>Ingresos</h4>
+          <div class="tt-list">
+            <label><input type="checkbox" checked onclick="return false;">Consignación</label>
+            <label><input type="checkbox" checked onclick="return false;">Pago Cartera</label>
+            <label><input type="checkbox" checked onclick="return false;">Pago Tarjeta de Crédito</label>
+            <label><input type="checkbox" checked onclick="return false;">Recarga Nequi</label>
+            <label><input type="checkbox" checked onclick="return false;">Recaudos</label>
+          </div>
+        </div>
+        <div class="cmp-col">
+          <h4>Retiros</h4>
+          <div class="tt-list">
+            <label><input type="checkbox" checked onclick="return false;">Avance Tarjeta de Crédito</label>
+            <label><input type="checkbox" onclick="return false;">Otros Retiros</label>
+            <label><input type="checkbox" onclick="return false;">Retiro en Efectivo</label>
+            <label><input type="checkbox" checked onclick="return false;">Retiro Nequi</label>
+            <label><input type="checkbox" checked onclick="return false;">Retiro Tarjeta Débito</label>
+          </div>
+        </div>
+        <div class="cmp-col">
+          <h4>Otros</h4>
+          <div class="tt-list">
+            <label><input type="checkbox" checked onclick="return false;">Saldo</label>
+            <label><input type="checkbox" checked onclick="return false;">Transferencia</label>
+          </div>
+        </div>
+      </div>
+      <div class="cmp" style="grid-template-columns:1fr 1fr 1fr;margin-top:14px;">
+        <div class="cmp-col">
+          <h4>Terceros</h4>
+          <div class="tt-list">
+            <label><input type="checkbox" checked onclick="return false;">Pago a Tercero</label>
+            <label><input type="checkbox" checked onclick="return false;">Pago de Tercero</label>
+            <label><input type="checkbox" checked onclick="return false;">Préstamo a Tercero</label>
+            <label><input type="checkbox" checked onclick="return false;">Préstamo de Tercero</label>
+          </div>
+        </div>
+        <div class="cmp-col">
+          <h4>Compensación</h4>
+          <div class="tt-list">
+            <label><input type="checkbox" checked onclick="return false;">Compensación</label>
+          </div>
+        </div>
+        <div class="cmp-col">
+          <h4>Transferir a otra Caja</h4>
+          <div class="tt-list">
+            <label><input type="checkbox" checked onclick="return false;">Transferir a otra Caja</label>
+          </div>
+        </div>
+      </div>
+      <div class="setup-note">Cada categoría en orden alfabético por nombre de transacción, con un checkbox simple: en verde cuando está habilitada, sin color cuando no. "Retiro comisiones" no aparece en la lista (transacción de sistema, no visible/seleccionable aquí). Los valores marcados son los que por defecto deben heredar un nuevo CB.</div>
+
+        <div class="btnbar" style="margin-top:18px;">
+          <button class="btn-dark-small">Cerrar</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>4. Menú: Gestionar Mis Corresponsales <span class="tag">A PROGRAMAR</span></h2>
+      <div style="display:flex;justify-content:center;">
+        <img src="../capturas/punto-1-08.png" alt="Ícono Gestionar Mis Corresponsales" style="max-width:220px;width:100%;border:1px solid var(--border);border-radius:10px;">
+      </div>
+      <div class="setup-note" style="margin-top:14px;">ESTE MENÚ DESAPARECE PORQUE EL SUPERADMIN NO DEBE TENER NINGÚN CORRESPONSAL ASIGNADO.</div>
+    </div>
+
+    <div class="card">
+      <h2>5. Menú Parámetros del sistema <span class="tag">A PROGRAMAR</span></h2>
+      <p style="font-size:13.5px;line-height:1.7;margin-top:0;">Nuevo menú dentro de Rol SuperAdmin. Reúne los valores que hoy están quemados en varias partes del sistema (como el período de Freemium por vencer) para que se puedan editar sin tocar código. Ocupa todo el ancho de la pantalla, sin barra oscura de encabezado — igual al resto de las pantallas reales del SuperAdmin.</p>
+
+      <h3 style="font-size:14px;margin:26px 0 10px;">Configuración de membresía</h3>
+      <table class="setup-table">
+        <tr><th>Parámetro</th><th>Valor</th><th>Descripción</th></tr>
+        <tr>
+          <td>Días para alertar Freemium por vencer</td>
+          <td><input type="text" value="45" style="width:60px;text-align:center;"></td>
+          <td style="color:var(--muted);">Días antes del vencimiento para empezar a contactar al corresponsal.</td>
+        </tr>
+        <tr>
+          <td>Duración total del plan Freemium</td>
+          <td><input type="text" value="45" style="width:60px;text-align:center;"></td>
+          <td style="color:var(--muted);">Días desde el alta del corresponsal antes del downgrade automático.</td>
+        </tr>
+        <tr>
+          <td>Avisos previos al downgrade</td>
+          <td><input type="text" value="7, 3, 1" style="width:70px;text-align:center;"></td>
+          <td style="color:var(--muted);">Días antes del vencimiento en que se envía cada aviso.</td>
+        </tr>
+      </table>
+      <div class="btnbar" style="justify-content:flex-end;margin-top:12px;">
+        <button class="btn-dark-small">Guardar cambios</button>
+      </div>
+      <div class="setup-note" style="margin-top:12px;">Nota para el programador: esta tabla es el punto de partida; cualquier otro valor "quemado en código" que se detecte más adelante se agrega aquí como una fila nueva.</div>
+
+      <h3 style="font-size:14px;margin:26px 0 10px;">Catálogo de causas de diferencia en cierres (global)</h3>
+      <p style="font-size:13.5px;line-height:1.7;margin:0 0 12px;">Causas disponibles para el Cierre de Caja del Cajero. Por defecto quedan <strong>todas activas</strong> para cualquier CB que se cree — cada Admin puede desactivar las que no le apliquen desde su propio menú Parámetros del Sistema.</p>
+      <div id="catalogoSuperAdminUI"></div>
+      <div style="display:flex;gap:8px;margin-top:12px;">
+        <select id="nuevaCausaAmbito" style="width:110px;"><option value="efectivo">Efectivo</option><option value="banco">Banco</option></select>
+        <select id="nuevaCausaDireccion" style="width:110px;"><option value="sobrante">Sobrante</option><option value="faltante">Faltante</option></select>
+        <input type="text" id="nuevaCausaTexto" placeholder="Texto de la nueva causa" style="flex:1;">
+        <button class="btn-dark-small" onclick="agregarCausaCatalogo()">Agregar</button>
+      </div>
+
+      <h3 style="font-size:14px;margin:26px 0 10px;">Causas sugeridas por cajeros</h3>
+      <p style="font-size:13.5px;line-height:1.7;margin:0 0 12px;">Cuando un cajero elige "Otra" al cerrar caja y escribe su propio texto, aparece aquí — ordenadas por ámbito y dirección — para que el SuperAdmin decida si la incorpora al catálogo global.</p>
+      <div id="causasSugeridasUI"></div>
+    </div>
+
+    <div class="section-title" style="margin-top:34px;">
+      <h2 style="text-transform:uppercase;letter-spacing:.4px;">Bugs reportados</h2>
+      <span class="badge badge-red">Rol: SuperAdmin</span>
+    </div>
+
+    <div class="card">
+      <h2>Bug 1: Error SMTP al activar/desactivar Premium <span class="tag">A CORREGIR</span></h2>
+      <p style="font-size:13.5px;line-height:1.6;margin-top:0;">
+        Al marcar un CB como <strong>Premium</strong> (o al quitárselo), el sistema muestra este mensaje de error y aparentemente el estado no cambia:
+      </p>
+      <img src="../capturas/punto-1-09.png" alt="Error al enviar notificación SMTP" style="max-width:500px;width:100%;border:1px solid var(--border);border-radius:10px;display:block;margin:0 auto;">
+      <p style="font-size:13.5px;line-height:1.6;">
+        Sin embargo, <strong>si se refresca la página, el CB sí queda con el estado correcto</strong> (Premium activado o quitado, según la acción). El mismo comportamiento ocurre en ambos sentidos: activar y desactivar.
+      </p>
+      <div class="note-box">
+        Causa probable: la acción de cambiar el estado Premium sí se guarda bien en la base de datos, pero dispara además un envío de notificación (correo) por SMTP, y ese envío está fallando por un problema de autenticación con el servidor de correo ("Could not authenticate"). El error de ese envío se le está mostrando al usuario como si toda la operación hubiera fallado, cuando en realidad solo falló el correo, no el guardado.
+      </div>
+      <p style="font-size:13.5px;line-height:1.6;margin-bottom:0;"><strong>Sugerencia para el programador:</strong></p>
+      <ol style="font-size:13.5px;line-height:1.9;padding-left:20px;margin-top:6px;">
+        <li>Separar el envío de la notificación por correo de la actualización del estado Premium, para que un fallo de SMTP no bloquee ni haga parecer fallida la acción principal.</li>
+        <li>Revisar las credenciales/configuración SMTP para corregir el error de autenticación de fondo.</li>
+        <li>Si el correo falla, mostrar un aviso distinto (ej. "Premium actualizado, pero no se pudo enviar la notificación por correo") en vez del mensaje de error genérico actual.</li>
+      </ol>
+    </div>
+
+
+  </div>

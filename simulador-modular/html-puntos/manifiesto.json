@@ -1,0 +1,86 @@
+{
+  "generadoDesde": [
+    {
+      "archivo": "punto-0.html",
+      "tab": "tab13",
+      "n": "0",
+      "titulo": "Checklist General",
+      "ordenDom": 0,
+      "predeterminado": true,
+      "bytes": 1760,
+      "sha256": "e603da5d614f86579bf8da0abe1c6d17aafff2b437029ed86cc192f28b47bb9d"
+    },
+    {
+      "archivo": "punto-1.html",
+      "tab": "tab5",
+      "n": "1",
+      "titulo": "Rol SuperAdmin",
+      "ordenDom": 5,
+      "bytes": 29451,
+      "sha256": "193a5085bd8d6b4e9fdf91678d807a15f812056b5e1668b6268f839b6c76fc95"
+    },
+    {
+      "archivo": "punto-2.html",
+      "tab": "tab1",
+      "n": "2",
+      "titulo": "Rol Admin",
+      "ordenDom": 1,
+      "bytes": 27552,
+      "sha256": "447f9bbfd6ef693b46c74606b0624664e6885feb4d100510c69bb76927c413ab"
+    },
+    {
+      "archivo": "punto-3.html",
+      "tab": "tab6",
+      "n": "3",
+      "titulo": "Rol Cajero",
+      "ordenDom": 2,
+      "bytes": 67519,
+      "sha256": "bd95e7f047c66fc85810feafc97a2b420cd40272303995c923f11c4b1aa3d2dd"
+    },
+    {
+      "archivo": "punto-4.html",
+      "tab": "tab7",
+      "n": "4",
+      "titulo": "Terceros (A)",
+      "ordenDom": 3,
+      "bytes": 22436,
+      "sha256": "e9466a5936ce29e96bbcc8aacf94741fa1d3bae2d2c4d5af9f19f02cc7ac9dc3"
+    },
+    {
+      "archivo": "punto-5.html",
+      "tab": "tab4",
+      "n": "5",
+      "titulo": "Terceros (B)",
+      "ordenDom": 4,
+      "bytes": 24303,
+      "sha256": "80b678ca805076a5b0a0a2fe4b3f033d358119182903596cebc90fa511f8328d"
+    },
+    {
+      "archivo": "punto-6.html",
+      "tab": "tab12",
+      "n": "6",
+      "titulo": "Reportes SuperAdmin",
+      "ordenDom": 6,
+      "bytes": 9065,
+      "sha256": "cb023763fd08ccd9d56a8366725fb5c0de6ea898e326cf6698ae13274b676799"
+    },
+    {
+      "archivo": "punto-7.html",
+      "tab": "tab9",
+      "n": "7",
+      "titulo": "Reportes Admin",
+      "ordenDom": 7,
+      "bytes": 61267,
+      "sha256": "e614ba32694c39b8f6c10e2bd7248e98f47c4ed76e104d7950e3c94cbea5c392"
+    },
+    {
+      "archivo": "punto-8.html",
+      "tab": "tab11",
+      "n": "8",
+      "titulo": "Reportes Cajero",
+      "ordenDom": 8,
+      "bytes": 8334,
+      "sha256": "e33dec344422c18b71789df8798d2c158369457a054316fe6a1d577762dbcd29"
+    }
+  ]
+}

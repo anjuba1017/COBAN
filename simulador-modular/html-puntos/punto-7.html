@@ -1,0 +1,916 @@
+  <!-- ===================== TAB 9 ===================== -->
+  <div id="tab9" class="tab-content">
+
+    <div class="section-title">
+      <h2 style="text-transform:uppercase;letter-spacing:.4px;">Reportes Admin</h2>
+      <span class="badge badge-amber">Por rol</span>
+    </div>
+
+    <div class="card">
+      <p style="font-size:13px;color:var(--muted);margin:0;">Esta sección corresponde a los <strong>reportes que necesita el rol Admin</strong>, y que no se hayan ajustado o modificado ya en las pestañas anteriores.</p>
+    </div>
+
+    <div class="section-title" style="margin-top:34px;">
+      <h2 style="text-transform:uppercase;letter-spacing:.4px;">Reportes del rol Admin</h2>
+    </div>
+
+        
+
+<div class="card">
+      <h2>Nueva propuesta de menú <span class="tag">PROPUESTA NUEVA</span></h2>
+      <p style="font-size:13.5px;line-height:1.7;margin-top:0;">Cambiamos la interfaz actual (Gestor de reportes, con tarjetas grandes) por un menú lateral parecido al que ya tiene "Gestionar mis Corresponsales":</p>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px;">
+        <div>
+          <div style="font-size:11.5px;color:var(--muted);margin-bottom:6px;text-align:center;">Interfaz actual</div>
+          <img src="../capturas/punto-7-01.png" alt="Gestor de reportes actual, con tarjetas grandes: Reporte general, Reporte por cajas, Reporte de terceros" style="width:100%;border:1px solid var(--border);border-radius:10px;">
+        </div>
+        <div>
+          <div style="font-size:11.5px;color:var(--muted);margin-bottom:6px;text-align:center;">Modelo a seguir (Gestionar mis Corresponsales)</div>
+          <img src="../capturas/punto-7-02.png" alt="Menú lateral de Gestionar mis Corresponsales: Mis Cajas, Mis Cajeros, Mis comisiones, Mis Terceros" style="width:100%;border:1px solid var(--border);border-radius:10px;">
+        </div>
+      </div>
+    </div>
+
+<div class="card" id="gestor-reportes">
+      <h2>Demo: Gestor de Reportes <span class="tag">DEMO</span></h2>
+      <p style="font-size:13.5px;line-height:1.7;margin-top:0;">Simulación de cómo quedaría la pestaña completa siguiendo el modelo de "Gestionar mis Corresponsales": menú lateral a la izquierda, formulario ocupando todo el ancho libre a la derecha, y el texto de contexto debajo de cada uno.</p>
+
+      <div style="border:1px solid var(--border);border-radius:14px;overflow:hidden;">
+        <div style="background:#141b33;color:#fff;padding:14px 22px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+          <span style="font-size:15px;font-weight:700;">Gestor de Reportes</span>
+          <select id="grSelectorCorresponsal" style="max-width:220px;">
+            <option>CB Barrio Centenario</option>
+            <option>CB Barrio Pajonal</option>
+          </select>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;">
+          <div style="background:#1c1c1c;min-width:220px;flex-shrink:0;padding:14px 0;">
+            <div class="gr-menu-item" id="grMenu_financiero" style="padding-left:18px;" onclick="seleccionarReporteGR('financiero')">Informe financiero</div>
+          <div class="gr-menu-item" id="grMenu_conciliacion" style="padding-left:18px;" onclick="seleccionarReporteGR('conciliacion')">Conciliación diaria</div>
+          <div class="gr-menu-group">Terceros</div>
+          <div class="gr-menu-item" id="grMenu_estado_global" style="padding-left:32px;" onclick="seleccionarReporteGR('estado_global')">Estado de cuenta global</div>
+          <div class="gr-menu-item" id="grMenu_estado_detallado" style="padding-left:32px;" onclick="seleccionarReporteGR('estado_detallado')">Estado de cuenta detallado</div>
+          <div class="gr-menu-item" id="grMenu_movimientos" style="padding-left:32px;" onclick="seleccionarReporteGR('movimientos')">Movimientos</div>
+          <div class="gr-menu-group">Cierres de caja</div>
+          <div class="gr-menu-item" id="grMenu_reporte_cierre" style="padding-left:32px;" onclick="seleccionarReporteGR('reporte_cierre')">Reporte de cierre</div>
+          <div class="gr-menu-item" id="grMenu_diferencias" style="padding-left:32px;" onclick="seleccionarReporteGR('diferencias')">Diferencias de cierre</div>
+          <div class="gr-menu-item" id="grMenu_comisiones" style="padding-left:18px;" onclick="seleccionarReporteGR('comisiones')">Comisiones</div>
+          <div class="gr-menu-item" id="grMenu_transacciones" style="padding-left:18px;" onclick="seleccionarReporteGR('transacciones')">Transacciones</div>
+          </div>
+          <div style="flex:1;min-width:280px;padding:22px;">
+            <div class="gr-pane" id="grPane_financiero" style="display:none;">
+          <h3 style="font-size:15px;margin:0 0 14px;">Informe financiero</h3>
+              <div class="pos-modal-like" id="panelInformeFinancieroIF" style="margin:0 0 20px;border:1px solid var(--border);border-radius:16px;overflow:hidden;background:#fff;">
+      <div style="padding:22px;">
+
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:18px;">
+          <label style="margin:0;flex-shrink:0;">Día a consultar</label>
+          <input type="date" id="fechaCorteIF" value="2026-07-24" style="max-width:150px;" oninput="renderInformeFinancieroIF()">
+        </div>
+
+        <div style="font-size:13px;font-weight:700;margin-bottom:10px;">Resumen financiero</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;">
+          <div style="background:#fafafe;border:1px solid var(--border);border-radius:10px;padding:12px;">
+            <div style="width:30px;height:30px;border-radius:50%;background:#fed7aa;display:flex;align-items:center;justify-content:center;font-size:13px;margin-bottom:8px;">🧑</div>
+            <div style="font-size:11px;color:var(--muted);">Caja</div>
+            <div class="mono" style="font-size:13.5px;font-weight:700;" id="ifCaja">$0</div>
+          </div>
+          <div style="background:#fafafe;border:1px solid var(--border);border-radius:10px;padding:12px;">
+            <div style="width:30px;height:30px;border-radius:50%;background:#e5e7eb;display:flex;align-items:center;justify-content:center;font-size:13px;margin-bottom:8px;">👥</div>
+            <div style="font-size:11px;color:var(--muted);">Terceros</div>
+            <div class="mono" style="font-size:13.5px;font-weight:700;" id="ifTerceros">$0</div>
+          </div>
+          <div style="background:#fafafe;border:1px solid var(--border);border-radius:10px;padding:12px;">
+            <div style="width:30px;height:30px;border-radius:50%;background:#fecaca;display:flex;align-items:center;justify-content:center;font-size:13px;margin-bottom:8px;">🏛️</div>
+            <div style="font-size:11px;color:var(--muted);">Banco</div>
+            <div class="mono" style="font-size:13.5px;font-weight:700;" id="ifBanco">$0</div>
+          </div>
+          <div style="background:#fafafe;border:1px solid var(--border);border-radius:10px;padding:12px;">
+            <div style="width:30px;height:30px;border-radius:50%;background:#bbf7d0;display:flex;align-items:center;justify-content:center;font-size:13px;margin-bottom:8px;">✅</div>
+            <div style="font-size:11px;color:var(--muted);">Cupo disponible</div>
+            <div class="mono" style="font-size:13.5px;font-weight:700;" id="ifCupo">$0</div>
+          </div>
+        </div>
+
+        <div style="background:#ececf3;border-radius:10px;padding:18px;margin-bottom:18px;">
+          <div style="font-size:12.5px;color:var(--muted);margin-bottom:10px;">Balance</div>
+          <div style="font-size:13px;line-height:2;margin-bottom:8px;">
+            <div style="display:flex;justify-content:space-between;"><span>Caja (efectivo por entregar)</span><span class="mono" id="ifBalCaja">$0</span></div>
+            <div style="display:flex;justify-content:space-between;"><span>Terceros</span><span class="mono" id="ifBalTerceros">$0</span></div>
+            <div style="display:flex;justify-content:space-between;"><span>Banco</span><span class="mono" id="ifBalBanco">$0</span></div>
+          </div>
+          <div style="border-top:1px solid var(--border);padding-top:10px;display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:14.5px;font-weight:700;">Saldo</span>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="font-size:21px;font-weight:700;" class="mono" id="ifSaldoFinal">$0</span>
+              <span id="ifIconoFinal" style="font-size:20px;">✅</span>
+            </div>
+          </div>
+          <div id="ifAlerta" class="note-box" style="display:none;margin-top:10px;">⚠️ Revisar datos ingresados en Terceros y Caja de cada operador.</div>
+        </div>
+
+        <hr style="border:none;border-top:1px solid var(--border);margin:18px 0;">
+
+        <div style="font-size:13px;font-weight:700;margin-bottom:6px;">Reporte de Somos Bancolombia</div>
+        <p style="font-size:12.5px;color:var(--muted);line-height:1.6;margin-top:0;margin-bottom:12px;">
+          Este paso es opcional: si quieres verificar estos datos contra la plataforma del banco, escribe aquí lo que te muestra Somos Bancolombia. A futuro esto podría llenarse automáticamente por API.
+        </p>
+
+        <table class="setup-table">
+          <tr><th>Concepto</th><th>Según Coban365</th><th>Según Somos Bancolombia</th><th style="text-align:center;">Estado</th></tr>
+          <tr>
+            <td>Saldo</td>
+            <td class="mono" id="ifSegunAppSaldo">$0</td>
+            <td><input type="text" id="ifBancoSaldo" placeholder="$ 0" style="text-align:right;" oninput="formatMoneyInputSigned(this); compararSomosBancolombiaIF();"></td>
+            <td style="text-align:center;" id="ifEstadoSaldo">–</td>
+          </tr>
+          <tr>
+            <td>Cupo disponible</td>
+            <td class="mono" id="ifSegunAppCupo">$0</td>
+            <td><input type="text" id="ifBancoCupo" placeholder="$ 0" style="text-align:right;" oninput="formatMoneyInputSigned(this); compararSomosBancolombiaIF();"></td>
+            <td style="text-align:center;" id="ifEstadoCupo">–</td>
+          </tr>
+        </table>
+
+      </div>
+    </div>
+
+    
+          <div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--border);">
+            <h3 style="font-size:12px;text-align:center;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);margin:0 0 14px;">Contexto</h3>
+            <p style="font-size:13.5px;line-height:1.7;margin-top:0;">
+        Informe financiero del estado del corresponsal que permite al Admin un resumen rápido de las cajas, terceros, deuda al banco y cupo disponible.
+      </p>
+          </div>
+        </div>
+
+        <div class="gr-pane" id="grPane_conciliacion" style="display:none;">
+          <h3 style="font-size:15px;margin:0 0 14px;">Conciliación diaria</h3>
+                  <div class="pos-modal-like" style="margin:0 0 20px;border:1px solid var(--border);border-radius:16px;overflow:hidden;background:#fff;">
+      <div style="padding:22px;">
+
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
+          <label style="margin:0;flex-shrink:0;">Fecha de corte</label>
+          <input type="date" id="fechaCorteCD" value="2026-07-01" style="max-width:150px;" oninput="renderConciliacionCD()">
+        </div>
+
+        <div style="display:flex;gap:16px;margin-bottom:18px;font-size:12.5px;color:var(--muted);flex-wrap:wrap;">
+          <span><span style="display:inline-block;width:10px;height:10px;background:var(--navy);margin-right:6px;"></span>El corresponsal debe (cuenta por pagar)</span>
+          <span><span style="display:inline-block;width:10px;height:10px;background:var(--red);margin-right:6px;"></span>Le deben al corresponsal (cuenta por cobrar)</span>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;align-items:stretch;">
+
+          <div style="background:#fafafe;border:1px solid var(--border);border-radius:10px;padding:14px;display:flex;flex-direction:column;">
+            <div style="font-size:12.5px;color:var(--muted);margin-bottom:8px;">🧑 Caja <span style="font-weight:400;">(orden alfabético)</span></div>
+            <div style="min-height:66px;">
+              <table style="width:100%;border-collapse:collapse;font-size:13px;" id="cajaListaCD"></table>
+            </div>
+            <button id="btnExpandirCajaCD" onclick="toggleExpandirCajaCD()" class="btn-ghost btn-small" style="margin:6px 0 0;padding:2px 0;text-align:left;border:none;background:none;color:var(--accent-dark);height:20px;line-height:20px;visibility:hidden;">Ver todos</button>
+            <div style="border-top:1px solid var(--border);margin-top:auto;padding-top:8px;display:flex;justify-content:space-between;font-size:13px;font-weight:700;">
+              <span>Saldo caja</span><span class="mono" id="saldoCajaCD">$0</span>
+            </div>
+          </div>
+
+          <div style="background:#fafafe;border:1px solid var(--border);border-radius:10px;padding:14px;display:flex;flex-direction:column;">
+            <div style="font-size:12.5px;color:var(--muted);margin-bottom:8px;">🏛️ Banco</div>
+            <div style="min-height:66px;">
+              <table style="width:100%;border-collapse:collapse;font-size:13px;" id="bancoListaCD"></table>
+            </div>
+            <div style="height:20px;"></div>
+            <div style="border-top:1px solid var(--border);margin-top:auto;padding-top:8px;display:flex;justify-content:space-between;font-size:13px;font-weight:700;">
+              <span>Saldo banco</span><span class="mono" id="saldoBancoCD">$0</span>
+            </div>
+          </div>
+
+          <div style="background:#fafafe;border:1px solid var(--border);border-radius:10px;padding:14px;display:flex;flex-direction:column;">
+            <div style="font-size:12.5px;color:var(--muted);margin-bottom:8px;">👥 Terceros <span style="font-weight:400;">(orden alfabético)</span></div>
+            <div style="min-height:66px;">
+              <table style="width:100%;border-collapse:collapse;font-size:13px;" id="tercerosListaCD"></table>
+            </div>
+            <button id="btnExpandirCD" onclick="toggleExpandirCD()" class="btn-ghost btn-small" style="margin:6px 0 0;padding:2px 0;text-align:left;border:none;background:none;color:var(--accent-dark);height:20px;line-height:20px;visibility:hidden;">Ver todos</button>
+            <div style="border-top:1px solid var(--border);margin-top:auto;padding-top:8px;display:flex;justify-content:space-between;font-size:13px;font-weight:700;">
+              <span>Saldo terceros</span><span class="mono" id="saldoTercerosCD">$0</span>
+            </div>
+          </div>
+
+        </div>
+
+        <div style="background:#ececf3;border-radius:10px;padding:18px;margin-top:14px;">
+          <div style="font-size:12.5px;color:var(--muted);margin-bottom:10px;">Balance</div>
+          <div style="font-size:13px;line-height:2;margin-bottom:8px;">
+            <div style="display:flex;justify-content:space-between;"><span>Caja (efectivo por entregar)</span><span class="mono" id="balCajaCD">$0</span></div>
+            <div style="display:flex;justify-content:space-between;"><span>Terceros</span><span class="mono" id="balTercerosCD">$0</span></div>
+            <div style="display:flex;justify-content:space-between;"><span>Banco</span><span class="mono" id="balBancoCD">$0</span></div>
+          </div>
+          <div style="border-top:1px solid var(--border);padding-top:10px;display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:14.5px;font-weight:700;">Saldo</span>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="font-size:21px;font-weight:700;" class="mono" id="saldoFinalCD">$0</span>
+              <span id="iconoFinalCD" style="font-size:20px;">✅</span>
+            </div>
+          </div>
+          <div id="alertaCD" class="note-box" style="display:none;margin-top:10px;">⚠️ Este saldo no da cero. Revisa Caja o Terceros.</div>
+        </div>
+
+      </div>
+    </div>
+
+    <div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--border);">
+      <h3 style="font-size:12px;text-align:center;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);margin:0 0 14px;">Contexto</h3>
+      <p style="font-size:13.5px;line-height:1.7;margin-top:0;">
+        Reporte de una sola fecha, pensado para que el Admin (o incluso alguien sin conocimiento contable) vea de un vistazo si el corresponsal cuadra: Caja + Terceros + Banco debe dar <strong>$0</strong>. Debajo simulamos también el <strong>setup inicial</strong> que necesita el corresponsal para arrancar (cajeras, terceros y saldo con el banco) — los demás valores del reporte se calculan solos a partir de esos datos.
+      </p>
+
+<div style="display:flex;justify-content:center;margin-top:18px;">
+      <div class="card" style="max-width:460px;width:100%;">
+        <h2 style="font-size:15px;">Datos iniciales del corresponsal <span class="tag">SETUP · EDITABLE</span></h2>
+        <p style="font-size:12.5px;color:var(--muted);margin-top:0;line-height:1.5;">
+          Esto es, en la práctica, el setup con el que arranca el corresponsal el día a día — ya definido a partir del cupo total asignado. Cambia cualquier valor y el reporte de abajo se recalcula solo.
+        </p>
+
+        <label style="margin-top:0;">Corresponsal</label>
+        <input type="text" value="CB Barrio Centenario [12029]" disabled>
+
+        <h3 style="font-size:11.5px;text-transform:uppercase;letter-spacing:.3px;color:var(--muted);margin:20px 0 8px;">Cajeras</h3>
+        <div id="cajerasSetupCD" style="display:flex;flex-direction:column;gap:6px;"></div>
+
+        <h3 style="font-size:11.5px;text-transform:uppercase;letter-spacing:.3px;color:var(--muted);margin:20px 0 8px;">Terceros</h3>
+        <div id="tercerosSetupCD" style="display:flex;flex-direction:column;gap:6px;"></div>
+        <button class="btn-ghost btn-small" style="width:100%;margin-top:8px;" onclick="agregarTerceroCD()">+ Agregar tercero</button>
+        <div class="hint">Positivo: el corresponsal le debe al tercero (cuenta por pagar). Negativo: el tercero le debe al corresponsal (cuenta por cobrar).</div>
+
+        <h3 style="font-size:11.5px;text-transform:uppercase;letter-spacing:.3px;color:var(--muted);margin:20px 0 8px;">Banco</h3>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <label style="margin:0;flex-shrink:0;">Saldo</label>
+          <input type="text" inputmode="numeric" id="deudaBancoCD" value="$ 2.000.000" style="max-width:150px;margin-left:auto;text-align:right;" oninput="formatMoneyInputSigned(this); renderConciliacionCD();">
+        </div>
+        <div class="hint">Positivo: el corresponsal le debe al banco. Negativo: el banco le debe al corresponsal (puede ocurrir).</div>
+      </div>
+    </div>
+    </div>
+  </div>
+
+        <div class="gr-pane" id="grPane_estado_global" style="display:none;">
+          <h3 style="font-size:15px;margin:0 0 14px;">Terceros — Estado de cuenta global</h3>
+              <div class="pos-modal-like" style="margin:0 0 20px;border:1px solid var(--border);border-radius:16px;overflow:hidden;background:#fff;">
+      <div style="padding:22px;">
+
+        <div style="position:relative;margin-bottom:14px;">
+          <input type="text" id="buscarTerceroET" placeholder="Buscar tercero..." style="width:100%;padding-left:34px;" oninput="renderEstadoTercerosET()">
+          <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);">🔍</span>
+        </div>
+
+        <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">Terceros activos (con saldo) · orden alfabético</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;font-weight:700;padding:0 0 6px;border-bottom:1px solid var(--border);">
+          <span style="font-size:13.5px;">Tercero</span>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <span style="font-size:13.5px;">Estado de cuenta</span>
+            <button class="btn-ghost btn-small" style="visibility:hidden;" tabindex="-1">Ver detalle</button>
+          </div>
+        </div>
+        <div id="listaActivosET"></div>
+
+        <button id="btnVerMasET" class="btn-ghost btn-small" style="width:100%;margin-top:12px;" onclick="toggleVerMasET()">Ver más</button>
+        <div id="listaCerosET" style="display:none;margin-top:6px;"></div>
+
+        <div id="sinResultadosET" class="tercero-empty" style="display:none;">No se encontraron terceros con ese nombre.</div>
+      </div>
+    </div>
+
+    
+          <div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--border);">
+            <h3 style="font-size:12px;text-align:center;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);margin:0 0 14px;">Contexto</h3>
+            <p style="font-size:13.5px;line-height:1.7;margin-top:0;">
+        Consulta rápida del estado de los terceros para saber su estado de cuenta con el corresponsal. Se listan los terceros en orden alfabético y con saldo a favor o en contra; los que están en ceros quedan colapsados.
+      </p>
+          </div>
+        </div>
+
+        <div class="gr-pane" id="grPane_estado_detallado" style="display:none;">
+          <h3 style="font-size:15px;margin:0 0 4px;">Terceros — Estado de cuenta detallado</h3>
+          <div id="barraTituloEC" style="font-size:12.5px;color:var(--muted);margin-bottom:14px;">Estado de Cuentas - CB [12029]</div>
+              <div class="pos-modal-like" id="panelEstadoCuentaEC" style="margin:0 0 20px;border:1px solid var(--border);border-radius:16px;overflow:hidden;background:#fff;">
+      <div style="padding:22px;">
+
+        <div class="two-field-row" style="align-items:flex-end;">
+          <div>
+            <label style="margin-top:0;">Tercero</label>
+            <select id="terceroSelectorEC" onchange="verDetalleTerceroET(this.value)">
+              <option value="">-- Selecciona un tercero --</option>
+            </select>
+          </div>
+          <div>
+            <label style="margin-top:0;">Consulta</label>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+              <input type="date" id="desdeEC" value="2026-06-01" style="max-width:150px;">
+              <span style="color:var(--muted);">—</span>
+              <input type="date" id="hastaEC" value="2026-06-30" style="max-width:150px;">
+              <button class="btn-primary" style="padding:8px 16px;" onclick="buscarMovimientosEC()">Buscar</button>
+              <button class="btn-ghost btn-small" onclick="limpiarConsultaEC()">Limpiar</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="resumen-cards" style="margin:18px 0;">
+          <div class="resumen-card">
+            <div class="resumen-icon ic-green" id="iconoSaldoEC">$</div>
+            <div><div class="resumen-label" id="labelSaldoEC">Saldo actual</div><div class="resumen-value" id="valorSaldoEC">$0</div></div>
+          </div>
+          <div class="resumen-card">
+            <div class="resumen-icon ic-green">✅</div>
+            <div><div class="resumen-label">Cupo disponible</div><div class="resumen-value" id="valorCupoEC">$0</div></div>
+          </div>
+          <div class="resumen-card">
+            <div class="resumen-icon ic-orange">%</div>
+            <div><div class="resumen-label">Comisión generada (periodo)</div><div class="resumen-value" id="valorComisionEC">$0</div></div>
+          </div>
+        </div>
+
+        <table class="setup-table" id="tablaMovimientosEC">
+          <tr><th>Fecha</th><th>Descripción</th><th>Referencia 1</th><th>Referencia 2</th><th>Valor</th><th>Comisión bancaria</th><th>Dispersión</th><th>Saldo</th></tr>
+        </table>
+        <div class="setup-note" style="margin-top:10px;">Los datos de los movimientos son ilustrativos; el Saldo de la última fila sí corresponde al saldo actual real del tercero mostrado en el Estado de Terceros.</div>
+
+        <div class="btnbar" style="justify-content:space-between;margin-top:16px;">
+          <div style="display:flex;gap:10px;">
+            <button class="btn-blue-small" disabled>Exportar a Excel</button>
+            <button class="btn-blue-small" disabled>Exportar a PDF</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    
+          <div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--border);">
+            <h3 style="font-size:12px;text-align:center;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);margin:0 0 14px;">Contexto</h3>
+            <p style="font-size:13.5px;line-height:1.7;margin-top:0;">
+        Reporte independiente: se puede abrir seleccionando un tercero directamente aquí, o como atajo haciendo clic en "Ver detalle" desde el Estado de Terceros — ambos caminos llevan al mismo reporte.
+      </p>
+          </div>
+        </div>
+
+    <div class="gr-pane" id="grPane_movimientos" style="display:none;">
+      <h3 id="mvAdminTitulo" style="font-size:15px;margin:0 0 4px;">Movimientos de terceros</h3>
+      <div style="font-size:12.5px;color:var(--muted);margin-bottom:14px;">Terceros — Estado de Cuentas Detallado</div>
+
+      <div class="pos-modal-like" style="margin:0 0 20px;border:1px solid var(--border);border-radius:16px;overflow:hidden;background:#fff;">
+        <div style="padding:22px;">
+
+          <div class="two-field-row" style="align-items:flex-end;">
+            <div>
+              <label style="margin-top:0;">Tercero</label>
+              <select id="mvAdminSelector" onchange="seleccionarTerceroMovAdmin(this.value)">
+                <option value="">-- Selecciona un tercero --</option>
+              </select>
+            </div>
+            <div>
+              <label style="margin-top:0;">Consulta</label>
+              <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                <input type="date" id="mvAdminDesde" value="2026-06-01" style="max-width:150px;">
+                <span style="color:var(--muted);">—</span>
+                <input type="date" id="mvAdminHasta" value="2026-06-30" style="max-width:150px;">
+                <button class="btn-primary" style="padding:8px 16px;" onclick="buscarMovimientosAdmin()">Buscar</button>
+                <button class="btn-ghost btn-small" onclick="limpiarMovimientosAdmin()">Limpiar</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="resumen-cards" style="margin:18px 0;">
+            <div class="resumen-card">
+              <div class="resumen-icon ic-green" id="mvAdminIconoSaldo">$</div>
+              <div><div class="resumen-label" id="mvAdminLabelSaldo">Saldo actual</div><div class="resumen-value" id="mvAdminValorSaldo">$0</div></div>
+            </div>
+            <div class="resumen-card">
+              <div class="resumen-icon ic-green">✅</div>
+              <div><div class="resumen-label">Cupo disponible</div><div class="resumen-value" id="mvAdminValorCupo">$0</div></div>
+            </div>
+            <div class="resumen-card">
+              <div class="resumen-icon ic-orange">%</div>
+              <div><div class="resumen-label">Comisión generada (periodo)</div><div class="resumen-value" id="mvAdminValorComision">$0</div></div>
+            </div>
+          </div>
+
+          <div style="overflow-x:auto;">
+            <table class="setup-table" id="mvAdminTabla"></table>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--border);">
+        <h3 style="font-size:12px;text-align:center;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);margin:0 0 14px;">Contexto</h3>
+        <p style="font-size:13.5px;line-height:1.7;margin-top:0;">
+          Se necesita un reporte de los movimientos que se le hacen a un tercero, para visualizarlos tanto para el Admin como para el Cajero, en caso de que quieran confrontar algún movimiento en el día o en un día específico. A diferencia del reporte que ve el Cajero (que es siempre sobre sus propios movimientos, así que no necesita aclarar quién los hizo), aquí el Admin puede tener varios cajeros atendiendo al mismo tercero — por eso esta vista incluye la columna <strong>Cajero</strong>, para saber exactamente quién intervino en cada movimiento.
+        </p>
+      </div>
+    </div>
+
+    <script>
+    let terceroActualMovAdmin = null;
+    function seleccionarTerceroMovAdmin(nombre){
+      const t = tercerosCD.find(x => x.nombre === nombre);
+      if(!t) return;
+      terceroActualMovAdmin = t;
+      renderMovimientosTerceroUI(t, 'mvAdmin', true);
+    }
+    function buscarMovimientosAdmin(){
+      if(terceroActualMovAdmin) renderMovimientosTerceroUI(terceroActualMovAdmin, 'mvAdmin');
+    }
+    function limpiarMovimientosAdmin(){
+      document.getElementById('mvAdminDesde').value = '2026-06-01';
+      document.getElementById('mvAdminHasta').value = '2026-06-30';
+      if(terceroActualMovAdmin) renderMovimientosTerceroUI(terceroActualMovAdmin, 'mvAdmin');
+    }
+    if(document.readyState === 'loading'){
+      document.addEventListener('DOMContentLoaded', function(){
+        poblarSelectorMovimientos('mvAdminSelector', 'Jose Ramirez');
+        seleccionarTerceroMovAdmin('Jose Ramirez');
+      });
+    } else {
+      poblarSelectorMovimientos('mvAdminSelector', 'Jose Ramirez');
+      seleccionarTerceroMovAdmin('Jose Ramirez');
+    }
+    </script>
+
+
+        <div class="gr-pane" id="grPane_reporte_cierre" style="display:none;">
+          <h3 style="font-size:15px;margin:0 0 14px;">Cierres de caja — Reporte de cierre</h3>
+              <div class="pos-modal-like" id="panelCierreCajaRCA" style="margin:0 0 20px;border:1px solid var(--border);border-radius:16px;overflow:hidden;background:#fff;">
+      <div style="padding:22px;">
+
+        <div class="two-field-row" style="margin-bottom:16px;">
+          <div>
+            <label style="margin-top:0;">Caja</label>
+            <select id="selectorCajaRCA" onchange="renderCierreCajaRCA()">
+              <option value="todos">Todos los cajeros (resumen)</option>
+              <option value="Soraya Monterrosa">Soraya Monterrosa</option>
+              <option value="Yohana Monterrosa">Yohana Monterrosa</option>
+              <option value="Salome Garcia">Salome Garcia</option>
+              <option value="Anyela Urrutia">Anyela Urrutia</option>
+            </select>
+          </div>
+          <div>
+            <label style="margin-top:0;">Fecha</label>
+            <input type="date" id="fechaRCA" value="2026-06-29" onchange="renderCierreCajaRCA()">
+          </div>
+        </div>
+
+        <div id="contenidoCierreRCA"></div>
+
+        <div class="btnbar" style="justify-content:space-between;margin-top:18px;">
+          <div style="display:flex;gap:8px;">
+            <button class="btn-blue-small" onclick="alert('Simulación: aquí se enviaría a imprimir.')">Imprimir</button>
+            <button class="btn-blue-small" disabled>Excel</button>
+            <button class="btn-blue-small" disabled>PDF</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    
+          <div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--border);">
+            <h3 style="font-size:12px;text-align:center;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);margin:0 0 14px;">Contexto</h3>
+            <p style="font-size:13.5px;line-height:1.7;margin-top:0;">
+        Reutiliza el mismo Reporte Diario de Caja que ya ve el Cajero — el Admin puede consultarlo por caja individual, o ver un resumen consolidado de todas las cajas del corresponsal en una sola fecha.
+      </p>
+          </div>
+        </div>
+
+        <div class="gr-pane" id="grPane_diferencias" style="display:none;">
+          <h3 style="font-size:15px;margin:0 0 14px;">Cierres de caja — Diferencias de cierre</h3>
+              <div class="pos-modal-like" style="margin:0 0 20px;border:1px solid var(--border);border-radius:16px;overflow:hidden;background:#fff;">
+      <div style="padding:18px 22px;">
+        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:14px;">
+          <div>
+            <label style="font-size:11px;color:var(--muted);margin-bottom:3px;display:block;">Desde</label>
+            <input type="date" id="rpDesde" value="2026-08-01">
+          </div>
+          <div>
+            <label style="font-size:11px;color:var(--muted);margin-bottom:3px;display:block;">Hasta</label>
+            <input type="date" id="rpHasta" value="2026-08-14">
+          </div>
+          <div>
+            <label style="font-size:11px;color:var(--muted);margin-bottom:3px;display:block;">Cajero</label>
+            <select id="rpCajero" style="min-width:180px;"><option value="todos">Todos</option></select>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;">
+          <div style="background:#fafafe;border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;">
+            <div style="font-size:11px;color:var(--muted);">Total sobrantes</div>
+            <div id="rpSobrantes" style="font-size:15px;font-weight:700;color:#1e6b3a;">$0</div>
+          </div>
+          <div style="background:#fafafe;border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;">
+            <div style="font-size:11px;color:var(--muted);">Total faltantes</div>
+            <div id="rpFaltantes" style="font-size:15px;font-weight:700;color:#c0392b;">$0</div>
+          </div>
+          <div style="background:#fafafe;border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;">
+            <div style="font-size:11px;color:var(--muted);"># cierres con sobrante</div>
+            <div id="rpNumSobrantes" style="font-size:15px;font-weight:700;">0</div>
+          </div>
+          <div style="background:#fafafe;border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;">
+            <div style="font-size:11px;color:var(--muted);"># cierres con faltante</div>
+            <div id="rpNumFaltantes" style="font-size:15px;font-weight:700;">0</div>
+          </div>
+          <div style="background:#fafafe;border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;">
+            <div style="font-size:11px;color:var(--muted);">Diferencia neta</div>
+            <div id="rpNeta" style="font-size:15px;font-weight:700;">$0</div>
+          </div>
+        </div>
+
+        <div class="setup-note" style="margin-top:12px;">Los sobrantes y faltantes son eventos independientes — no se compensan entre sí. La Diferencia neta es solo informativa, no una operación contable real.</div>
+
+        <div id="detalleCajeroCont" class="hidden" style="margin-top:16px;"></div>
+      </div>
+    </div>
+
+    <script>
+    (function(){
+      const RESUMEN_CIERRES = [
+        { fecha: '14 ago', cajero: 'Soraya Monterrosa', valor: 0 },
+        { fecha: '13 ago', cajero: 'Soraya Monterrosa', valor: 45000 },
+        { fecha: '12 ago', cajero: 'Soraya Monterrosa', valor: -60000 },
+        { fecha: '11 ago', cajero: 'Yohana Monterrosa', valor: 45000 },
+        { fecha: '10 ago', cajero: 'Yohana Monterrosa', valor: -40000 },
+        { fecha: '09 ago', cajero: 'Anyela Urrutia', valor: 18000 }
+      ];
+
+      function fmtDC(v){ if(v===null) return '—'; const s=Math.round(v); return (s<0?'-':'')+'$'+Math.abs(s).toLocaleString('es-CO'); }
+
+      window.renderCatalogoAdminUI = function(containerId){
+        containerId = containerId || 'catalogoAdminUI';
+        const cont = document.getElementById(containerId);
+        if(!cont) return;
+        const filas = window.CATALOGO_CAUSAS.map(c => {
+          const ambitoTag = c.ambito === 'efectivo' ? 'background:#e9ecf3;color:#3d4a6b;' : 'background:#eee9ff;color:#534ab7;';
+          const direccionTag = c.direccion === 'sobrante' ? 'background:#dcefe0;color:#1e6b3a;' : 'background:#fdf3e9;color:#8a5a1e;';
+          return `<tr style="${c.activa ? '' : 'opacity:.5;'}">
+            <td style="font-size:12.5px;">${c.texto}</td>
+            <td><span style="font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:999px;${ambitoTag}">${c.ambito === 'efectivo' ? 'Efectivo' : 'Banco'}</span></td>
+            <td><span style="font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:999px;${direccionTag}">${c.direccion === 'sobrante' ? 'Sobrante' : 'Faltante'}</span></td>
+            <td style="text-align:right;"><button class="btn-ghost btn-small" onclick="toggleCausaCatalogo('${c.id}')">${c.activa ? 'Desactivar' : 'Activar'}</button></td>
+          </tr>`;
+        }).join('');
+        cont.innerHTML = `<table class="setup-table"><tr><th>Causa</th><th>Ámbito</th><th>Dirección</th><th>Acción</th></tr>${filas}</table>`;
+      };
+
+      window.renderResumenPeriodo = function(){
+        const cajeroSel = document.getElementById('rpCajero').value;
+        const datos = RESUMEN_CIERRES.filter(d => cajeroSel === 'todos' || d.cajero === cajeroSel);
+        let totalSobrantes = 0, totalFaltantes = 0, numSobrantes = 0, numFaltantes = 0;
+        datos.forEach(d => {
+          if(d.valor > 0){ totalSobrantes += d.valor; numSobrantes++; }
+          else if(d.valor < 0){ totalFaltantes += Math.abs(d.valor); numFaltantes++; }
+        });
+        const neta = totalSobrantes - totalFaltantes;
+        document.getElementById('rpSobrantes').textContent = fmtDC(totalSobrantes);
+        document.getElementById('rpFaltantes').textContent = fmtDC(totalFaltantes);
+        document.getElementById('rpNumSobrantes').textContent = numSobrantes;
+        document.getElementById('rpNumFaltantes').textContent = numFaltantes;
+        const netaEl = document.getElementById('rpNeta');
+        netaEl.textContent = (neta < 0 ? '-' : '') + fmtDC(Math.abs(neta));
+        netaEl.style.color = neta === 0 ? 'inherit' : (neta > 0 ? '#1e6b3a' : '#c0392b');
+
+        window.renderDetalleCajero();
+      };
+
+      window.renderDetalleCajero = function(){
+        const cajeroSel = document.getElementById('rpCajero').value;
+        const cont = document.getElementById('detalleCajeroCont');
+        if(cajeroSel === 'todos'){ cont.classList.add('hidden'); cont.innerHTML = ''; return; }
+        cont.classList.remove('hidden');
+        const HOY_REF_DIA = 17;
+        const filas = demoCases.map((c) => {
+          const cash = c.billQty.reduce((s,q,j)=>s+q*bills[j],0) + c.bundleQty.reduce((s,q,j)=>s+q*bills[j]*100,0) + c.coinQty.reduce((s,q,j)=>s+q*coins[j],0);
+          const terceros = c.terceros || 0;
+          const compensaciones = c.compensaciones || 0;
+          const netoDatafono = c.app - terceros - compensaciones;
+          const bankDiff = netoDatafono - c.bank;
+          const cashDiff = cash - c.app;
+          let estado = 'ok', texto = 'Cuadrado';
+          let filaStyle = '';
+          if(bankDiff !== 0 || cashDiff !== 0){
+            estado = (bankDiff !== 0 || cashDiff < 0) ? 'bad' : 'warn';
+            const diaNum = parseInt(c.fecha) || HOY_REF_DIA;
+            const dias = Math.max(HOY_REF_DIA - diaNum, 0);
+            texto = `Diferencia pendiente (${dias} día${dias===1?'':'s'})`;
+            if(dias > 5) filaStyle = 'background:#fdf3e9;';
+          }
+          return `<tr style="${filaStyle}">
+            <td><strong>${c.fecha}</strong><br><span style="color:var(--muted);font-size:11px;">${c.hour}</span></td>
+            <td>${pesos(cash)}</td><td>${pesos(c.app)}</td><td>${pesos(c.bank)}</td><td>${pesos(netoDatafono)}</td>
+            <td>${signedHTML(cashDiff)}</td><td>${signedHTML(bankDiff)}</td>
+            <td><span class="pill ${estado}">${texto}</span></td>
+          </tr>`;
+        }).join('');
+        cont.innerHTML = `<div class="pos-modal-like" style="border:1px solid var(--border);border-radius:14px;overflow:hidden;">
+          <div style="background:var(--navy);color:#fff;padding:14px 18px;font-size:13px;font-weight:700;">Detalle de cierres — ${cajeroSel} <span style="font-weight:400;font-size:11px;opacity:.8;">(datos de ejemplo)</span></div>
+          <div style="padding:14px 18px;overflow-x:auto;">
+            <table class="setup-table">
+              <tr><th>Fecha</th><th>Efectivo</th><th>Coban365 (Caja actual)</th><th>Datafono</th><th>Coban365 (Neto Total)</th><th>Dif. Efectivo</th><th>Dif. Banco</th><th>Estado</th></tr>
+              ${filas}
+            </table>
+          </div>
+        </div>`;
+      };
+
+      window.poblarCajerosResumenPeriodo = function(){
+        const sel = document.getElementById('rpCajero');
+        const cajeros = [...new Set(RESUMEN_CIERRES.map(d => d.cajero))].sort();
+        sel.innerHTML = '<option value="todos">Todos</option>' + cajeros.map(c => `<option value="${c}">${c}</option>`).join('');
+        sel.onchange = window.renderResumenPeriodo;
+      };
+
+      window.poblarCajerosResumenPeriodo();
+      window.renderResumenPeriodo();
+      function renderAmbosCatalogos(){
+        window.renderCatalogoAdminUI('catalogoAdminUI');
+        window.renderCatalogoAdminUI('catalogoSuperAdminUI');
+      }
+      if(document.readyState === 'loading'){
+        document.addEventListener('DOMContentLoaded', renderAmbosCatalogos);
+      } else {
+        renderAmbosCatalogos();
+      }
+    })();
+    </script>
+
+
+
+          <div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--border);">
+            <h3 style="font-size:12px;text-align:center;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);margin:0 0 14px;">Contexto</h3>
+            <p style="font-size:13.5px;line-height:1.7;margin-top:0;">
+        Lo que genera el Cambio 3 en Rol Cajero se consolida aquí para todos los cajeros del corresponsal. El Admin avanza el estado de cada una a medida que investiga o el banco resuelve.
+      </p>
+          </div>
+        </div>
+
+        <div class="gr-pane" id="grPane_comisiones" style="display:none;">
+          <h3 style="font-size:15px;margin:0 0 14px;">Comisiones</h3>
+          <div class="pos-modal-like" id="panelReporteComisionesRC" style="border:1px solid var(--border);border-radius:16px;overflow:hidden;background:#fff;">
+        <div style="padding:22px;">
+
+          <div class="two-field-row" style="margin-bottom:14px;">
+            <div>
+              <label style="margin-top:0;">Rango de fechas</label>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <input type="date" id="desdeRC" value="2026-06-01" oninput="renderReporteComisionesRC()">
+                <span style="color:var(--muted);">—</span>
+                <input type="date" id="hastaRC" value="2026-06-30" oninput="renderReporteComisionesRC()">
+              </div>
+            </div>
+            <div>
+              <label style="margin-top:0;">Ordenar por</label>
+              <select id="ordenarRC" onchange="renderReporteComisionesRC()">
+                <option value="comision">Comisión Total (Mayor a Menor)</option>
+                <option value="alfabetico">Nombre del tercero (alfabéticamente)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="resumen-cards" style="margin-bottom:16px;">
+            <div class="resumen-card">
+              <div class="resumen-icon ic-orange">🏦</div>
+              <div><div class="resumen-label">Comisión bancaria (periodo)</div><div class="resumen-value" id="rcTotalBancaria">$0</div></div>
+            </div>
+            <div class="resumen-card">
+              <div class="resumen-icon ic-green">%</div>
+              <div><div class="resumen-label">Comisión de dispersión (periodo)</div><div class="resumen-value" id="rcTotalDispersion">$0</div></div>
+            </div>
+            <div class="resumen-card">
+              <div class="resumen-icon ic-yellow">Σ</div>
+              <div><div class="resumen-label">Comisión total (periodo)</div><div class="resumen-value" id="rcTotalGeneral">$0</div></div>
+            </div>
+          </div>
+
+          <table class="setup-table" id="tablaComisionesRC">
+            <tr><th>Tercero</th><th>Movimientos</th><th>Comisión bancaria</th><th>Comisión dispersión</th><th>Comisión total</th></tr>
+          </table>
+          <div class="btnbar" style="justify-content:space-between;margin-top:14px;">
+            <div style="display:flex;gap:10px;">
+              <button class="btn-blue-small" disabled>Exportar a Excel</button>
+              <button class="btn-blue-small" disabled>Exportar a PDF</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+          <div class="setup-note" style="margin-top:14px;">
+      <div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--border);">
+            <h3 style="font-size:12px;text-align:center;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);margin:0 0 14px;">Contexto</h3>
+            <p style="font-size:13.5px;line-height:1.7;margin-top:0;">
+        Cada vez que un tercero envía dinero, el corresponsal cobra una comisión bancaria y/o de dispersión — es, en la práctica, un ingreso del corresponsal. Hoy esa comisión solo se ve en el modal de <strong>Comisiones de Terceros</strong> que está en el Cajero, como un acumulado por tercero sin fecha ni desglose. El Admin necesita ver, en un rango de fechas, cuánto ha generado cada tercero y cuánto ha generado el corresponsal en total, para evaluar qué tan rentable es la relación con cada tercero.
+      </p>
+
+      <div class="cmp">
+        <div class="cmp-col">
+          <h4>Actual</h4>
+          <ul>
+            <li>Solo existe el modal de Comisiones de Terceros, pensado para retirar la comisión pendiente.</li>
+            <li>Muestra un acumulado total por tercero, sin fecha de generación ni desglose.</li>
+            <li>No distingue comisión bancaria de comisión de dispersión.</li>
+            <li>No hay una vista consolidada de cuánto generó el corresponsal en un periodo.</li>
+          </ul>
+        </div>
+        <div class="cmp-col">
+          <h4 class="new">Propuesto</h4>
+          <ul>
+            <li class="new">Nuevo reporte con filtro de rango de fechas (sin necesidad de seleccionar un tercero puntual).</li>
+            <li class="new">3 tarjetas resumen: Comisión bancaria total, Comisión de dispersión total, Comisión total del periodo.</li>
+            <li class="new">Tabla por tercero: comisión bancaria, comisión de dispersión, comisión total, y cantidad de movimientos que la generaron.</li>
+            <li class="new">Ordenable por comisión total o alfabéticamente (para ver de un vistazo qué terceros son más rentables).</li>
+            <li class="new">Botón para exportar a Excel/PDF.</li>
+          </ul>
+        </div>
+      </div>
+          </div>
+        </div>
+        </div>
+
+    <div class="gr-pane" id="grPane_transacciones" style="display:none;">
+      <h3 style="font-size:15px;margin:0 0 14px;">Transacciones</h3>
+
+      <div style="display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;margin-bottom:14px;">
+        <div>
+          <label style="margin-top:0;">Desde</label>
+          <input type="date" id="txDesde" value="2026-08-14">
+        </div>
+        <div>
+          <label style="margin-top:0;">Hasta</label>
+          <input type="date" id="txHasta" value="2026-08-14">
+        </div>
+        <button class="btn-dark-small" onclick="buscarTransaccionesTX()">Buscar</button>
+        <button class="btn-ghost btn-small" onclick="verEnVivoTX()">Ver en vivo</button>
+        <span id="txModoLabel" style="font-size:11.5px;color:var(--muted);margin-left:auto;">Mostrando movimientos en tiempo real</span>
+      </div>
+
+      <div style="overflow-x:auto;">
+        <table class="setup-table" style="min-width:820px;font-size:12px;">
+          <tr>
+            <th>#</th><th>Fecha</th><th>Hora</th><th>Usuario</th><th>Tipo</th>
+            <th style="text-align:right;">Ingreso</th><th style="text-align:right;">Egreso</th>
+            <th style="text-align:right;">Banco</th><th style="text-align:right;">Cupo</th>
+            <th style="text-align:right;">Caja Cajero</th><th style="text-align:right;">Caja Total CB</th>
+          </tr>
+          <tbody id="tablaTransaccionesTX"></tbody>
+        </table>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;">
+        <span id="txPagInfo" style="font-size:11.5px;color:var(--muted);"></span>
+        <div style="display:flex;gap:8px;">
+          <button class="btn-ghost btn-small" onclick="paginaAnteriorTX()">Anterior</button>
+          <button class="btn-ghost btn-small" onclick="paginaSiguienteTX()">Siguiente</button>
+        </div>
+      </div>
+
+      <div class="btnbar" style="justify-content:flex-end;margin-top:14px;">
+        <button class="btn-blue-small" disabled>Exportar a Excel</button>
+        <button class="btn-blue-small" disabled>Exportar a PDF</button>
+      </div>
+
+      <div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--border);">
+        <h3 style="font-size:12px;text-align:center;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);margin:0 0 14px;">Contexto</h3>
+        <p style="font-size:13.5px;line-height:1.7;margin-top:0;">
+          Hoy no existe ningún reporte que le permita al Admin ver, de un vistazo, todas las transacciones hechas en una fecha — solo puede revisar movimiento por movimiento dentro de cada caja. Este reporte muestra, apenas se entra, los movimientos en tiempo real del día en curso; si se busca un rango de fechas, esos resultados <strong>reemplazan</strong> la vista en vivo. La selección se puede exportar como cualquier otro informe.
+        </p>
+      </div>
+    </div>
+
+    <script>
+    const TRANSACCIONES_TX = [
+      {n:1,fecha:'14/8/26',hora:'06:12',usuario:'aurrutia',tipo:'Recaudo',ingreso:300000,egreso:null,banco:2750000,cupo:13515000,cajaCajero:300000,cajaTotal:300000,total:16565000},
+      {n:2,fecha:'14/8/26',hora:'06:34',usuario:'smonterrosa',tipo:'Compensación',ingreso:30000,egreso:null,banco:2780000,cupo:13515000,cajaCajero:30000,cajaTotal:330000,total:16625000},
+      {n:3,fecha:'14/8/26',hora:'06:41',usuario:'smonterrosa',tipo:'Retiro',ingreso:null,egreso:20000,banco:2760000,cupo:13515000,cajaCajero:10000,cajaTotal:310000,total:16585000},
+      {n:4,fecha:'14/8/26',hora:'07:03',usuario:'smonterrosa',tipo:'Consignación',ingreso:200000,egreso:null,banco:2960000,cupo:13515000,cajaCajero:210000,cajaTotal:510000,total:16985000},
+      {n:5,fecha:'14/8/26',hora:'07:21',usuario:'smonterrosa',tipo:'Compensación',ingreso:null,egreso:300000,banco:2660000,cupo:13515000,cajaCajero:-90000,cajaTotal:210000,total:16385000},
+      {n:6,fecha:'14/8/26',hora:'07:31',usuario:'smonterrosa',tipo:'Consignación',ingreso:60000,egreso:null,banco:2720000,cupo:13515000,cajaCajero:-30000,cajaTotal:270000,total:16505000},
+      {n:7,fecha:'14/8/26',hora:'07:42',usuario:'aurrutia',tipo:'Consignación',ingreso:60000,egreso:null,banco:2780000,cupo:13515000,cajaCajero:360000,cajaTotal:330000,total:16625000},
+      {n:8,fecha:'14/8/26',hora:'07:58',usuario:'ymonterrosa',tipo:'Consignación',ingreso:100000,egreso:null,banco:2880000,cupo:13515000,cajaCajero:100000,cajaTotal:430000,total:16825000},
+      {n:9,fecha:'14/8/26',hora:'08:17',usuario:'ymonterrosa',tipo:'Compensación',ingreso:null,egreso:20000,banco:2860000,cupo:13515000,cajaCajero:80000,cajaTotal:410000,total:16785000},
+      {n:10,fecha:'14/8/26',hora:'08:39',usuario:'aurrutia',tipo:'Consignación',ingreso:100000,egreso:null,banco:2960000,cupo:13515000,cajaCajero:460000,cajaTotal:510000,total:16985000},
+      {n:11,fecha:'14/8/26',hora:'09:02',usuario:'ymonterrosa',tipo:'Pago de crédito',ingreso:null,egreso:200000,banco:2760000,cupo:13515000,cajaCajero:-120000,cajaTotal:310000,total:16585000},
+      {n:12,fecha:'14/8/26',hora:'09:14',usuario:'smonterrosa',tipo:'Compensación',ingreso:null,egreso:20000,banco:2740000,cupo:13515000,cajaCajero:-50000,cajaTotal:290000,total:16545000},
+      {n:13,fecha:'14/8/26',hora:'09:31',usuario:'ymonterrosa',tipo:'Retiro',ingreso:null,egreso:50000,banco:2690000,cupo:13515000,cajaCajero:-170000,cajaTotal:240000,total:16445000},
+      {n:14,fecha:'14/8/26',hora:'09:47',usuario:'ymonterrosa',tipo:'Consignación',ingreso:80000,egreso:null,banco:2770000,cupo:13515000,cajaCajero:-90000,cajaTotal:320000,total:16605000},
+      {n:15,fecha:'14/8/26',hora:'10:12',usuario:'ymonterrosa',tipo:'Compensación',ingreso:60000,egreso:null,banco:2830000,cupo:13515000,cajaCajero:-30000,cajaTotal:380000,total:16725000},
+      {n:16,fecha:'14/8/26',hora:'10:24',usuario:'smonterrosa',tipo:'Compensación',ingreso:null,egreso:45000,banco:2785000,cupo:13515000,cajaCajero:-95000,cajaTotal:335000,total:16635000},
+      {n:17,fecha:'14/8/26',hora:'10:46',usuario:'smonterrosa',tipo:'Compensación',ingreso:60000,egreso:null,banco:2845000,cupo:13515000,cajaCajero:-35000,cajaTotal:395000,total:16755000},
+      {n:18,fecha:'14/8/26',hora:'10:52',usuario:'smonterrosa',tipo:'Retiro',ingreso:null,egreso:20000,banco:2825000,cupo:13515000,cajaCajero:-55000,cajaTotal:375000,total:16715000},
+      {n:19,fecha:'14/8/26',hora:'11:15',usuario:'ymonterrosa',tipo:'Consignación',ingreso:30000,egreso:null,banco:2855000,cupo:13515000,cajaCajero:0,cajaTotal:405000,total:16775000},
+      {n:20,fecha:'14/8/26',hora:'11:32',usuario:'aurrutia',tipo:'Recaudo',ingreso:250000,egreso:null,banco:3105000,cupo:13515000,cajaCajero:710000,cajaTotal:655000,total:17275000},
+      {n:21,fecha:'14/8/26',hora:'11:44',usuario:'aurrutia',tipo:'Consignación',ingreso:60000,egreso:null,banco:3165000,cupo:13515000,cajaCajero:770000,cajaTotal:715000,total:17395000},
+      {n:22,fecha:'14/8/26',hora:'12:07',usuario:'aurrutia',tipo:'Compensación',ingreso:null,egreso:60000,banco:3105000,cupo:13515000,cajaCajero:710000,cajaTotal:655000,total:17275000},
+      {n:23,fecha:'14/8/26',hora:'12:19',usuario:'ymonterrosa',tipo:'Pago de crédito',ingreso:null,egreso:100000,banco:3005000,cupo:13515000,cajaCajero:-100000,cajaTotal:555000,total:17075000},
+      {n:24,fecha:'14/8/26',hora:'12:27',usuario:'smonterrosa',tipo:'Consignación',ingreso:30000,egreso:null,banco:3035000,cupo:13515000,cajaCajero:-25000,cajaTotal:585000,total:17135000},
+      {n:25,fecha:'14/8/26',hora:'12:51',usuario:'smonterrosa',tipo:'Pago de crédito',ingreso:null,egreso:250000,banco:2785000,cupo:13515000,cajaCajero:-275000,cajaTotal:335000,total:16635000},
+      {n:26,fecha:'14/8/26',hora:'13:12',usuario:'smonterrosa',tipo:'Recaudo',ingreso:200000,egreso:null,banco:2985000,cupo:13515000,cajaCajero:-75000,cajaTotal:535000,total:17035000},
+      {n:27,fecha:'14/8/26',hora:'13:20',usuario:'ymonterrosa',tipo:'Compensación',ingreso:null,egreso:20000,banco:2965000,cupo:13515000,cajaCajero:-120000,cajaTotal:515000,total:16995000},
+      {n:28,fecha:'14/8/26',hora:'13:35',usuario:'aurrutia',tipo:'Compensación',ingreso:null,egreso:60000,banco:2905000,cupo:13515000,cajaCajero:650000,cajaTotal:455000,total:16875000},
+      {n:29,fecha:'14/8/26',hora:'13:40',usuario:'smonterrosa',tipo:'Recaudo',ingreso:45000,egreso:null,banco:2950000,cupo:13515000,cajaCajero:-30000,cajaTotal:500000,total:16965000},
+      {n:30,fecha:'14/8/26',hora:'13:50',usuario:'aurrutia',tipo:'Compensación',ingreso:null,egreso:60000,banco:2890000,cupo:13515000,cajaCajero:590000,cajaTotal:440000,total:16845000},
+      {n:31,fecha:'14/8/26',hora:'14:15',usuario:'aurrutia',tipo:'Pago de crédito',ingreso:null,egreso:250000,banco:2640000,cupo:13515000,cajaCajero:340000,cajaTotal:190000,total:16345000},
+      {n:32,fecha:'14/8/26',hora:'14:25',usuario:'aurrutia',tipo:'Pago de crédito',ingreso:null,egreso:45000,banco:2595000,cupo:13515000,cajaCajero:295000,cajaTotal:145000,total:16255000},
+      {n:33,fecha:'14/8/26',hora:'14:49',usuario:'aurrutia',tipo:'Retiro',ingreso:null,egreso:150000,banco:2445000,cupo:13515000,cajaCajero:145000,cajaTotal:-5000,total:15955000},
+      {n:34,fecha:'14/8/26',hora:'15:03',usuario:'ymonterrosa',tipo:'Recaudo',ingreso:30000,egreso:null,banco:2475000,cupo:13515000,cajaCajero:-90000,cajaTotal:25000,total:16015000},
+      {n:35,fecha:'14/8/26',hora:'15:10',usuario:'smonterrosa',tipo:'Consignación',ingreso:200000,egreso:null,banco:2675000,cupo:13515000,cajaCajero:170000,cajaTotal:225000,total:16415000},
+      {n:36,fecha:'14/8/26',hora:'15:19',usuario:'aurrutia',tipo:'Compensación',ingreso:30000,egreso:null,banco:2705000,cupo:13515000,cajaCajero:175000,cajaTotal:255000,total:16475000},
+      {n:37,fecha:'14/8/26',hora:'15:32',usuario:'smonterrosa',tipo:'Retiro',ingreso:null,egreso:150000,banco:2555000,cupo:13515000,cajaCajero:20000,cajaTotal:105000,total:16175000},
+      {n:38,fecha:'14/8/26',hora:'15:54',usuario:'aurrutia',tipo:'Retiro',ingreso:null,egreso:100000,banco:2455000,cupo:13515000,cajaCajero:75000,cajaTotal:5000,total:15975000},
+      {n:39,fecha:'14/8/26',hora:'16:11',usuario:'aurrutia',tipo:'Pago de crédito',ingreso:null,egreso:300000,banco:2155000,cupo:13515000,cajaCajero:-225000,cajaTotal:-295000,total:15375000},
+      {n:40,fecha:'14/8/26',hora:'16:30',usuario:'aurrutia',tipo:'Compensación',ingreso:null,egreso:120000,banco:2035000,cupo:13515000,cajaCajero:-345000,cajaTotal:-415000,total:15135000}
+    ];
+    const TX_POR_PAGINA = 25;
+    let txPaginaActual = 1;
+
+    function fmtTX(v){
+      if(v === null || v === undefined) return '—';
+      const s = Math.round(v);
+      return (s<0?'-':'') + '$' + Math.abs(s).toLocaleString('es-CO');
+    }
+
+    function renderTablaTX(filas){
+      const totalPaginas = Math.max(1, Math.ceil(filas.length / TX_POR_PAGINA));
+      if(txPaginaActual > totalPaginas) txPaginaActual = totalPaginas;
+      const inicio = (txPaginaActual - 1) * TX_POR_PAGINA;
+      const pagina = filas.slice(inicio, inicio + TX_POR_PAGINA);
+
+      document.getElementById('tablaTransaccionesTX').innerHTML = pagina.map(r => `<tr>
+        <td>${r.n}</td>
+        <td>${r.fecha}</td>
+        <td>${r.hora}</td>
+        <td>${r.usuario}</td>
+        <td>${r.tipo}</td>
+        <td style="text-align:right;color:#1e6b3a;">${r.ingreso !== null ? fmtTX(r.ingreso) : '—'}</td>
+        <td style="text-align:right;color:#c0392b;">${r.egreso !== null ? fmtTX(r.egreso) : '—'}</td>
+        <td style="text-align:right;">${fmtTX(r.banco)}</td>
+        <td style="text-align:right;">${fmtTX(r.cupo)}</td>
+        <td style="text-align:right;">${fmtTX(r.cajaCajero)}</td>
+        <td style="text-align:right;font-weight:700;">${fmtTX(r.total)}</td>
+      </tr>`).join('');
+
+      document.getElementById('txPagInfo').textContent = `Página ${txPaginaActual} de ${totalPaginas} · ${filas.length} transacciones`;
+    }
+
+    window.paginaSiguienteTX = function(){
+      const filas = window.txFilasActuales || TRANSACCIONES_TX;
+      const totalPaginas = Math.max(1, Math.ceil(filas.length / TX_POR_PAGINA));
+      if(txPaginaActual < totalPaginas){ txPaginaActual++; renderTablaTX(filas); }
+    };
+    window.paginaAnteriorTX = function(){
+      const filas = window.txFilasActuales || TRANSACCIONES_TX;
+      if(txPaginaActual > 1){ txPaginaActual--; renderTablaTX(filas); }
+    };
+
+    window.verEnVivoTX = function(){
+      document.getElementById('txModoLabel').textContent = 'Mostrando movimientos en tiempo real';
+      txPaginaActual = 1;
+      window.txFilasActuales = TRANSACCIONES_TX;
+      renderTablaTX(TRANSACCIONES_TX);
+    };
+
+    window.buscarTransaccionesTX = function(){
+      const desde = document.getElementById('txDesde').value;
+      const hasta = document.getElementById('txHasta').value;
+      document.getElementById('txModoLabel').textContent = `Mostrando resultados del ${desde} al ${hasta}`;
+      txPaginaActual = 1;
+      window.txFilasActuales = TRANSACCIONES_TX;
+      renderTablaTX(TRANSACCIONES_TX);
+    };
+
+    window.txFilasActuales = TRANSACCIONES_TX;
+    renderTablaTX(TRANSACCIONES_TX);
+    </script>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <style>
+      .gr-menu-group{color:#8a8a8a;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;padding:14px 18px 6px;}
+      .gr-menu-item{color:#e5e5e5;font-size:13.5px;padding:10px 18px;cursor:pointer;}
+      .gr-menu-item:hover{background:#2a2a2a;}
+      .gr-menu-item.activo{background:#3a3a3a;color:#fff;font-weight:700;border-left:3px solid #6d4aff;}
+    </style>
+
+    <script>
+    function seleccionarReporteGR(key){
+      document.querySelectorAll('.gr-pane').forEach(p => p.style.display = 'none');
+      document.querySelectorAll('.gr-menu-item').forEach(m => m.classList.remove('activo'));
+      const pane = document.getElementById('grPane_' + key);
+      if(pane) pane.style.display = 'block';
+      const menu = document.getElementById('grMenu_' + key);
+      if(menu) menu.classList.add('activo');
+    }
+    window.abrirGestorReporte = function(key){
+      goToSection('tab9', 'gestor-reportes');
+      seleccionarReporteGR(key);
+    };
+    seleccionarReporteGR('financiero');
+    </script>
+
+
+  </div>

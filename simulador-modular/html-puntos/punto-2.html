@@ -1,0 +1,423 @@
+  <!-- ===================== TAB 1 ===================== -->
+  <div id="tab1" class="tab-content">
+
+    <div class="section-title">
+      <h2 style="text-transform:uppercase;letter-spacing:.4px;">Rol: Admin</h2>
+    </div>
+
+    <div class="card">
+      <p style="font-size:13px;color:var(--muted);margin:0 0 4px;">Cambios propuestos para el rol <strong>ADMIN</strong>. Al igual que en el rol SuperAdmin, se va a ir numerando cada punto según el menú donde se realiza el cambio.</p>
+    </div>
+
+        <div class="card">
+      <h2>Cambios en Rol ADMIN <span class="tag">CONTEXTO</span></h2>
+      <p style="font-size:13.5px;line-height:1.7;margin-top:0;">Actualmente el Admin tiene 4 menús en la barra lateral, como se ve en la imagen. Hay que agregar nuevas opciones al menú y hacer modificaciones en algunos de los menús ya existentes:</p>
+      <div style="display:flex;justify-content:center;margin-top:14px;">
+        <img src="../capturas/punto-2-01.png" alt="Barra lateral actual del rol Admin: Mis Cajas, Mis Cajeros, Mis comisiones, Mis Terceros" style="max-width:520px;width:100%;border:1px solid var(--border);border-radius:10px;">
+      </div>
+    </div>
+
+<div class="card">
+      <h2>Sistema de notificaciones <span class="tag">A PROGRAMAR</span></h2>
+      <p style="font-size:13.5px;line-height:1.7;margin-top:0;">Base genérica para avisarle al Admin cosas que necesita saber sin tener que estar revisando pantallas por su cuenta — el primer caso de uso es "todos los cajeros de este CB ya cerraron, ya puedes conciliar contra el banco" (ver Cambio 3.1 en Rol Cajero), pero está pensado para reutilizarse en otros avisos futuros (por ejemplo, un cajero con demasiado dinero en caja).</p>
+      <div class="setup-note" style="margin-top:0;margin-bottom:14px;"><strong>Regla de disparo para este caso:</strong> nunca se le pregunta al cajero si es "el último" — eso no se puede saber si varios cierran al mismo tiempo. Cada vez que un cajero cierra caja, el sistema cuenta cuántos cajeros de ese CB ya cerraron hoy contra cuántos tiene asignados en total (dato que ya existe en "Mis Cajeros"). Si coinciden, se crea la notificación automáticamente.</div>
+      <table class="setup-table">
+        <tr><th>Campo</th><th>Para qué sirve</th></tr>
+        <tr><td>rol / usuario</td><td>Quién debe recibirla (ej. el Admin de un CB específico).</td></tr>
+        <tr><td>CB</td><td>A qué corresponsal pertenece.</td></tr>
+        <tr><td>tipo</td><td>Qué clase de aviso es (ej. <span class="mono" style="font-size:12px;">conciliacion_lista</span>), para poder filtrar o darle un ícono distinto.</td></tr>
+        <tr><td>mensaje</td><td>El texto que se muestra.</td></tr>
+        <tr><td>leída</td><td>Si el usuario ya la vio.</td></tr>
+        <tr><td>fecha</td><td>Cuándo se generó.</td></tr>
+      </table>
+
+      <div style="margin-top:16px;display:flex;align-items:center;gap:10px;">
+        <span style="font-size:12.5px;color:var(--muted);">Así se vería la campanita:</span>
+        <div style="position:relative;display:inline-block;">
+          <button class="btn-ghost btn-small" onclick="toggleNotificacionesDropdown()" style="font-size:16px;padding:6px 10px;">🔔</button>
+          <span id="notifBadge" style="display:none;position:absolute;top:-6px;right:-6px;background:#c0392b;color:#fff;font-size:10px;font-weight:700;border-radius:999px;padding:1px 6px;">0</span>
+          <div id="notifDropdown" class="hidden" style="position:absolute;top:100%;left:0;margin-top:6px;width:340px;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:20;padding:8px;">
+            <div id="notifLista" style="max-height:260px;overflow-y:auto;"></div>
+          </div>
+        </div>
+      </div>
+      <div class="setup-note" style="margin-top:10px;">Pruébalo: ve a Rol Cajero → Cambio 3.1 (demo de Cierre de Caja), marca "Este CB tiene: Varios cajeros", y cierra la caja de los 3 cajeros que aparecen (en cualquier orden, con su propio botón "Cerrar caja" cada uno). El sistema cuenta el progreso solo — nadie tiene que avisar que ya cerró — y apenas cierra el tercero, la campanita de aquí muestra el aviso.</div>
+    </div>
+
+<div class="card" style="background:#fff;">
+      <h2>1. Sub Menú: Mis Cajas <span class="tag">BUG / AJUSTE REQUERIDO</span></h2>
+      <p style="font-size:13.5px;line-height:1.7;margin-top:0;margin-bottom:0;">
+        Al crear una nueva caja y cuando se le da en seleccionar Cajero, aparecen <strong>todos los perfiles de cajeros que están creados</strong> (de todos los corresponsales). Deben listarse únicamente los cajeros que ha creado el Admin para el corresponsal donde se está haciendo el setup inicial.
+      </p>
+    </div>
+
+
+    
+
+<div class="card">
+      <h2>2. Sub Menú: Mis Cajeros <span class="tag">AJUSTE REQUERIDO</span></h2>
+      <p style="font-size:13.5px;line-height:1.7;margin-top:0;margin-bottom:0;">
+        El cambio en este menú es cuando se va a crear un nuevo cajero y consiste en:
+      </p>
+      <p style="font-size:13.5px;line-height:1.7;margin-top:10px;margin-bottom:0;">
+        Normalizar mayúsculas/minúsculas automáticamente al guardar el campo <strong>Nombre</strong>: la primera letra de cada palabra en mayúscula y el resto en minúscula.
+      </p>
+      <table class="setup-table" style="margin-top:16px;">
+        <tr><th>Antes (actual)</th><th>Después (a programar)</th></tr>
+        <tr><td>juan carlos gomez</td><td>Juan Carlos Gomez</td></tr>
+        <tr><td>MARIA JOSE PEREZ</td><td>Maria Jose Perez</td></tr>
+      </table>
+    </div>
+
+    
+
+    <div class="card">
+      <h2>3. Sub Menú: Mis Comisiones <span class="tag">SIN CAMBIOS</span></h2>
+      <p style="font-size:13.5px;line-height:1.6;margin-top:0;margin-bottom:0;">Este menú queda igual — no se proponen cambios.</p>
+    </div>
+
+<div class="card">
+      <h2>4. Sub Menú: Mis Terceros <span class="tag">CONTEXTO</span></h2>
+      <p style="font-size:13.5px;line-height:1.7;margin-top:0;">
+        Los terceros son personas o empresas que, en la mayoría de los casos, entregan dinero al corresponsal y luego el CB les devuelve ese dinero a través de movimientos, o les recoge efectivo hasta agotar la cantidad enviada. También puede pasar al revés: que sea el CB quien le preste dinero al tercero, por ejemplo facilitándole un cupo de crédito por un valor determinado, y a ese tercero se le pueden hacer movimientos o entregas en efectivo hasta agotar ese cupo otorgado.
+      </p>
+      <p style="font-size:13.5px;line-height:1.7;">
+        A los terceros se les genera una comisión cuando entregan dinero al CB (préstamo de tercero), de dos formas:
+      </p>
+      <ul style="font-size:13.5px;line-height:1.9;">
+        <li><strong>Comisión bancaria</strong>: valor que cobra el banco.</li>
+        <li><strong>Dispersión</strong>: valor que cobra el CB al tercero.</li>
+      </ul>
+      <p style="font-size:13.5px;line-height:1.7;margin-bottom:0;">
+        Para calcular correctamente estas 2 comisiones en cada envío que hace el tercero, hay que hacer los siguientes 4 cambios en el código:
+      </p>
+    </div>
+
+    <div class="card">
+      <h2><span class="tag">CAMBIO 1</span> Nuevo método de envío a agregar <span class="tag">CAMBIO EN CÓDIGO</span></h2>
+      <div class="cmp">
+        <div class="cmp-col">
+          <h4>Actual</h4>
+          <ul>
+            <li>Transferencia</li>
+            <li>Compensación</li>
+            <li>Consignación en sucursal</li>
+            <li>Consignación Cajero</li>
+            <li>Consignación CB</li>
+            <li>Entrega en efectivo</li>
+          </ul>
+        </div>
+        <div class="cmp-col">
+          <h4>Nuevo (con el método agregado)</h4>
+          <ul>
+            <li>Transferencia</li>
+            <li>Compensación</li>
+            <li class="new">Compensación a otro CB ← NUEVO</li>
+            <li>Consignación en sucursal</li>
+            <li>Consignación Cajero</li>
+            <li>Consignación CB</li>
+            <li>Entrega en efectivo</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><span class="tag">CAMBIO 2</span> Comisión bancaria por método <span class="tag">YA EN CÓDIGO</span></h2>
+      <table class="setup-table">
+        <tr><th>Método de envío</th><th>¿Genera comisión bancaria?</th></tr>
+        <tr><td>Transferencia</td><td><span class="badge badge-green">NO</span></td></tr>
+        <tr><td>Compensación</td><td><span class="badge badge-green">NO</span></td></tr>
+        <tr class="row-new"><td>Compensación a otro CB</td><td><span class="badge badge-green">NO · NUEVO</span></td></tr>
+        <tr><td>Consignación en sucursal</td><td><span class="badge badge-amber">SI</span></td></tr>
+        <tr><td>Consignación Cajero</td><td><span class="badge badge-amber">SI</span></td></tr>
+        <tr><td>Consignación CB</td><td><span class="badge badge-amber">SI</span></td></tr>
+        <tr><td>Entrega en efectivo</td><td><span class="badge badge-amber">SI</span></td></tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2><span class="tag">CAMBIO 3</span> Dispersión por método <span class="tag">AJUSTE REQUERIDO</span></h2>
+      <div class="cmp">
+        <div class="cmp-col">
+          <h4>Actual (en código)</h4>
+          <ul>
+            <li>Existe 1 solo campo de "Dispersión" por tercero</li>
+            <li>Ese mismo valor se aplica a los 7 métodos de envío por igual</li>
+          </ul>
+        </div>
+        <div class="cmp-col">
+          <h4>Propuesto (a programar)</h4>
+          <ul>
+            <li class="new">Un valor de dispersión independiente por cada método</li>
+            <li class="new">7 campos en total, uno por método de envío</li>
+          </ul>
+        </div>
+      </div>
+      <table class="setup-table" style="margin-top:16px;">
+        <tr><th>Método de envío</th><th>Dispersión</th></tr>
+        <tr><td>Transferencia</td><td>Valor propio (0 a 8 x1000)</td></tr>
+        <tr><td>Compensación</td><td>Valor propio (0 a 8 x1000)</td></tr>
+        <tr><td>Compensación a otro CB</td><td>Valor propio (0 a 8 x1000)</td></tr>
+        <tr><td>Consignación en sucursal</td><td>Valor propio (0 a 8 x1000)</td></tr>
+        <tr><td>Consignación Cajero</td><td>Valor propio (0 a 8 x1000)</td></tr>
+        <tr><td>Consignación CB</td><td>Valor propio (0 a 8 x1000)</td></tr>
+        <tr><td>Entrega en efectivo</td><td>Valor propio (0 a 8 x1000)</td></tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2><span class="tag">CAMBIO 4</span> Cambios en el formulario de creación de tercero <span class="tag">A PROGRAMAR</span></h2>
+      <p style="font-size:13.5px;line-height:1.6;margin-top:0;">Así se ve hoy el formulario de creación de tercero:</p>
+      <img src="../capturas/punto-2-02.png" alt="Formulario actual de creación de tercero" style="max-width:340px;width:100%;border:1px solid var(--border);border-radius:10px;display:block;margin:0 auto 18px;">
+      <div class="cmp">
+        <div class="cmp-col">
+          <h4>Antes (actual)</h4>
+          <ul>
+            <li>Formulario vertical, con scroll</li>
+            <li>Corresponsal, Nombre, Tipo/Número de identificación, Correo, Celular, Dirección</li>
+            <li>Crédito Disponible, Saldo Inicial</li>
+            <li>Comisión Bancaria: valor sin formato de pesos</li>
+            <li>1 solo campo de Dispersión (0 a 8 x1000) para todos los métodos</li>
+            <li>Opción Cobrar / Pagar al corresponsal</li>
+          </ul>
+        </div>
+        <div class="cmp-col">
+          <h4>Después (a programar)</h4>
+          <ul>
+            <li class="new">Formulario en 2 columnas, sin scroll</li>
+            <li>Columna izquierda: identificación y perfil (igual que hoy)</li>
+            <li>Columna derecha: parametrización financiera</li>
+            <li class="new">Comisión Bancaria: con formato de pesos ($ 17.000)</li>
+            <li class="new">7 campos de Dispersión (0 a 8 x1000), uno por cada método de envío, uno debajo del otro</li>
+            <li>Opción Cobrar / Pagar al corresponsal</li>
+            <li class="new">Agregar en checklist la opción de Disponible para depósitos/retiros por datáfono</li>
+          </ul>
+        </div>
+      </div>
+      <p style="font-size:14px;font-weight:700;text-align:center;margin:20px 0 0;">Propuesta del nuevo formulario de creación de terceros</p>
+    </div>
+
+    <div class="pos-modal-like" style="max-width:900px;margin:0 auto 20px;border:1px solid var(--border);border-radius:16px;overflow:hidden;background:#fff;">
+      <div style="background:var(--navy);color:#fff;padding:16px 22px;font-size:14px;font-weight:700;letter-spacing:.3px;">
+        Nuevo tercero - CB [12029]
+      </div>
+      <div style="padding:22px;">
+
+        <div class="btnbar" style="justify-content:flex-start;margin-top:0;">
+          <button class="btn-primary-blue btn-small">+ Nuevo Tercero</button>
+        </div>
+
+      <div class="two-col-form" style="margin-top:16px;">
+        <div class="form-col left">
+          <h3>Identificación y perfil del tercero</h3>
+
+          <label>Corresponsal</label>
+          <input type="text" value="CB BARRIO CENTENARIO" disabled>
+
+          <label>Nombre del tercero</label>
+          <input type="text" id="terceroNombre_p2ref" value="MAURICIO CHARÁ" disabled>
+
+          <div class="two-field-row">
+            <div>
+              <label>Tipo de identificación</label>
+              <select id="tipoIdentificacion_p2ref" disabled>
+                <option value="CC" selected>Cédula de Ciudadanía</option>
+              </select>
+            </div>
+            <div>
+              <label>Número de identificación</label>
+              <input type="text" id="numeroIdentificacion_p2ref" value="33434343" disabled>
+            </div>
+          </div>
+
+          <div class="two-field-row">
+            <div>
+              <label>Correo electrónico</label>
+              <input type="text" id="correoTercero_p2ref" placeholder="Ej: correo@dominio.com" disabled>
+            </div>
+            <div>
+              <label>Celular</label>
+              <input type="text" id="celularTercero_p2ref" placeholder="Ej: 3001234567" disabled>
+            </div>
+          </div>
+
+          <label>Dirección</label>
+          <input type="text" id="direccionTercero_p2ref" placeholder="Ej: Calle 10 # 5-20" disabled>
+
+          <div class="saldo-box">
+            <label>Crédito disponible</label>
+            <input type="text" inputmode="numeric" id="creditoDisponible_p2ref" value="$ 0" disabled>
+
+            <label>Saldo inicial</label>
+            <input type="text" inputmode="numeric" id="saldoInicial_p2ref" value="$ 0" disabled>
+
+            <div class="radio-group">
+              <label><input type="radio" name="tipoRelacion_p2ref" checked disabled> 🪙 Cobrar al corresponsal</label>
+              <label><input type="radio" name="tipoRelacion_p2ref" disabled> 🎁 Pagar al corresponsal</label>
+            </div>
+
+            <label style="margin-top:16px;">
+              <input type="checkbox" checked disabled style="width:auto;margin-right:8px;">
+              Disponible para depósitos/retiros por datáfono
+            </label>
+            <div class="hint" style="margin-bottom:12px;">Si se desmarca, este tercero nunca aparecerá listado como destino en el popup de Depósitos/Retiros (ej. cuentas de otros bancos que no se pueden procesar por datáfono).</div>
+          </div>
+        </div>
+
+        <div class="form-col">
+          <h3>Parametrización de comisión bancaria y dispersión</h3>
+
+          <label>Comisión bancaria</label>
+          <input type="text" inputmode="numeric" id="comisionBancariaTercero_p2ref" value="$ 17.000" disabled>
+
+          <label style="margin-top:20px;">Dispersión por método de envío</label>
+          <div class="disp-stack">
+            <div class="disp-row">
+              <div class="disp-row-label">Transferencia</div>
+              <input type="range" min="0" max="8" step="1" value="1" disabled class="disp-slider" style="--pct:12.5%;">
+              <div class="disp-ticks"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span></div>
+              <div class="disp-value-chip">1 <span>x1000</span></div>
+            </div>
+            <div class="disp-row">
+              <div class="disp-row-label">Compensación</div>
+              <input type="range" min="0" max="8" step="1" value="1" disabled class="disp-slider" style="--pct:12.5%;">
+              <div class="disp-ticks"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span></div>
+              <div class="disp-value-chip">1 <span>x1000</span></div>
+            </div>
+            <div class="disp-row">
+              <div class="disp-row-label">Compensación a otro CB</div>
+              <input type="range" min="0" max="8" step="1" value="1" disabled class="disp-slider" style="--pct:12.5%;">
+              <div class="disp-ticks"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span></div>
+              <div class="disp-value-chip">1 <span>x1000</span></div>
+            </div>
+            <div class="disp-row">
+              <div class="disp-row-label">Consignación en sucursal</div>
+              <input type="range" min="0" max="8" step="1" value="2" disabled class="disp-slider" style="--pct:25%;">
+              <div class="disp-ticks"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span></div>
+              <div class="disp-value-chip">2 <span>x1000</span></div>
+            </div>
+            <div class="disp-row">
+              <div class="disp-row-label">Consignación Cajero</div>
+              <input type="range" min="0" max="8" step="1" value="2" disabled class="disp-slider" style="--pct:25%;">
+              <div class="disp-ticks"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span></div>
+              <div class="disp-value-chip">2 <span>x1000</span></div>
+            </div>
+            <div class="disp-row">
+              <div class="disp-row-label">Consignación CB</div>
+              <input type="range" min="0" max="8" step="1" value="2" disabled class="disp-slider" style="--pct:25%;">
+              <div class="disp-ticks"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span></div>
+              <div class="disp-value-chip">2 <span>x1000</span></div>
+            </div>
+            <div class="disp-row">
+              <div class="disp-row-label">Entrega en efectivo</div>
+              <input type="range" min="0" max="8" step="1" value="2" disabled class="disp-slider" style="--pct:25%;">
+              <div class="disp-ticks"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span></div>
+              <div class="disp-value-chip">2 <span>x1000</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="btnbar" style="justify-content:space-between;margin-top:18px;">
+          <button class="btn-dark-small">Cerrar</button>
+          <button class="btn-blue-small">Guardar</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><span class="tag">CAMBIO 5</span> Nueva propuesta para el dashboard de Gestión de Terceros <span class="tag">A PROGRAMAR</span></h2>
+      <p style="font-size:13.5px;line-height:1.7;margin-top:0;">
+        Dado los cambios en los métodos de envío y el cálculo de la dispersión para cada uno de ellos, la ventana de Gestión de Terceros actual (donde se listan los terceros ya creados) debe cambiar por la siguiente nueva propuesta.
+      </p>
+      <ul style="font-size:13.5px;line-height:1.9;padding-left:20px;margin-top:0;margin-bottom:0;">
+        <li>Se quitan las columnas <strong>Identificación</strong> y <strong>Correo Electrónico</strong> de la fila principal, para ganar espacio.</li>
+        <li>La columna <strong>Dispersión</strong> ahora resume los <strong>7 métodos de envío</strong> actuales en un botón expandible ("7 métodos"), ya que no caben como columnas fijas en una sola fila.</li>
+        <li>Se agrega un acceso directo a <strong>WhatsApp</strong> junto al celular, para poder contactar al tercero directamente si hay que confirmar o modificar algún dato de su perfil.</li>
+        <li>Se agrega un <strong>buscador</strong> arriba de la lista: los terceros se listan en orden alfabético, y al escribir 3 o más caracteres se filtra por el más parecido.</li>
+      </ul>
+    </div>
+
+    <div class="pos-modal-like" style="max-width:1140px;margin:0 auto 20px;border:1px solid var(--border);border-radius:16px;overflow:hidden;background:#fff;padding:28px;">
+      <h2 style="font-size:22px;font-weight:700;margin:0 0 16px;">Gestión de terceros</h2>
+      <div class="btnbar" style="margin-top:0;justify-content:flex-start;">
+        <button class="btn-primary-blue btn-small">+ Nuevo Tercero</button>
+      </div>
+
+      <div style="margin-top:16px;">
+        <label style="margin-top:0;">Buscar tercero por nombre</label>
+        <input type="text" id="buscarTerceroGT" placeholder="Escribe al menos 3 letras... (opcional)" oninput="renderListaTercerosGT()">
+      </div>
+      <div id="resultadosGT" style="font-size:12.5px;color:var(--muted);margin-top:8px;"></div>
+
+      <table class="mov-table" style="margin-top:16px;">
+        <thead>
+          <tr>
+            <th>Nombre</th><th>Celular</th><th style="text-align:right;">Crédito</th>
+            <th style="text-align:right;">Saldo inicial</th><th style="text-align:right;">Comisión bancaria</th>
+            <th>Dispersión</th><th>Estado</th><th></th>
+          </tr>
+        </thead>
+        <tbody id="listaTercerosGT"></tbody>
+      </table>
+    </div>
+
+    
+
+<div class="card">
+      <h2>5. Sub Menú: Parámetros del Sistema <span class="tag">A PROGRAMAR</span></h2>
+      <p style="font-size:13.5px;line-height:1.7;margin-top:0;">Menú nuevo, propio del rol Admin (no confundir con "Parámetros del sistema" de SuperAdmin, que es global). Aquí el Admin activa o desactiva, <strong>solo para su propio CB</strong>, cuáles causas del catálogo global aplican — todas activas por defecto. No puede editar el texto de las causas, ni agregar nuevas directamente: eso lo administra el SuperAdmin.</p>
+    </div>
+
+    <div class="pos-modal-like" style="max-width:900px;margin:0 auto 16px;border:1px solid var(--border);border-radius:16px;overflow:hidden;background:#fff;">
+      <div style="background:var(--navy);color:#fff;padding:16px 22px;font-size:14px;font-weight:700;letter-spacing:.3px;">
+        Catálogo de causas de diferencia — activas para este CB
+      </div>
+      <div style="padding:18px 22px;">
+        <p style="font-size:12.5px;color:var(--muted);margin:0 0 12px;">Cada causa tiene ámbito (Efectivo/Banco) y dirección (Sobrante/Faltante). El cambio se refleja de inmediato en Rol Cajero → Cierre de Caja.</p>
+        <div id="catalogoAdminUI"></div>
+        <div class="setup-note" style="margin-top:12px;">¿Se te ocurre una causa que no está en la lista? Elige "Otra" al cerrar caja y escríbela — queda en una cola de revisión para que el SuperAdmin decida si la incorpora al catálogo global.</div>
+      </div>
+    </div>
+
+<div class="section-title" style="margin-top:34px;">
+      <h2 style="text-transform:uppercase;letter-spacing:.4px;">Bugs reportados</h2>
+      <span class="badge badge-red">Rol: Admin</span>
+    </div>
+
+    <div class="card">
+      <h2>Bug 1: Saldo inicial condicionado al crédito disponible <span class="tag">A CORREGIR</span></h2>
+      <p style="font-size:13.5px;line-height:1.6;margin-top:0;">
+        Al crear un tercero, el campo <strong>Saldo Inicial</strong> está condicionando a que su valor no pueda ser mayor al <strong>Crédito Disponible</strong>:
+      </p>
+      <img src="../capturas/punto-2-03.png" alt="Error: el saldo inicial no puede ser mayor al crédito" style="max-width:340px;width:100%;border:1px solid var(--border);border-radius:10px;display:block;margin:0 auto;">
+      <div class="note-box" style="margin-top:16px;">
+        <strong>Nota aclaratoria:</strong> el Crédito Disponible es el valor máximo hasta donde un cajero puede entregar dinero o realizar uno o varios movimientos al tercero. Es el equivalente al "Fiado" con que cuenta un tercero en caso de necesitar que le hagan movimientos o se le entregue dinero.
+      </div>
+      <p style="font-size:13.5px;line-height:1.7;">
+        Hay un mal planteamiento en la lógica actual del formulario (Saldo inicial condicionado al crédito disponible), ya que al momento de hacer el setup inicial para cada tercero, el Admin se puede encontrar con estos casos:
+      </p>
+      <ol style="font-size:13.5px;line-height:1.9;padding-left:20px;margin-top:0;">
+        <li><strong>A.</strong> El tercero puede tener un <strong>saldo a favor</strong> (ej. $1.000.000) por un préstamo que hizo al corresponsal.</li>
+        <li><strong>B.</strong> El tercero puede tener una <strong>deuda</strong> porque el CB ya le hizo algunos movimientos (ej. -$600.000) por algunos movimientos anteriores.</li>
+      </ol>
+      <p style="font-size:13.5px;line-height:1.7;">
+        En cualquiera de los dos casos, si coloco $1.000.000 (Cobrar al corresponsal) o $600.000 (Pagar al corresponsal), salta la alarma de "El saldo inicial no puede ser mayor al crédito" — y aquí está el bug, porque el saldo inicial no está ligado a qué cupo de crédito le otorgue el CB al tercero (puede darse que este tercero aún no califique para que le otorguen un crédito disponible. Sin embargo, tal como está el formulario actual, obliga a colocar un saldo inicial no mayor al crédito disponible).
+      </p>
+      <p style="font-size:13.5px;line-height:1.7;margin-bottom:0;"><strong>Sugerencia para el programador:</strong></p>
+      <ol style="font-size:13.5px;line-height:1.9;padding-left:20px;margin-top:6px;margin-bottom:0;">
+        <li>El campo Saldo Inicial no debe estar condicionado ni limitado por el valor del Crédito Disponible; son dos conceptos independientes.</li>
+        <li>El valor del Crédito Disponible se debe usar únicamente para que, una vez el CB esté en producción, el cajero pueda realizar un movimiento (depósito) o una entrega de dinero (retiro con tarjeta o entrega en efectivo) a ese tercero hasta por el monto que ese cupo tenga definido en el setup.</li>
+        <li>Si el movimiento (tipo depósito) o la entrega de dinero (tipo retiro con tarjeta o entrega en efectivo) supera el Crédito disponible, debe saltar un mensaje indicando que no hay cupo suficiente para realizar la operación.</li>
+      </ol>
+    </div>
+
+    <div class="card">
+      <h2>Bug 2: Terceros sin contraseña asignada <span class="tag">A CORREGIR</span></h2>
+      <p style="font-size:13.5px;line-height:1.6;margin-top:0;margin-bottom:0;">
+        A los terceros que se crean no se les está asignando una contraseña, por lo que no hay una forma de que accedan al sistema y vean su estado de cuenta.
+      </p>
+    </div>
+
+      </div>
