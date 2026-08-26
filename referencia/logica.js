@@ -1,0 +1,3062 @@
+
+    window.NOTIFICACIONES = [];
+
+    window.crearNotificacion = function(rol, cb, tipo, mensaje){
+      window.NOTIFICACIONES.unshift({
+        id: 'n' + Date.now(),
+        rol: rol,
+        cb: cb,
+        tipo: tipo,
+        mensaje: mensaje,
+        leida: false,
+        fecha: new Date().toLocaleString('es-CO')
+      });
+      window.renderNotificaciones();
+    };
+
+    window.marcarNotificacionLeida = function(id){
+      const n = window.NOTIFICACIONES.find(x => x.id === id);
+      if(n) n.leida = true;
+      window.renderNotificaciones();
+    };
+
+    window.renderNotificaciones = function(){
+      const badge = document.getElementById('notifBadge');
+      const lista = document.getElementById('notifLista');
+      if(!badge || !lista) return;
+      const noLeidas = window.NOTIFICACIONES.filter(n => !n.leida);
+      if(noLeidas.length > 0){
+        badge.style.display = 'block';
+        badge.textContent = noLeidas.length;
+      } else {
+        badge.style.display = 'none';
+      }
+      if(window.NOTIFICACIONES.length === 0){
+        lista.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:10px;">No hay notificaciones.</div>';
+        return;
+      }
+      lista.innerHTML = window.NOTIFICACIONES.map(n => `
+        <div style="padding:8px 10px;border-bottom:1px solid var(--border);${n.leida ? 'opacity:.55;' : 'background:#f4f2ff;'}cursor:pointer;" onclick="marcarNotificacionLeida('${n.id}')">
+          <div style="font-size:12px;">${n.mensaje}</div>
+          <div style="font-size:10.5px;color:var(--muted);margin-top:3px;">${n.cb} · ${n.fecha}</div>
+        </div>`).join('');
+    };
+
+    window.toggleNotificacionesDropdown = function(){
+      const dd = document.getElementById('notifDropdown');
+      if(!dd) return;
+      dd.classList.toggle('hidden');
+    };
+
+    window.CATALOGO_CAUSAS = [
+      { id: 'c01', texto: 'Depósito o recarga registrada por valor diferente', ambito: 'efectivo', direccion: 'sobrante', activa: true },
+      { id: 'c02', texto: 'El cliente dejó más efectivo del real', ambito: 'efectivo', direccion: 'sobrante', activa: true },
+      { id: 'c03', texto: 'Se recibieron propinas', ambito: 'efectivo', direccion: 'sobrante', activa: true },
+      { id: 'c04', texto: 'Sobrante sin explicación clara', ambito: 'efectivo', direccion: 'sobrante', activa: true },
+      { id: 'c05', texto: 'Transacción de depósito sin recibir dinero del cliente', ambito: 'efectivo', direccion: 'faltante', activa: true },
+      { id: 'c06', texto: 'Retiro con entrega de más efectivo del solicitado', ambito: 'efectivo', direccion: 'faltante', activa: true },
+      { id: 'c07', texto: 'Tercero solicitado por WhatsApp o teléfono sin registrar', ambito: 'efectivo', direccion: 'faltante', activa: true },
+      { id: 'c08', texto: 'Faltante sin explicación clara', ambito: 'efectivo', direccion: 'faltante', activa: true },
+      { id: 'c09', texto: 'Depósito con voucher que el banco no registró', ambito: 'banco', direccion: 'sobrante', activa: true },
+      { id: 'c10', texto: 'Movimiento sin esclarecer entre datáfono y banco', ambito: 'banco', direccion: 'sobrante', activa: true },
+      { id: 'c11', texto: 'Retiro no procesado por datáfono pero sí por el banco', ambito: 'banco', direccion: 'faltante', activa: true },
+      { id: 'c12', texto: 'Movimiento sin esclarecer entre datáfono y banco', ambito: 'banco', direccion: 'faltante', activa: true },
+      { id: 'c13', texto: 'Compensación enviada con código de CB incorrecto', ambito: 'banco', direccion: 'faltante', activa: false },
+      { id: 'c14', texto: 'Compensación revertida por el banco, dinero retenido en sucursal', ambito: 'banco', direccion: 'faltante', activa: true },
+      { id: 'c15', texto: 'Depósito rechazado en datáfono pero aprobado por el banco', ambito: 'banco', direccion: 'faltante', activa: true }
+    ];
+    let CATALOGO_NEXT_ID = 16;
+
+    window.obtenerCausasCatalogo = function(ambito, direccion){
+      return window.CATALOGO_CAUSAS.filter(c => c.activa && c.ambito === ambito && c.direccion === direccion);
+    };
+
+    window.toggleCausaCatalogo = function(id){
+      const c = window.CATALOGO_CAUSAS.find(x => x.id === id);
+      if(c) c.activa = !c.activa;
+      if(typeof window.renderCatalogoAdminUI === 'function'){
+        window.renderCatalogoAdminUI('catalogoAdminUI');
+        window.renderCatalogoAdminUI('catalogoSuperAdminUI');
+      }
+    };
+
+    window.agregarCausaCatalogo = function(){
+      const ambito = document.getElementById('nuevaCausaAmbito').value;
+      const direccion = document.getElementById('nuevaCausaDireccion').value;
+      const texto = document.getElementById('nuevaCausaTexto').value.trim();
+      if(!texto) return;
+      window.CATALOGO_CAUSAS.push({ id: 'c' + (CATALOGO_NEXT_ID++), texto, ambito, direccion, activa: true });
+      document.getElementById('nuevaCausaTexto').value = '';
+      if(typeof window.renderCatalogoAdminUI === 'function'){
+        window.renderCatalogoAdminUI('catalogoAdminUI');
+        window.renderCatalogoAdminUI('catalogoSuperAdminUI');
+      }
+    };
+
+    window.CAUSAS_SUGERIDAS_PENDIENTES = [
+      { id: 's01', texto: 'El cliente pagó con datáfono propio y aparte me dio el efectivo completo', ambito: 'efectivo', direccion: 'sobrante', cajero: 'Yohana Monterrosa', fecha: '13 ago', veces: 1, estado: 'pendiente' },
+      { id: 's02', texto: 'Se me perdió un billete al organizar la caja fuerte', ambito: 'efectivo', direccion: 'faltante', cajero: 'Soraya Monterrosa', fecha: '12 ago', veces: 3, estado: 'pendiente' },
+      { id: 's03', texto: 'El banco descontó una comisión que no estaba en el contrato', ambito: 'banco', direccion: 'faltante', cajero: 'Anyela Urrutia', fecha: '10 ago', veces: 2, estado: 'pendiente' }
+    ];
+
+    window.renderCausasSugeridasUI = function(){
+      const cont = document.getElementById('causasSugeridasUI');
+      if(!cont) return;
+      const pendientes = window.CAUSAS_SUGERIDAS_PENDIENTES.filter(s => s.estado === 'pendiente');
+      const ordenadas = [...pendientes].sort((a,b) => (a.ambito+a.direccion).localeCompare(b.ambito+b.direccion));
+      if(ordenadas.length === 0){
+        cont.innerHTML = '<div class="setup-note">No hay causas sugeridas pendientes de revisión.</div>';
+        return;
+      }
+      const ambitoTag = a => a === 'efectivo' ? 'background:#e9ecf3;color:#3d4a6b;' : 'background:#eee9ff;color:#534ab7;';
+      const direccionTag = d => d === 'sobrante' ? 'background:#dcefe0;color:#1e6b3a;' : 'background:#fdf3e9;color:#8a5a1e;';
+      cont.innerHTML = `<table class="setup-table"><tr><th>Ámbito</th><th>Dirección</th><th>Texto sugerido</th><th>Cajero / fecha</th><th>Veces</th><th>Acción</th></tr>`
+        + ordenadas.map(s => `<tr>
+            <td><span style="font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:999px;${ambitoTag(s.ambito)}">${s.ambito === 'efectivo' ? 'Efectivo' : 'Banco'}</span></td>
+            <td><span style="font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:999px;${direccionTag(s.direccion)}">${s.direccion === 'sobrante' ? 'Sobrante' : 'Faltante'}</span></td>
+            <td style="font-size:12.5px;">${s.texto}</td>
+            <td style="font-size:11.5px;color:var(--muted);">${s.cajero}<br>${s.fecha}</td>
+            <td style="text-align:center;">${s.veces}</td>
+            <td style="text-align:right;white-space:nowrap;">
+              <button class="btn-dark-small" onclick="incorporarCausaSugerida('${s.id}')">Incorporar</button>
+              <button class="btn-ghost btn-small" onclick="descartarCausaSugerida('${s.id}')">Descartar</button>
+            </td>
+          </tr>`).join('')
+        + `</table>`;
+    };
+
+    window.incorporarCausaSugerida = function(id){
+      const s = window.CAUSAS_SUGERIDAS_PENDIENTES.find(x => x.id === id);
+      if(!s) return;
+      s.estado = 'incorporada';
+      window.CATALOGO_CAUSAS.push({ id: 'c' + (CATALOGO_NEXT_ID++), texto: s.texto, ambito: s.ambito, direccion: s.direccion, activa: true });
+      window.renderCausasSugeridasUI();
+      window.renderCatalogoAdminUI('catalogoAdminUI');
+      window.renderCatalogoAdminUI('catalogoSuperAdminUI');
+    };
+
+    window.descartarCausaSugerida = function(id){
+      const s = window.CAUSAS_SUGERIDAS_PENDIENTES.find(x => x.id === id);
+      if(s) s.estado = 'descartada';
+      window.renderCausasSugeridasUI();
+    };
+
+    if(document.readyState === 'loading'){
+      document.addEventListener('DOMContentLoaded', window.renderCausasSugeridasUI);
+    } else {
+      window.renderCausasSugeridasUI();
+    }
+    
+
+/* ===== SCRIPT BREAK ===== */
+
+
+
+const bills = [100000,50000,20000,10000,5000,2000,1000];
+const coins = [1000,500,200,100,50];
+
+// Catálogo de causas — mismo concepto que en el simulador maestro
+const CATALOGO = [
+  { id:'c01', texto:'Depósito, recaudo o recarga registrada por valor diferente', ambito:'efectivo', direccion:'sobrante' },
+  { id:'c02', texto:'El cliente dejó más efectivo del real', ambito:'efectivo', direccion:'sobrante' },
+  { id:'c03', texto:'Se recibieron propinas', ambito:'efectivo', direccion:'sobrante' },
+  { id:'c04', texto:'Se entregó menos dinero al cliente en un retiro', ambito:'efectivo', direccion:'sobrante' },
+  { id:'c05', texto:'Transacción de depósito sin recibir dinero del cliente', ambito:'efectivo', direccion:'faltante' },
+  { id:'c06', texto:'Retiro con entrega de más efectivo del solicitado', ambito:'efectivo', direccion:'faltante' },
+  { id:'c07', texto:'Transacción solicitada por WhatsApp o teléfono sin registrar', ambito:'efectivo', direccion:'faltante' },
+  { id:'c08', texto:'Transacción de depósito recibiendo menos dinero del acordado', ambito:'efectivo', direccion:'faltante' },
+  { id:'c09', texto:'Transacción tipo Transferencia pero se entrega efectivo al cliente', ambito:'efectivo', direccion:'faltante' },
+  { id:'c10', texto:'Depósito con voucher que el banco no registró', ambito:'banco', direccion:'sobrante' },
+  { id:'c11', texto:'Retiro no procesado por datáfono pero sí por el banco', ambito:'banco', direccion:'faltante' },
+  { id:'c12', texto:'Compensación revertida por el banco, dinero retenido en sucursal', ambito:'banco', direccion:'faltante' },
+  { id:'c13', texto:'Depósito rechazado en datáfono pero aprobado por el banco', ambito:'banco', direccion:'faltante' }
+];
+
+const demoCases = [
+  { name:'Caso 0 · Todo cuadra', note:'Datafono = Neto Datáfono · efectivo = Caja actual', app:2450000, bank:2250000, terceros:120000, compensaciones:80000, billQty:[24,1,0,0,0,0,0], bundleQty:[0,0,0,0,0,0,0], coinQty:[0,0,0,0,0], fecha:'14 ago', hour:'6:00 p. m.', cashier:'Soraya Monterrosa' },
+  { name:'Caso 1 · Sobrante', note:'Datafono = Neto Datáfono · efectivo mayor que Caja actual (+$45.000)', app:2450000, bank:2250000, terceros:120000, compensaciones:80000, billQty:[24,1,0,4,1,0,0], bundleQty:[0,0,0,0,0,0,0], coinQty:[0,0,0,0,0], fecha:'13 ago', hour:'6:00 p. m.', cashier:'Soraya Monterrosa' },
+  { name:'Caso 2 · Faltante', note:'Datafono = Neto Datáfono · efectivo menor que Caja actual (-$60.000)', app:3180000, bank:3030000, terceros:100000, compensaciones:50000, billQty:[31,0,1,0,0,0,0], bundleQty:[0,0,0,0,0,0,0], coinQty:[0,0,0,0,0], fecha:'12 ago', hour:'5:45 p. m.', cashier:'Soraya Monterrosa' },
+  { name:'Caso 3 · Dos diferencias (Coban365 registra de más, sobra)', note:'Neto Datáfono > Datafono impreso (+$70.000) · efectivo mayor que Caja actual (+$45.000)', app:4860000, bank:4490000, terceros:180000, compensaciones:120000, billQty:[49,0,0,0,1,0,0], bundleQty:[0,0,0,0,0,0,0], coinQty:[0,0,0,0,0], fecha:'11 ago', hour:'5:30 p. m.', cashier:'Soraya Monterrosa' },
+  { name:'Caso 4 · Dos diferencias (Datafono reporta de más, falta)', note:'Neto Datáfono < Datafono impreso (-$75.000) · efectivo menor que Caja actual (-$40.000)', app:5240000, bank:5065000, terceros:150000, compensaciones:100000, billQty:[52,0,0,0,0,0,0], bundleQty:[0,0,0,0,0,0,0], coinQty:[0,0,0,0,0], fecha:'10 ago', hour:'5:15 p. m.', cashier:'Soraya Monterrosa' }
+];
+
+let activeCase = 0;
+let bancoMotivoSel = null;
+let efectivoMotivoSel = null;
+let bancoOtraTexto = '';
+let bancolombiaMotivoSel = null;
+let bancolombiaOtraTexto = '';
+let bancolombiaChecklist = [false, false, false];
+let cantidadCajerosCD = '1';
+const CAJEROS_MULTI_CD = ['Soraya Monterrosa', 'Yohana Monterrosa', 'Anyela Urrutia'];
+let cierresHoyMultiCD = {};
+
+window.cambiarCantidadCajerosCD = function(){
+  cantidadCajerosCD = document.getElementById('cantidadCajerosCD').value;
+  document.getElementById('unicoCajeroWrap').style.display = cantidadCajerosCD === '1' ? 'block' : 'none';
+  document.getElementById('variosCajerosWrap').style.display = cantidadCajerosCD === 'varios' ? 'block' : 'none';
+  if(cantidadCajerosCD === 'varios') renderCajerosMultiCD();
+  recalcular();
+};
+
+function renderCajerosMultiCD(){
+  const cont = document.getElementById('cajerosMultiCD');
+  if(!cont) return;
+  cont.innerHTML = CAJEROS_MULTI_CD.map(nombre => {
+    const cerrado = !!cierresHoyMultiCD[nombre];
+    return `<div style="display:flex;justify-content:space-between;align-items:center;background:#fff;border:1px solid var(--border);border-radius:8px;padding:8px 12px;">
+      <span style="font-size:12.5px;">${nombre}</span>
+      ${cerrado
+        ? '<span style="font-size:11px;font-weight:700;color:#1e6b3a;">✓ Cerró hoy</span>'
+        : `<button class="btn-ghost btn-small" onclick="cerrarCajaMultiCD('${nombre}')">Cerrar caja</button>`}
+    </div>`;
+  }).join('');
+  const totalCerrados = Object.values(cierresHoyMultiCD).filter(Boolean).length;
+  document.getElementById('progresoCierreMultiCD').textContent = `${totalCerrados} de ${CAJEROS_MULTI_CD.length} cajeros han cerrado hoy.`;
+}
+
+window.cerrarCajaMultiCD = function(nombre){
+  cierresHoyMultiCD[nombre] = true;
+  renderCajerosMultiCD();
+  const totalCerrados = Object.values(cierresHoyMultiCD).filter(Boolean).length;
+  if(totalCerrados === CAJEROS_MULTI_CD.length){
+    crearNotificacion('admin', 'CB Barrio Centenario', 'conciliacion_lista', 'Todos los cajeros de CB Barrio Centenario cerraron hoy — ya puedes conciliar el consolidado contra el banco.');
+  }
+};
+
+let efectivoOtraTexto = '';
+let bancoChecklist = [false, false, false];
+let efectivoChecklist = [false, false, false];
+const PREGUNTAS_CHECKLIST = [
+  '¿Revisaste si el datáfono mostró rechazo en alguna transacción que el banco ya tenía como aprobada (o al revés)?',
+  '¿Comparaste el valor exacto contra el listado de movimientos del banco en línea (no solo el saldo total)?',
+  '¿Descartaste que sea un movimiento de un tercero o una compensación que se te haya pasado por alto?'
+];
+let cerrado = false;
+
+function pesos(v){ const s = Math.round(v||0); return (s<0?'-':'') + '$' + Math.abs(s).toLocaleString('es-CO'); }
+function signed(v){ if(v===0) return '$0'; return (v>0?'+':'-') + pesos(Math.abs(v)).replace('$','$'); }
+
+function inputId(group, i){ return group+'-'+i; }
+
+function pintarFilas(contId, denoms, group, multiplicador, qtys){
+  const cont = document.getElementById(contId);
+  cont.innerHTML = denoms.map((d,i) => `
+    <div class="row">
+      <span>$${d.toLocaleString('es-CO')}</span>
+      <input type="text" inputmode="numeric" id="${inputId(group,i)}" value="${qtys[i]}" oninput="recalcular()">
+      <span class="sub" id="${group}-sub-${i}">${pesos(d*multiplicador*(qtys[i]||0))}</span>
+    </div>`).join('');
+}
+
+function grupoTotal(group, denoms, multiplicador){
+  let total = 0;
+  denoms.forEach((d,i) => {
+    const cant = parseInt((document.getElementById(inputId(group,i))||{}).value) || 0;
+    const sub = d * multiplicador * cant;
+    const el = document.getElementById(group+'-sub-'+i);
+    if(el) el.textContent = pesos(sub);
+    total += sub;
+  });
+  return total;
+}
+
+function tarjetaHTML(c, sel, fn){
+  return `<div class="tarjeta ${sel===c.id?'sel':''}" onclick="${fn}('${c.id}')"><div class="h">${c.texto}</div></div>`;
+}
+
+function panelMotivo(contId, ambito, diff, sel, otraTexto, elegirFn, otraFn, checklist, toggleChecklistFn){
+  const cont = document.getElementById(contId);
+  if(diff === 0){ cont.classList.add('hidden'); cont.innerHTML=''; return; }
+  cont.classList.remove('hidden');
+  const direccion = diff > 0 ? 'sobrante' : 'faltante';
+  const etiqueta = ambito === 'banco' ? '¿Qué pasó con movimientos del banco?' : '¿Qué pasó con el efectivo?';
+  const causas = CATALOGO.filter(c => c.ambito === ambito && c.direccion === direccion);
+  let extra = '';
+  if(sel === 'otra'){
+    extra = `<input type="text" placeholder="Escribe el motivo..." value="${otraTexto}" oninput="${otraFn}(this.value)" style="width:100%;margin-top:6px;">`
+      + `<div style="margin-top:10px;padding-top:10px;border-top:1px dashed #f0c88f;">`
+      + `<div style="font-size:11.5px;font-weight:700;color:#8a5a1e;margin-bottom:6px;">Antes de continuar, confirma:</div>`
+      + PREGUNTAS_CHECKLIST.map((p, i) => `<label style="display:flex;align-items:flex-start;gap:6px;font-size:11.5px;margin-bottom:5px;cursor:pointer;">
+          <input type="checkbox" ${checklist[i] ? 'checked' : ''} onchange="${toggleChecklistFn}(${i})" style="margin-top:2px;">
+          <span>${p}</span>
+        </label>`).join('')
+      + `</div>`;
+  }
+  cont.innerHTML = `<div class="tit">${etiqueta} (${direccion})</div>`
+    + causas.map(c => tarjetaHTML(c, sel, elegirFn)).join('')
+    + `<div class="tarjeta ${sel==='otra'?'sel':''}" onclick="${elegirFn}('otra')"><div class="h">Otra (especificar)</div></div>`
+    + extra;
+}
+
+window.elegirBanco = function(id){ bancoMotivoSel = id; recalcular(); };
+window.escribirOtraBanco = function(txt){ bancoOtraTexto = txt; };
+window.elegirEfectivo = function(id){ efectivoMotivoSel = id; recalcular(); };
+window.escribirOtraEfectivo = function(txt){ efectivoOtraTexto = txt; };
+window.toggleChecklistBanco = function(i){ bancoChecklist[i] = !bancoChecklist[i]; recalcular(); };
+window.toggleChecklistEfectivo = function(i){ efectivoChecklist[i] = !efectivoChecklist[i]; recalcular(); };
+window.elegirBancolombia = function(id){ bancolombiaMotivoSel = id; recalcular(); };
+window.escribirOtraBancolombia = function(txt){ bancolombiaOtraTexto = txt; };
+window.toggleChecklistBancolombia = function(i){ bancolombiaChecklist[i] = !bancolombiaChecklist[i]; recalcular(); };
+
+function recalcular(){
+  if(cerrado) return;
+  const bTotal = grupoTotal('bills', bills, 1);
+  document.getElementById('billSubtotal').textContent = pesos(bTotal);
+  const fTotal = grupoTotal('bundles', bills, 100);
+  document.getElementById('bundleSubtotal').textContent = pesos(fTotal);
+  const cTotal = grupoTotal('coins', coins, 1);
+  document.getElementById('coinSubtotal').textContent = pesos(cTotal);
+
+  const cash = bTotal + fTotal + cTotal;
+  const c = demoCases[activeCase];
+  const app = c.app, datafonoImpreso = c.bank, terceros = c.terceros || 0, compensaciones = c.compensaciones || 0;
+  const netoDatafono = app - terceros - compensaciones;
+  const deudaCalculada = netoDatafono + compensaciones;
+
+  document.getElementById('rCash').textContent = pesos(cash);
+  document.getElementById('rApp').textContent = pesos(app);
+  document.getElementById('rNeto').textContent = pesos(netoDatafono);
+  document.getElementById('rBank').textContent = pesos(datafonoImpreso);
+
+  const bankDiff = netoDatafono - datafonoImpreso;
+  const cashDiff = cash - app;
+
+  const bankBox = document.getElementById('bankDiffBox');
+  bankBox.className = 'diffbox ' + (bankDiff === 0 ? 'ok' : 'bad');
+  document.getElementById('bankDiffAmt').innerHTML = bankDiff < 0 ? `<span style="color:#c0392b;">${signed(bankDiff)}</span>` : signed(bankDiff);
+  document.getElementById('bankDiffLbl').textContent = bankDiff === 0 ? 'Conciliado' : (bankDiff > 0 ? 'Coban365 registra de más vs. banco' : 'Datafono reporta de mas vs Coban');
+
+  const cashBox = document.getElementById('cashDiffBox');
+  cashBox.className = 'diffbox ' + (cashDiff === 0 ? 'ok' : (cashDiff > 0 ? 'warn' : 'bad'));
+  document.getElementById('cashDiffAmt').innerHTML = cashDiff < 0 ? `<span style="color:#c0392b;">${signed(cashDiff)}</span>` : signed(cashDiff);
+  document.getElementById('cashDiffLbl').textContent = cashDiff === 0 ? 'Cuadrado' : (cashDiff > 0 ? 'Sobrante de caja' : 'Faltante de caja');
+
+  if(bankDiff === 0) bancoMotivoSel = null;
+  if(cashDiff === 0) efectivoMotivoSel = null;
+  panelMotivo('motivoBanco', 'banco', bankDiff, bancoMotivoSel, bancoOtraTexto, 'elegirBanco', 'escribirOtraBanco', bancoChecklist, 'toggleChecklistBanco');
+  panelMotivo('motivoEfectivo', 'efectivo', cashDiff, efectivoMotivoSel, efectivoOtraTexto, 'elegirEfectivo', 'escribirOtraEfectivo', efectivoChecklist, 'toggleChecklistEfectivo');
+
+  let bancolombiaDiff = 0;
+  if(cantidadCajerosCD === '1'){
+    const saldoRealEl = document.getElementById('saldoRealBancolombiaCD');
+    const saldoRealRaw = saldoRealEl ? String(saldoRealEl.value).replace(/[^0-9]/g,'') : '';
+    const saldoReal = saldoRealRaw ? parseInt(saldoRealRaw, 10) : 0;
+    document.getElementById('deudaCalculadaCD').textContent = pesos(deudaCalculada);
+    bancolombiaDiff = deudaCalculada - saldoReal;
+    const bcoBox = document.getElementById('bancolombiaDiffBox');
+    bcoBox.className = 'diffbox ' + (bancolombiaDiff === 0 ? 'ok' : 'bad');
+    document.getElementById('bancolombiaDiffAmt').innerHTML = bancolombiaDiff < 0 ? `<span style="color:#c0392b;">${signed(bancolombiaDiff)}</span>` : signed(bancolombiaDiff);
+    document.getElementById('bancolombiaDiffLbl').textContent = bancolombiaDiff === 0 ? 'Conciliado' : (bancolombiaDiff > 0 ? 'Coban365 registra de más vs. Bancolombia' : 'Bancolombia reporta de más vs Coban365');
+    if(bancolombiaDiff === 0) bancolombiaMotivoSel = null;
+    panelMotivo('motivoBancolombia', 'banco', bancolombiaDiff, bancolombiaMotivoSel, bancolombiaOtraTexto, 'elegirBancolombia', 'escribirOtraBancolombia', bancolombiaChecklist, 'toggleChecklistBancolombia');
+  }
+
+  const notice = document.getElementById('notice');
+  const bankIssue = bankDiff !== 0, cashIssue = cashDiff !== 0;
+  if(!bankIssue && !cashIssue){
+    notice.className = 'notice ok';
+    notice.innerHTML = '<strong>Cierre cuadrado.</strong> El efectivo, Coban365 y el datafono coinciden.';
+  } else if(bankIssue && cashIssue){
+    notice.className = 'notice warn';
+    if(cashDiff > 0){
+      notice.innerHTML = '<strong>Hay dos diferencias por validación.</strong> Diferencia de conciliación con el cierre del datafono y sobrante de efectivo. Ninguna transacción se modifica para cuadrar — el sobrante/faltante se registra con la explicación posible de la causa escogida arriba.';
+    } else {
+      notice.innerHTML = '<strong>Hay dos diferencias independientes.</strong> Diferencia de conciliación con el banco y faltante de efectivo. Ninguna transacción se modifica para cuadrar — el sobrante/faltante se registra con la explicación posible de la causa escogida arriba.';
+    }
+  } else if(bankIssue){
+    notice.className = 'notice warn';
+    notice.innerHTML = '<strong>Hay una diferencia.</strong> Diferencia de conciliación con el cierre del datafono. Ninguna transacción se modifica para cuadrar — se registra con la explicación posible de la causa escogida arriba.';
+  } else {
+    notice.className = 'notice warn';
+    if(cashDiff > 0){
+      notice.innerHTML = '<strong>Hay una diferencia.</strong> sobrante de efectivo. Ninguna transacción se modifica para cuadrar — el sobrante se registra tal cual, con la explicación posible de la causa escogida arriba.';
+    } else {
+      notice.innerHTML = '<strong>Hay una diferencia.</strong> Faltante de efectivo. Ninguna transacción se modifica para cuadrar — el faltante se registra tal cual, con la explicación posible de la causa escogida arriba.';
+    }
+  }
+
+  const btn = document.getElementById('btnValidar');
+  const bancoOk = bankDiff === 0 || (bancoMotivoSel && (bancoMotivoSel!=='otra' || bancoOtraTexto.trim()));
+  const efectivoOk = cashDiff === 0 || (efectivoMotivoSel && (efectivoMotivoSel!=='otra' || efectivoOtraTexto.trim()));
+  const bancolombiaOk = cantidadCajerosCD !== '1' || bancolombiaDiff === 0 || (bancolombiaMotivoSel && (bancolombiaMotivoSel!=='otra' || bancolombiaOtraTexto.trim()));
+  btn.disabled = !(bancoOk && efectivoOk && bancolombiaOk);
+
+  return { cash, app, bank: datafonoImpreso, netoDatafono, terceros, bankDiff, cashDiff, bancolombiaDiff };
+}
+
+function loadCase(i){
+  activeCase = Number(i);
+  cerrado = false;
+  bancoMotivoSel = null; efectivoMotivoSel = null; bancoOtraTexto=''; efectivoOtraTexto='';
+  bancoChecklist = [false, false, false]; efectivoChecklist = [false, false, false];
+  bancolombiaMotivoSel = null; bancolombiaOtraTexto = ''; bancolombiaChecklist = [false, false, false];
+  document.getElementById('saldoRealBancolombiaCD').value = '$ 2.330.000';
+  document.getElementById('saldoRealBancolombiaCD').disabled = false;
+  document.getElementById('resultadoCierre').innerHTML = '';
+  const c = demoCases[activeCase];
+  document.getElementById('caseSelect').value = activeCase;
+  pintarFilas('billRows', bills, 'bills', 1, c.billQty);
+  pintarFilas('bundleRows', bills, 'bundles', 100, c.bundleQty);
+  pintarFilas('coinRows', coins, 'coins', 1, c.coinQty);
+  document.querySelectorAll('#billRows input, #bundleRows input, #coinRows input').forEach(el => el.disabled = false);
+  recalcular();
+}
+
+function notaChecklist(checklist){
+  const marcadas = checklist.filter(Boolean).length;
+  if(marcadas === 3) return '';
+  return ` <span style="color:#8a5a1e;">(cerrado sin verificar ${3 - marcadas} de 3 puntos del checklist)</span>`;
+}
+
+function validarCierre(){
+  const r = recalcular();
+  if(document.getElementById('btnValidar').disabled) return;
+  cerrado = true;
+  document.querySelectorAll('#billRows input, #bundleRows input, #coinRows input').forEach(el => el.disabled = true);
+  document.getElementById('btnValidar').disabled = true;
+
+  const causaBanco = r.bankDiff !== 0 ? (bancoMotivoSel==='otra' ? bancoOtraTexto + notaChecklist(bancoChecklist) : CATALOGO.find(c=>c.id===bancoMotivoSel).texto) : null;
+  const causaEfectivo = r.cashDiff !== 0 ? (efectivoMotivoSel==='otra' ? efectivoOtraTexto + notaChecklist(efectivoChecklist) : CATALOGO.find(c=>c.id===efectivoMotivoSel).texto) : null;
+  const causaBancolombia = (cantidadCajerosCD === '1' && r.bancolombiaDiff !== 0) ? (bancolombiaMotivoSel==='otra' ? bancolombiaOtraTexto + notaChecklist(bancolombiaChecklist) : CATALOGO.find(c=>c.id===bancolombiaMotivoSel).texto) : null;
+
+  let html = '<div class="setup-note"><strong>Cierre registrado — ninguna transacción fue modificada.</strong><br>';
+  html += `Total Efectivo: ${pesos(r.cash)} · queda como saldo de apertura del día siguiente.<br>`;
+  if(causaBanco) html += `Diferencia de conciliación guardada: ${signed(r.bankDiff)} — ${causaBanco}<br>`;
+  if(causaEfectivo) html += `Diferencia de caja guardada: ${signed(r.cashDiff)} — ${causaEfectivo}<br>`;
+  if(causaBancolombia) html += `Diferencia con Bancolombia guardada: ${signed(r.bancolombiaDiff)} — ${causaBancolombia}<br>`;
+  if(!causaBanco && !causaEfectivo && !causaBancolombia) html += 'Sin diferencias — cierre cuadrado.<br>';
+
+  html += '</div>';
+  document.getElementById('resultadoCierre').innerHTML = html;
+
+  demoCases[activeCase]._resultado = { cash:r.cash, bankDiff:r.bankDiff, cashDiff:r.cashDiff, causaBanco, causaEfectivo, validado:true };
+  renderReporte();
+}
+
+function signedHTML(v){
+  return v < 0 ? `<span style="color:#c0392b;">${signed(v)}</span>` : signed(v);
+}
+
+function renderReporte(){
+  document.getElementById('reportBody').innerHTML = demoCases.map((c,i) => {
+    const cash = c.billQty.reduce((s,q,j)=>s+q*bills[j],0) + c.bundleQty.reduce((s,q,j)=>s+q*bills[j]*100,0) + c.coinQty.reduce((s,q,j)=>s+q*coins[j],0);
+    const terceros = c.terceros || 0;
+    const compensaciones = c.compensaciones || 0;
+    const netoDatafono = c.app - terceros - compensaciones;
+    const bankDiff = netoDatafono - c.bank;
+    const cashDiff = cash - c.app;
+    let estado = 'ok', texto = 'Cuadrado';
+    if(bankDiff !== 0 || cashDiff !== 0){
+      estado = (bankDiff !== 0 || cashDiff < 0) ? 'bad' : 'warn';
+      texto = c._resultado && c._resultado.validado ? 'Validado, con diferencia' : 'Diferencia pendiente';
+    }
+    return `<tr>
+      <td><strong>${c.fecha}</strong><br><span style="color:var(--muted);font-size:11.5px;">${c.hour}</span></td>
+      <td>${pesos(cash)}</td>
+      <td>${pesos(c.app)}</td>
+      <td>${pesos(c.bank)}</td>
+      <td>${pesos(netoDatafono)}</td>
+      <td>${signedHTML(cashDiff)}</td>
+      <td>${signedHTML(bankDiff)}</td>
+      <td><span class="pill ${estado}">${texto}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+
+function lineaTicket(izq, der){
+  const ancho = 32;
+  const espacio = Math.max(1, ancho - izq.length - der.length);
+  return izq + ' '.repeat(espacio) + der;
+}
+
+function toggleTicket(){
+  const wrap = document.getElementById('ticketWrap');
+  const visible = !wrap.classList.contains('hidden');
+  if(visible){ wrap.classList.add('hidden'); return; }
+  wrap.classList.remove('hidden');
+
+  const c = demoCases[activeCase];
+  const terceros = c.terceros || 0;
+  const compensaciones = c.compensaciones || 0;
+  const netoDatafono = c.app - terceros - compensaciones;
+  const cash = c.billQty.reduce((s,q,j)=>s+q*bills[j],0) + c.bundleQty.reduce((s,q,j)=>s+q*bills[j]*100,0) + c.coinQty.reduce((s,q,j)=>s+q*coins[j],0);
+  const cashDiff = cash - c.app;
+  const bankDiff = netoDatafono - c.bank;
+
+  let L = [];
+  L.push('CIERRE DE CAJA');
+  L.push('[12029] BARRIO CENTENARIO');
+  L.push(c.cashier.toUpperCase());
+  L.push(c.fecha + ' - ' + c.hour);
+  L.push('-'.repeat(32));
+  L.push('BILLETES');
+  bills.forEach((d,i) => { const q = c.billQty[i]; if(q>0) L.push(lineaTicket(`$${d.toLocaleString('es-CO')} x${q}`, pesos(d*q))); });
+  L.push(lineaTicket('Subtotal Billetes', pesos(c.billQty.reduce((s,q,i)=>s+q*bills[i],0))));
+  L.push('-'.repeat(32));
+  L.push('FAJOS (100 unid)');
+  bills.forEach((d,i) => { const q = c.bundleQty[i]; if(q>0) L.push(lineaTicket(`$${d.toLocaleString('es-CO')} x${q}`, pesos(d*100*q))); });
+  L.push(lineaTicket('Subtotal Fajos', pesos(c.bundleQty.reduce((s,q,i)=>s+q*bills[i]*100,0))));
+  L.push('-'.repeat(32));
+  L.push('MONEDAS');
+  coins.forEach((d,i) => { const q = c.coinQty[i]; if(q>0) L.push(lineaTicket(`$${d.toLocaleString('es-CO')} x${q}`, pesos(d*q))); });
+  L.push(lineaTicket('Subtotal Monedas', pesos(c.coinQty.reduce((s,q,i)=>s+q*coins[i],0))));
+  L.push('-'.repeat(32));
+  L.push(lineaTicket('TOTAL EFECTIVO', pesos(cash)));
+  L.push('-'.repeat(32));
+  L.push(lineaTicket('Coban365 (Caja actual)', ''));
+  L.push(lineaTicket('', pesos(c.app)));
+  L.push(lineaTicket('Datafono (Cuadre caja)', ''));
+  L.push(lineaTicket('', pesos(c.bank)));
+  L.push(lineaTicket('Coban365 (Neto total)', ''));
+  L.push(lineaTicket('', pesos(netoDatafono)));
+  L.push('-'.repeat(32));
+  L.push(lineaTicket('Dif. Efectivo', signed(cashDiff)));
+  L.push(lineaTicket('Dif. Banco', signed(bankDiff)));
+  L.push('-'.repeat(32));
+  L.push((cashDiff===0 && bankDiff===0) ? 'CIERRE CUADRADO' : 'CIERRE CON DIFERENCIA');
+  L.push('-'.repeat(32));
+
+  document.getElementById('ticketBox').innerHTML = L.join('<br>');
+}
+
+function imprimirTicketReal(){
+  const contenido = document.getElementById('ticketBox').innerHTML;
+  const ventana = window.open('', 'imprimirTicket', 'width=340,height=600');
+  ventana.document.write(`
+    <html>
+      <head>
+        <title>Ticket de cierre</title>
+        <style>
+          @page { size: 58mm auto; margin: 4mm; }
+          body{ font-family:'Courier New',monospace; font-size:11.5px; line-height:1.5; color:#111; width:52mm; margin:0; }
+        </style>
+      </head>
+      <body onload="window.print(); window.close();">${contenido}</body>
+    </html>
+  `);
+  ventana.document.close();
+}
+
+
+function switchTab(tab){
+  document.getElementById('tab-cierre').classList.toggle('hidden', tab!=='cierre');
+  document.getElementById('tab-reporte').classList.toggle('hidden', tab!=='reporte');
+  document.querySelectorAll('.tabbtn').forEach(b => b.classList.toggle('active', b.dataset.tab===tab));
+}
+
+document.getElementById('caseSelect').innerHTML = demoCases.map((c,i) => `<option value="${i}">${c.name}</option>`).join('');
+loadCase(0);
+renderReporte();
+
+    
+
+/* ===== SCRIPT BREAK ===== */
+
+
+    let terceroActualMovCajero = null;
+    function seleccionarTerceroMovCajero(nombre){
+      const t = tercerosCD.find(x => x.nombre === nombre);
+      if(!t) return;
+      terceroActualMovCajero = t;
+      renderMovimientosTerceroUI(t, 'mvCajero');
+    }
+    function buscarMovimientosCajero(){
+      if(terceroActualMovCajero) renderMovimientosTerceroUI(terceroActualMovCajero, 'mvCajero');
+    }
+    function limpiarMovimientosCajero(){
+      document.getElementById('mvCajeroDesde').value = '2026-06-01';
+      document.getElementById('mvCajeroHasta').value = '2026-06-30';
+      if(terceroActualMovCajero) renderMovimientosTerceroUI(terceroActualMovCajero, 'mvCajero');
+    }
+    if(document.readyState === 'loading'){
+      document.addEventListener('DOMContentLoaded', function(){
+        poblarSelectorMovimientos('mvCajeroSelector', 'Jose Ramirez');
+        seleccionarTerceroMovCajero('Jose Ramirez');
+      });
+    } else {
+      poblarSelectorMovimientos('mvCajeroSelector', 'Jose Ramirez');
+      seleccionarTerceroMovCajero('Jose Ramirez');
+    }
+    
+
+/* ===== SCRIPT BREAK ===== */
+
+
+    let terceroActualMovAdmin = null;
+    function seleccionarTerceroMovAdmin(nombre){
+      const t = tercerosCD.find(x => x.nombre === nombre);
+      if(!t) return;
+      terceroActualMovAdmin = t;
+      renderMovimientosTerceroUI(t, 'mvAdmin', true);
+    }
+    function buscarMovimientosAdmin(){
+      if(terceroActualMovAdmin) renderMovimientosTerceroUI(terceroActualMovAdmin, 'mvAdmin');
+    }
+    function limpiarMovimientosAdmin(){
+      document.getElementById('mvAdminDesde').value = '2026-06-01';
+      document.getElementById('mvAdminHasta').value = '2026-06-30';
+      if(terceroActualMovAdmin) renderMovimientosTerceroUI(terceroActualMovAdmin, 'mvAdmin');
+    }
+    if(document.readyState === 'loading'){
+      document.addEventListener('DOMContentLoaded', function(){
+        poblarSelectorMovimientos('mvAdminSelector', 'Jose Ramirez');
+        seleccionarTerceroMovAdmin('Jose Ramirez');
+      });
+    } else {
+      poblarSelectorMovimientos('mvAdminSelector', 'Jose Ramirez');
+      seleccionarTerceroMovAdmin('Jose Ramirez');
+    }
+    
+
+/* ===== SCRIPT BREAK ===== */
+
+
+    (function(){
+      const RESUMEN_CIERRES = [
+        { fecha: '14 ago', cajero: 'Soraya Monterrosa', valor: 0 },
+        { fecha: '13 ago', cajero: 'Soraya Monterrosa', valor: 45000 },
+        { fecha: '12 ago', cajero: 'Soraya Monterrosa', valor: -60000 },
+        { fecha: '11 ago', cajero: 'Yohana Monterrosa', valor: 45000 },
+        { fecha: '10 ago', cajero: 'Yohana Monterrosa', valor: -40000 },
+        { fecha: '09 ago', cajero: 'Anyela Urrutia', valor: 18000 }
+      ];
+
+      function fmtDC(v){ if(v===null) return '—'; const s=Math.round(v); return (s<0?'-':'')+'$'+Math.abs(s).toLocaleString('es-CO'); }
+
+      window.renderCatalogoAdminUI = function(containerId){
+        containerId = containerId || 'catalogoAdminUI';
+        const cont = document.getElementById(containerId);
+        if(!cont) return;
+        const filas = window.CATALOGO_CAUSAS.map(c => {
+          const ambitoTag = c.ambito === 'efectivo' ? 'background:#e9ecf3;color:#3d4a6b;' : 'background:#eee9ff;color:#534ab7;';
+          const direccionTag = c.direccion === 'sobrante' ? 'background:#dcefe0;color:#1e6b3a;' : 'background:#fdf3e9;color:#8a5a1e;';
+          return `<tr style="${c.activa ? '' : 'opacity:.5;'}">
+            <td style="font-size:12.5px;">${c.texto}</td>
+            <td><span style="font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:999px;${ambitoTag}">${c.ambito === 'efectivo' ? 'Efectivo' : 'Banco'}</span></td>
+            <td><span style="font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:999px;${direccionTag}">${c.direccion === 'sobrante' ? 'Sobrante' : 'Faltante'}</span></td>
+            <td style="text-align:right;"><button class="btn-ghost btn-small" onclick="toggleCausaCatalogo('${c.id}')">${c.activa ? 'Desactivar' : 'Activar'}</button></td>
+          </tr>`;
+        }).join('');
+        cont.innerHTML = `<table class="setup-table"><tr><th>Causa</th><th>Ámbito</th><th>Dirección</th><th>Acción</th></tr>${filas}</table>`;
+      };
+
+      window.renderResumenPeriodo = function(){
+        const cajeroSel = document.getElementById('rpCajero').value;
+        const datos = RESUMEN_CIERRES.filter(d => cajeroSel === 'todos' || d.cajero === cajeroSel);
+        let totalSobrantes = 0, totalFaltantes = 0, numSobrantes = 0, numFaltantes = 0;
+        datos.forEach(d => {
+          if(d.valor > 0){ totalSobrantes += d.valor; numSobrantes++; }
+          else if(d.valor < 0){ totalFaltantes += Math.abs(d.valor); numFaltantes++; }
+        });
+        const neta = totalSobrantes - totalFaltantes;
+        document.getElementById('rpSobrantes').textContent = fmtDC(totalSobrantes);
+        document.getElementById('rpFaltantes').textContent = fmtDC(totalFaltantes);
+        document.getElementById('rpNumSobrantes').textContent = numSobrantes;
+        document.getElementById('rpNumFaltantes').textContent = numFaltantes;
+        const netaEl = document.getElementById('rpNeta');
+        netaEl.textContent = (neta < 0 ? '-' : '') + fmtDC(Math.abs(neta));
+        netaEl.style.color = neta === 0 ? 'inherit' : (neta > 0 ? '#1e6b3a' : '#c0392b');
+
+        window.renderDetalleCajero();
+      };
+
+      window.renderDetalleCajero = function(){
+        const cajeroSel = document.getElementById('rpCajero').value;
+        const cont = document.getElementById('detalleCajeroCont');
+        if(cajeroSel === 'todos'){ cont.classList.add('hidden'); cont.innerHTML = ''; return; }
+        cont.classList.remove('hidden');
+        const HOY_REF_DIA = 17;
+        const filas = demoCases.map((c) => {
+          const cash = c.billQty.reduce((s,q,j)=>s+q*bills[j],0) + c.bundleQty.reduce((s,q,j)=>s+q*bills[j]*100,0) + c.coinQty.reduce((s,q,j)=>s+q*coins[j],0);
+          const terceros = c.terceros || 0;
+          const compensaciones = c.compensaciones || 0;
+          const netoDatafono = c.app - terceros - compensaciones;
+          const bankDiff = netoDatafono - c.bank;
+          const cashDiff = cash - c.app;
+          let estado = 'ok', texto = 'Cuadrado';
+          let filaStyle = '';
+          if(bankDiff !== 0 || cashDiff !== 0){
+            estado = (bankDiff !== 0 || cashDiff < 0) ? 'bad' : 'warn';
+            const diaNum = parseInt(c.fecha) || HOY_REF_DIA;
+            const dias = Math.max(HOY_REF_DIA - diaNum, 0);
+            texto = `Diferencia pendiente (${dias} día${dias===1?'':'s'})`;
+            if(dias > 5) filaStyle = 'background:#fdf3e9;';
+          }
+          return `<tr style="${filaStyle}">
+            <td><strong>${c.fecha}</strong><br><span style="color:var(--muted);font-size:11px;">${c.hour}</span></td>
+            <td>${pesos(cash)}</td><td>${pesos(c.app)}</td><td>${pesos(c.bank)}</td><td>${pesos(netoDatafono)}</td>
+            <td>${signedHTML(cashDiff)}</td><td>${signedHTML(bankDiff)}</td>
+            <td><span class="pill ${estado}">${texto}</span></td>
+          </tr>`;
+        }).join('');
+        cont.innerHTML = `<div class="pos-modal-like" style="border:1px solid var(--border);border-radius:14px;overflow:hidden;">
+          <div style="background:var(--navy);color:#fff;padding:14px 18px;font-size:13px;font-weight:700;">Detalle de cierres — ${cajeroSel} <span style="font-weight:400;font-size:11px;opacity:.8;">(datos de ejemplo)</span></div>
+          <div style="padding:14px 18px;overflow-x:auto;">
+            <table class="setup-table">
+              <tr><th>Fecha</th><th>Efectivo</th><th>Coban365 (Caja actual)</th><th>Datafono</th><th>Coban365 (Neto Total)</th><th>Dif. Efectivo</th><th>Dif. Banco</th><th>Estado</th></tr>
+              ${filas}
+            </table>
+          </div>
+        </div>`;
+      };
+
+      window.poblarCajerosResumenPeriodo = function(){
+        const sel = document.getElementById('rpCajero');
+        const cajeros = [...new Set(RESUMEN_CIERRES.map(d => d.cajero))].sort();
+        sel.innerHTML = '<option value="todos">Todos</option>' + cajeros.map(c => `<option value="${c}">${c}</option>`).join('');
+        sel.onchange = window.renderResumenPeriodo;
+      };
+
+      window.poblarCajerosResumenPeriodo();
+      window.renderResumenPeriodo();
+      function renderAmbosCatalogos(){
+        window.renderCatalogoAdminUI('catalogoAdminUI');
+        window.renderCatalogoAdminUI('catalogoSuperAdminUI');
+      }
+      if(document.readyState === 'loading'){
+        document.addEventListener('DOMContentLoaded', renderAmbosCatalogos);
+      } else {
+        renderAmbosCatalogos();
+      }
+    })();
+    
+
+/* ===== SCRIPT BREAK ===== */
+
+
+    const TRANSACCIONES_TX = [
+      {n:1,fecha:'14/8/26',hora:'06:12',usuario:'aurrutia',tipo:'Recaudo',ingreso:300000,egreso:null,banco:2750000,cupo:13515000,cajaCajero:300000,cajaTotal:300000,total:16565000},
+      {n:2,fecha:'14/8/26',hora:'06:34',usuario:'smonterrosa',tipo:'Compensación',ingreso:30000,egreso:null,banco:2780000,cupo:13515000,cajaCajero:30000,cajaTotal:330000,total:16625000},
+      {n:3,fecha:'14/8/26',hora:'06:41',usuario:'smonterrosa',tipo:'Retiro',ingreso:null,egreso:20000,banco:2760000,cupo:13515000,cajaCajero:10000,cajaTotal:310000,total:16585000},
+      {n:4,fecha:'14/8/26',hora:'07:03',usuario:'smonterrosa',tipo:'Consignación',ingreso:200000,egreso:null,banco:2960000,cupo:13515000,cajaCajero:210000,cajaTotal:510000,total:16985000},
+      {n:5,fecha:'14/8/26',hora:'07:21',usuario:'smonterrosa',tipo:'Compensación',ingreso:null,egreso:300000,banco:2660000,cupo:13515000,cajaCajero:-90000,cajaTotal:210000,total:16385000},
+      {n:6,fecha:'14/8/26',hora:'07:31',usuario:'smonterrosa',tipo:'Consignación',ingreso:60000,egreso:null,banco:2720000,cupo:13515000,cajaCajero:-30000,cajaTotal:270000,total:16505000},
+      {n:7,fecha:'14/8/26',hora:'07:42',usuario:'aurrutia',tipo:'Consignación',ingreso:60000,egreso:null,banco:2780000,cupo:13515000,cajaCajero:360000,cajaTotal:330000,total:16625000},
+      {n:8,fecha:'14/8/26',hora:'07:58',usuario:'ymonterrosa',tipo:'Consignación',ingreso:100000,egreso:null,banco:2880000,cupo:13515000,cajaCajero:100000,cajaTotal:430000,total:16825000},
+      {n:9,fecha:'14/8/26',hora:'08:17',usuario:'ymonterrosa',tipo:'Compensación',ingreso:null,egreso:20000,banco:2860000,cupo:13515000,cajaCajero:80000,cajaTotal:410000,total:16785000},
+      {n:10,fecha:'14/8/26',hora:'08:39',usuario:'aurrutia',tipo:'Consignación',ingreso:100000,egreso:null,banco:2960000,cupo:13515000,cajaCajero:460000,cajaTotal:510000,total:16985000},
+      {n:11,fecha:'14/8/26',hora:'09:02',usuario:'ymonterrosa',tipo:'Pago de crédito',ingreso:null,egreso:200000,banco:2760000,cupo:13515000,cajaCajero:-120000,cajaTotal:310000,total:16585000},
+      {n:12,fecha:'14/8/26',hora:'09:14',usuario:'smonterrosa',tipo:'Compensación',ingreso:null,egreso:20000,banco:2740000,cupo:13515000,cajaCajero:-50000,cajaTotal:290000,total:16545000},
+      {n:13,fecha:'14/8/26',hora:'09:31',usuario:'ymonterrosa',tipo:'Retiro',ingreso:null,egreso:50000,banco:2690000,cupo:13515000,cajaCajero:-170000,cajaTotal:240000,total:16445000},
+      {n:14,fecha:'14/8/26',hora:'09:47',usuario:'ymonterrosa',tipo:'Consignación',ingreso:80000,egreso:null,banco:2770000,cupo:13515000,cajaCajero:-90000,cajaTotal:320000,total:16605000},
+      {n:15,fecha:'14/8/26',hora:'10:12',usuario:'ymonterrosa',tipo:'Compensación',ingreso:60000,egreso:null,banco:2830000,cupo:13515000,cajaCajero:-30000,cajaTotal:380000,total:16725000},
+      {n:16,fecha:'14/8/26',hora:'10:24',usuario:'smonterrosa',tipo:'Compensación',ingreso:null,egreso:45000,banco:2785000,cupo:13515000,cajaCajero:-95000,cajaTotal:335000,total:16635000},
+      {n:17,fecha:'14/8/26',hora:'10:46',usuario:'smonterrosa',tipo:'Compensación',ingreso:60000,egreso:null,banco:2845000,cupo:13515000,cajaCajero:-35000,cajaTotal:395000,total:16755000},
+      {n:18,fecha:'14/8/26',hora:'10:52',usuario:'smonterrosa',tipo:'Retiro',ingreso:null,egreso:20000,banco:2825000,cupo:13515000,cajaCajero:-55000,cajaTotal:375000,total:16715000},
+      {n:19,fecha:'14/8/26',hora:'11:15',usuario:'ymonterrosa',tipo:'Consignación',ingreso:30000,egreso:null,banco:2855000,cupo:13515000,cajaCajero:0,cajaTotal:405000,total:16775000},
+      {n:20,fecha:'14/8/26',hora:'11:32',usuario:'aurrutia',tipo:'Recaudo',ingreso:250000,egreso:null,banco:3105000,cupo:13515000,cajaCajero:710000,cajaTotal:655000,total:17275000},
+      {n:21,fecha:'14/8/26',hora:'11:44',usuario:'aurrutia',tipo:'Consignación',ingreso:60000,egreso:null,banco:3165000,cupo:13515000,cajaCajero:770000,cajaTotal:715000,total:17395000},
+      {n:22,fecha:'14/8/26',hora:'12:07',usuario:'aurrutia',tipo:'Compensación',ingreso:null,egreso:60000,banco:3105000,cupo:13515000,cajaCajero:710000,cajaTotal:655000,total:17275000},
+      {n:23,fecha:'14/8/26',hora:'12:19',usuario:'ymonterrosa',tipo:'Pago de crédito',ingreso:null,egreso:100000,banco:3005000,cupo:13515000,cajaCajero:-100000,cajaTotal:555000,total:17075000},
+      {n:24,fecha:'14/8/26',hora:'12:27',usuario:'smonterrosa',tipo:'Consignación',ingreso:30000,egreso:null,banco:3035000,cupo:13515000,cajaCajero:-25000,cajaTotal:585000,total:17135000},
+      {n:25,fecha:'14/8/26',hora:'12:51',usuario:'smonterrosa',tipo:'Pago de crédito',ingreso:null,egreso:250000,banco:2785000,cupo:13515000,cajaCajero:-275000,cajaTotal:335000,total:16635000},
+      {n:26,fecha:'14/8/26',hora:'13:12',usuario:'smonterrosa',tipo:'Recaudo',ingreso:200000,egreso:null,banco:2985000,cupo:13515000,cajaCajero:-75000,cajaTotal:535000,total:17035000},
+      {n:27,fecha:'14/8/26',hora:'13:20',usuario:'ymonterrosa',tipo:'Compensación',ingreso:null,egreso:20000,banco:2965000,cupo:13515000,cajaCajero:-120000,cajaTotal:515000,total:16995000},
+      {n:28,fecha:'14/8/26',hora:'13:35',usuario:'aurrutia',tipo:'Compensación',ingreso:null,egreso:60000,banco:2905000,cupo:13515000,cajaCajero:650000,cajaTotal:455000,total:16875000},
+      {n:29,fecha:'14/8/26',hora:'13:40',usuario:'smonterrosa',tipo:'Recaudo',ingreso:45000,egreso:null,banco:2950000,cupo:13515000,cajaCajero:-30000,cajaTotal:500000,total:16965000},
+      {n:30,fecha:'14/8/26',hora:'13:50',usuario:'aurrutia',tipo:'Compensación',ingreso:null,egreso:60000,banco:2890000,cupo:13515000,cajaCajero:590000,cajaTotal:440000,total:16845000},
+      {n:31,fecha:'14/8/26',hora:'14:15',usuario:'aurrutia',tipo:'Pago de crédito',ingreso:null,egreso:250000,banco:2640000,cupo:13515000,cajaCajero:340000,cajaTotal:190000,total:16345000},
+      {n:32,fecha:'14/8/26',hora:'14:25',usuario:'aurrutia',tipo:'Pago de crédito',ingreso:null,egreso:45000,banco:2595000,cupo:13515000,cajaCajero:295000,cajaTotal:145000,total:16255000},
+      {n:33,fecha:'14/8/26',hora:'14:49',usuario:'aurrutia',tipo:'Retiro',ingreso:null,egreso:150000,banco:2445000,cupo:13515000,cajaCajero:145000,cajaTotal:-5000,total:15955000},
+      {n:34,fecha:'14/8/26',hora:'15:03',usuario:'ymonterrosa',tipo:'Recaudo',ingreso:30000,egreso:null,banco:2475000,cupo:13515000,cajaCajero:-90000,cajaTotal:25000,total:16015000},
+      {n:35,fecha:'14/8/26',hora:'15:10',usuario:'smonterrosa',tipo:'Consignación',ingreso:200000,egreso:null,banco:2675000,cupo:13515000,cajaCajero:170000,cajaTotal:225000,total:16415000},
+      {n:36,fecha:'14/8/26',hora:'15:19',usuario:'aurrutia',tipo:'Compensación',ingreso:30000,egreso:null,banco:2705000,cupo:13515000,cajaCajero:175000,cajaTotal:255000,total:16475000},
+      {n:37,fecha:'14/8/26',hora:'15:32',usuario:'smonterrosa',tipo:'Retiro',ingreso:null,egreso:150000,banco:2555000,cupo:13515000,cajaCajero:20000,cajaTotal:105000,total:16175000},
+      {n:38,fecha:'14/8/26',hora:'15:54',usuario:'aurrutia',tipo:'Retiro',ingreso:null,egreso:100000,banco:2455000,cupo:13515000,cajaCajero:75000,cajaTotal:5000,total:15975000},
+      {n:39,fecha:'14/8/26',hora:'16:11',usuario:'aurrutia',tipo:'Pago de crédito',ingreso:null,egreso:300000,banco:2155000,cupo:13515000,cajaCajero:-225000,cajaTotal:-295000,total:15375000},
+      {n:40,fecha:'14/8/26',hora:'16:30',usuario:'aurrutia',tipo:'Compensación',ingreso:null,egreso:120000,banco:2035000,cupo:13515000,cajaCajero:-345000,cajaTotal:-415000,total:15135000}
+    ];
+    const TX_POR_PAGINA = 25;
+    let txPaginaActual = 1;
+
+    function fmtTX(v){
+      if(v === null || v === undefined) return '—';
+      const s = Math.round(v);
+      return (s<0?'-':'') + '$' + Math.abs(s).toLocaleString('es-CO');
+    }
+
+    function renderTablaTX(filas){
+      const totalPaginas = Math.max(1, Math.ceil(filas.length / TX_POR_PAGINA));
+      if(txPaginaActual > totalPaginas) txPaginaActual = totalPaginas;
+      const inicio = (txPaginaActual - 1) * TX_POR_PAGINA;
+      const pagina = filas.slice(inicio, inicio + TX_POR_PAGINA);
+
+      document.getElementById('tablaTransaccionesTX').innerHTML = pagina.map(r => `<tr>
+        <td>${r.n}</td>
+        <td>${r.fecha}</td>
+        <td>${r.hora}</td>
+        <td>${r.usuario}</td>
+        <td>${r.tipo}</td>
+        <td style="text-align:right;color:#1e6b3a;">${r.ingreso !== null ? fmtTX(r.ingreso) : '—'}</td>
+        <td style="text-align:right;color:#c0392b;">${r.egreso !== null ? fmtTX(r.egreso) : '—'}</td>
+        <td style="text-align:right;">${fmtTX(r.banco)}</td>
+        <td style="text-align:right;">${fmtTX(r.cupo)}</td>
+        <td style="text-align:right;">${fmtTX(r.cajaCajero)}</td>
+        <td style="text-align:right;font-weight:700;">${fmtTX(r.total)}</td>
+      </tr>`).join('');
+
+      document.getElementById('txPagInfo').textContent = `Página ${txPaginaActual} de ${totalPaginas} · ${filas.length} transacciones`;
+    }
+
+    window.paginaSiguienteTX = function(){
+      const filas = window.txFilasActuales || TRANSACCIONES_TX;
+      const totalPaginas = Math.max(1, Math.ceil(filas.length / TX_POR_PAGINA));
+      if(txPaginaActual < totalPaginas){ txPaginaActual++; renderTablaTX(filas); }
+    };
+    window.paginaAnteriorTX = function(){
+      const filas = window.txFilasActuales || TRANSACCIONES_TX;
+      if(txPaginaActual > 1){ txPaginaActual--; renderTablaTX(filas); }
+    };
+
+    window.verEnVivoTX = function(){
+      document.getElementById('txModoLabel').textContent = 'Mostrando movimientos en tiempo real';
+      txPaginaActual = 1;
+      window.txFilasActuales = TRANSACCIONES_TX;
+      renderTablaTX(TRANSACCIONES_TX);
+    };
+
+    window.buscarTransaccionesTX = function(){
+      const desde = document.getElementById('txDesde').value;
+      const hasta = document.getElementById('txHasta').value;
+      document.getElementById('txModoLabel').textContent = `Mostrando resultados del ${desde} al ${hasta}`;
+      txPaginaActual = 1;
+      window.txFilasActuales = TRANSACCIONES_TX;
+      renderTablaTX(TRANSACCIONES_TX);
+    };
+
+    window.txFilasActuales = TRANSACCIONES_TX;
+    renderTablaTX(TRANSACCIONES_TX);
+    
+
+/* ===== SCRIPT BREAK ===== */
+
+
+    function seleccionarReporteGR(key){
+      document.querySelectorAll('.gr-pane').forEach(p => p.style.display = 'none');
+      document.querySelectorAll('.gr-menu-item').forEach(m => m.classList.remove('activo'));
+      const pane = document.getElementById('grPane_' + key);
+      if(pane) pane.style.display = 'block';
+      const menu = document.getElementById('grMenu_' + key);
+      if(menu) menu.classList.add('activo');
+    }
+    window.abrirGestorReporte = function(key){
+      goToSection('tab9', 'gestor-reportes');
+      seleccionarReporteGR(key);
+    };
+    seleccionarReporteGR('financiero');
+    
+
+/* ===== SCRIPT BREAK ===== */
+
+
+// ================= TABS =================
+function goTab(id){
+  document.querySelectorAll('.tab-content').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el=>el.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelector('.tab-btn[data-tab="'+id+'"]').classList.add('active');
+}
+
+function filtrarComisionesTerceros(){
+  const texto = (document.getElementById('cmt-buscar').value || '').trim().toLowerCase();
+  const filas = document.querySelectorAll('.cmt-row');
+  let conteo = 0, total = 0, hayVisibles = false;
+  filas.forEach(fila => {
+    const nombre = (fila.getAttribute('data-nombre') || '').toLowerCase();
+    const coincide = texto === '' || nombre.includes(texto);
+    fila.style.display = coincide ? '' : 'none';
+    if (coincide) {
+      conteo++;
+      total += parseInt(fila.getAttribute('data-valor'), 10) || 0;
+      hayVisibles = true;
+    }
+  });
+  const sinResultados = document.getElementById('cmt-sin-resultados');
+  if (sinResultados) sinResultados.style.display = hayVisibles ? 'none' : 'block';
+  const conteoEl = document.getElementById('cmt-conteo');
+  const totalEl = document.getElementById('cmt-total');
+  if (conteoEl) conteoEl.textContent = conteo;
+  if (totalEl) totalEl.textContent = '$' + total.toLocaleString('es-CO');
+}
+
+function goToSection(tabId, anchorId){
+  goTab(tabId);
+  const destino = document.getElementById(anchorId);
+  if(destino && typeof destino.scrollIntoView === 'function'){
+    destino.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    destino.style.transition = 'background-color .3s';
+    destino.style.backgroundColor = '#f4f2ff';
+    setTimeout(()=>{ destino.style.backgroundColor = ''; }, 900);
+  }
+}
+
+// ================= MÉTODOS =================
+const CUPO_ASIGNADO = 25000000;
+
+// datafono: true = se puede listar como destino de depósito/retiro (cuenta propia, alcanzable por datáfono/transferencia)
+// datafono: false = cuenta de otro banco / no debe listarse nunca como destino aquí (se configura al crear el tercero)
+const TERCEROS_DEMO = [
+  {id:1, nombre:"Mauricio Chará",        saldoFavor:3000000, cxc:0,       cupo:0,      datafono:true, comisionGenerada:0},
+  {id:2, nombre:"Lucía López",            saldoFavor:1000000, cxc:0,       cupo:0,      datafono:true, comisionGenerada:0},
+  {id:3, nombre:"Luz Dary Gómez",         saldoFavor:0,       cxc:0,       cupo:2000000, datafono:true, comisionGenerada:0},
+  {id:4, nombre:"Jose Ramirez",           saldoFavor:0,       cxc:0,       cupo:1000000, datafono:true, comisionGenerada:0},
+  {id:5, nombre:"Nequi *4567",            saldoFavor:0,       cxc:2000000, cupo:0,      datafono:true, comisionGenerada:0},
+  {id:6, nombre:"Bancolombia *9005",      saldoFavor:0,       cxc:0,       cupo:500000, datafono:false, comisionGenerada:0},
+  {id:7, nombre:"66174- Barrio Pajonal",  saldoFavor:0,       cxc:0,       cupo:0,      datafono:false, comisionGenerada:0},
+  {id:8, nombre:"Daviplata *5678",        saldoFavor:0,       cxc:0,       cupo:0,      datafono:false, comisionGenerada:0},
+  {id:9, nombre:"65398-Barrio Caracoli",  saldoFavor:0,       cxc:0,       cupo:0,      datafono:false, comisionGenerada:0},
+  {id:10, nombre:"25426-Districol",       saldoFavor:0,       cxc:0,       cupo:0,      datafono:false, comisionGenerada:0},
+];
+
+const METODOS = {
+  transferencia:            {label:"Transferencia",            bancaria:false, needsAccount:true,  needsCorresponsal:false, compensaBanco:false, pasaCaja:false},
+  compensacion:              {label:"Compensación",             bancaria:false, needsAccount:false, needsCorresponsal:false, compensaBanco:true,  pasaCaja:false},
+  compensacion_otro_cb:      {label:"Compensación a otro CB",   bancaria:false, needsAccount:false, needsCorresponsal:true,  compensaBanco:false, pasaCaja:false},
+  consignacion_sucursal:     {label:"Consignación en sucursal", bancaria:true,  needsAccount:true,  needsCorresponsal:false, compensaBanco:false, pasaCaja:false},
+  consignacion_cajero:       {label:"Consignación Cajero",      bancaria:true,  needsAccount:true,  needsCorresponsal:false, compensaBanco:false, pasaCaja:false},
+  consignacion_cb:           {label:"Consignación CB",          bancaria:true,  needsAccount:true,  needsCorresponsal:false, compensaBanco:false, pasaCaja:false},
+  entrega_efectivo:          {label:"Entrega en efectivo",      bancaria:true,  needsAccount:false, needsCorresponsal:false, compensaBanco:false, pasaCaja:true},
+};
+
+// ================= Formato de dinero =================
+function formatMoneyInput(el){
+  let raw = el.value.replace(/[^0-9]/g,'');
+  if(raw===''){ el.value=''; return; }
+  raw = raw.replace(/^0+(?=\d)/,'');
+  const n = parseInt(raw,10)||0;
+  el.value = '$ ' + n.toLocaleString('es-CO');
+}
+function readMoney(id){
+  const el = document.getElementById(id);
+  if(!el) return 0;
+  const raw = String(el.value).replace(/[^0-9]/g,'');
+  return raw ? parseInt(raw,10) : 0;
+}
+function fmt(n){
+  n = Math.round(n||0);
+  return '$' + n.toLocaleString('es-CO');
+}
+
+// ================= Estado del corresponsal (compartido con el Dashboard Cajero / Registro de Movimiento) =================
+let cajaActual = 4000000;
+let deudaActual = 2000000;
+
+function cupoDe(deuda){ return CUPO_ASIGNADO - deuda; }
+
+function pintarEstado(){
+  pintarEstadoPOS();
+}
+
+function construirMensajeResumen(item){
+  let destino;
+  if(item.needsAccount){
+    destino = `recibida correctamente en la cuenta <strong>${item.cuentaDestino}</strong>`;
+  } else if(item.needsCorresponsal){
+    destino = `compensada correctamente con el corresponsal <strong>${item.corresponsalDestino}</strong>`;
+  } else if(item.compensaBanco){
+    destino = `compensada correctamente contra la deuda del CB con el banco`;
+  } else if(item.pasaCaja){
+    destino = `recibida correctamente en caja`;
+  } else {
+    destino = `procesada correctamente`;
+  }
+  return `<strong>[${item.metodo}]</strong> por ${fmt(item.cantidad)} de <strong>${item.tercero}</strong> sumado a su estado de cuenta, y ${destino}.`;
+}
+
+function mostrarResumenMovimiento(item){
+  document.getElementById('modalMsg').innerHTML = construirMensajeResumen(item);
+  document.getElementById('modalOverlay').classList.add('show');
+}
+
+function cerrarModal(){
+  document.getElementById('modalOverlay').classList.remove('show');
+}
+
+// ================= TAB 7: Simulación de Movimientos de Terceros (instancia independiente) =================
+const DISPERSION_DEFAULT_ST = {
+  transferencia:1, compensacion:1, compensacion_otro_cb:1,
+  consignacion_sucursal:2, consignacion_cajero:2, consignacion_cb:2, entrega_efectivo:2
+};
+
+const dispGridST = document.getElementById('dispGrid_st');
+if(dispGridST){
+  dispGridST.innerHTML = Object.entries(METODOS).map(([key,m])=>{
+    const val = DISPERSION_DEFAULT_ST[key];
+    return `<div class="disp-row">
+      <div class="disp-row-label">${m.label}</div>
+      <input type="range" min="0" max="8" step="1" value="${val}" id="disp_${key}_st"
+        class="disp-slider" oninput="dispSliderChangedST('${key}')">
+      <div class="disp-ticks"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span></div>
+      <div class="disp-value-chip" id="dispval_${key}_st">${val} <span>x1000</span></div>
+    </div>`;
+  }).join('');
+  Object.keys(METODOS).forEach(key=>updateSliderFillST(key));
+}
+
+function updateSliderFillST(key){
+  const el = document.getElementById('disp_'+key+'_st');
+  if(!el) return;
+  const pct = (el.value/8)*100;
+  el.style.setProperty('--pct', pct+'%');
+}
+
+function dispSliderChangedST(key){
+  const v = document.getElementById('disp_'+key+'_st').value;
+  document.getElementById('dispval_'+key+'_st').innerHTML = v + ' <span>x1000</span>';
+  updateSliderFillST(key);
+  actualizarPreviewST();
+}
+
+function normalizarNombre(str){
+  return String(str||'').toLowerCase().replace(/(^|\s)\S/g, c=>c.toUpperCase());
+}
+
+function terceroConfigST(){
+  const bancaria = readMoney('comisionBancariaTercero_st');
+  const dispersion = {};
+  Object.keys(METODOS).forEach(key=>{
+    dispersion[key] = Number(document.getElementById('disp_'+key+'_st').value)||0;
+  });
+  return { bancaria, dispersion, nombre: document.getElementById('terceroNombre_st').value || 'Tercero' };
+}
+
+function syncTerceroNombreST(){
+  const nombreNormalizado = normalizarNombre(document.getElementById('terceroNombre_st').value);
+  const saldo = readMoney('saldoInicial_st');
+  const credito = readMoney('creditoDisponible_st');
+  const etiqueta = `${nombreNormalizado} [Saldo: ${fmt(saldo)} - Crédito: ${fmt(credito)}]`;
+  const sel = document.getElementById('tercero_st');
+  if(sel){ sel.innerHTML = `<option value="${nombreNormalizado}">${etiqueta}</option>`; }
+  actualizarPreviewST();
+}
+
+function toggleDatafonoTerceroST(checkbox){
+  // Vincula la casilla del formulario de creación de tercero (pestaña Terceros)
+  // con el tercero MAURICIO CHARÁ (id:1) usado en el popup de Depósitos/Retiros
+  // del Simulador de movimientos de caja, para que la simulación sea realista.
+  const t = TERCEROS_DEMO.find(x=>x.id===1);
+  if(t){
+    t.datafono = checkbox.checked;
+    const cont = document.getElementById('terceroList');
+    if(cont) renderTerceroList();
+  }
+}
+
+function sincronizarCreditoTerceroST(){
+  // Igual que el checkbox de datáfono: el crédito disponible que se configura aquí
+  // se refleja en vivo como el cupo de MAURICIO CHARÁ (id:1) en el Simulador Dashboard Cajero.
+  const t = TERCEROS_DEMO.find(x=>x.id===1);
+  if(t){
+    t.cupo = readMoney('creditoDisponible_st');
+    const cont = document.getElementById('terceroList');
+    if(cont) renderTerceroList();
+  }
+}
+
+let cajaActualST = readMoney('cajaInicial_st');
+let deudaActualST = readMoney('deudaInicial_st');
+let historialST = [];
+let contadorST = 0;
+let saldosTercerosST = { 'Mauricio Chará': 4000000, 'Nequi *4567': -2000000 };
+
+function fmtSaldoTercero(v){
+  v = v || 0;
+  if(v > 0) return 'CB debe ' + fmt(v);
+  if(v < 0) return 'Debe al CB ' + fmt(Math.abs(v));
+  return 'Sin saldo ($0)';
+}
+
+function pintarEstadoST(){
+  const c = document.getElementById('estCaja_st');
+  if(!c) return;
+  c.textContent = fmt(cajaActualST);
+  document.getElementById('estDeuda_st').textContent = fmt(deudaActualST);
+  document.getElementById('estCupo_st').textContent = fmt(cupoDe(deudaActualST));
+}
+
+function reiniciarEstadoST(){
+  cajaActualST = readMoney('cajaInicial_st');
+  deudaActualST = readMoney('deudaInicial_st');
+  saldosTercerosST = { 'Mauricio Chará': 4000000, 'Nequi *4567': -2000000 };
+  pintarEstadoST();
+}
+
+function getBancariaST(key){
+  const m = METODOS[key];
+  return (m && m.bancaria) ? terceroConfigST().bancaria : 0;
+}
+
+function calcDispersionST(cantidad, key){
+  cantidad = Number(cantidad)||0;
+  const mult = terceroConfigST().dispersion[key] || 0;
+  const raw = cantidad*mult/1000;
+  return Math.ceil(raw/1000)*1000;
+}
+
+function pintarConfigUsadaST(){
+  const cfg = terceroConfigST();
+  document.getElementById('cfgTercero_st').textContent = cfg.nombre;
+  document.getElementById('cfgBancaria_st').textContent = fmt(cfg.bancaria);
+  const t = document.getElementById('cfgDispTable_st');
+  t.innerHTML = '<tr><th>Método</th><th>Dispersión</th></tr>' +
+    Object.entries(METODOS).map(([key,m])=>`<tr><td>${m.label}</td><td>${cfg.dispersion[key]} x 1000</td></tr>`).join('');
+}
+
+const selMetodoST = document.getElementById('metodo_st');
+if(selMetodoST){
+  Object.entries(METODOS).forEach(([key,m])=>{
+    const opt = document.createElement('option');
+    opt.value = key; opt.textContent = m.label;
+    selMetodoST.appendChild(opt);
+  });
+}
+
+function actualizarUIST(){
+  const key = selMetodoST.value;
+  const m = METODOS[key];
+  document.getElementById('cuentaDestinoWrap_st').style.display = (m && m.needsAccount) ? 'block' : 'none';
+  document.getElementById('corresponsalDestinoWrap_st').style.display = (m && m.needsCorresponsal) ? 'block' : 'none';
+  document.getElementById('compensaNote_st').style.display = (m && m.compensaBanco) ? 'block' : 'none';
+  actualizarPreviewST();
+}
+
+function actualizarPreviewST(){
+  pintarConfigUsadaST();
+  const key = selMetodoST.value;
+  const m = METODOS[key];
+  const cantidad = readMoney('cantidad_st');
+  const dispersion = key ? calcDispersionST(cantidad, key) : 0;
+  const bancaria = m ? getBancariaST(key) : 0;
+  const total = bancaria + dispersion;
+
+  document.getElementById('pvMovs_st').textContent = m ? '1' : '—';
+  document.getElementById('pvCaja_st').innerHTML = !m ? '—' : (m.pasaCaja
+    ? '<span class="badge badge-amber">Sí</span>'
+    : '<span class="badge badge-green">No</span>');
+  document.getElementById('pvBanco_st').innerHTML = !m ? '—' : (m.compensaBanco
+    ? '<span class="badge badge-amber">Sí, se compensa</span>'
+    : '<span class="badge badge-green">No</span>');
+  document.getElementById('pvBancaria_st').textContent = fmt(bancaria);
+  document.getElementById('pvDispersion_st').textContent = fmt(dispersion);
+  document.getElementById('pvTotal_st').textContent = fmt(total);
+}
+
+function actualizarTipoTransaccionST(){
+  const val = document.getElementById('tipoTransaccion_st').value;
+  const esPrestamoTercero = (val === 'prestamo_tercero');
+  document.querySelectorAll('.campos-prestamo-st').forEach(el=>{
+    el.style.display = esPrestamoTercero ? 'block' : 'none';
+  });
+  document.getElementById('tipoPendienteNote_st').style.display = esPrestamoTercero ? 'none' : 'block';
+  const btn = document.getElementById('btnRegistrarST');
+  if(btn) btn.disabled = !esPrestamoTercero;
+}
+
+if(selMetodoST){
+  selMetodoST.addEventListener('change', actualizarUIST);
+  actualizarUIST();
+  pintarEstadoST();
+  pintarConfigUsadaST();
+  syncTerceroNombreST();
+  actualizarTipoTransaccionST();
+}
+
+function limpiarFormularioST(){
+  document.getElementById('referencia_st').value='';
+  document.getElementById('cantidad_st').value='$ 0';
+  selMetodoST.value='';
+  actualizarUIST();
+}
+
+function registrarMovimientoST(){
+  const key = selMetodoST.value;
+  const m = METODOS[key];
+  if(!m){ alert('Selecciona un método de envío para simular.'); return; }
+  const tercero = document.getElementById('tercero_st').value || '(sin nombre)';
+  const cantidad = readMoney('cantidad_st');
+  if(cantidad <= 0){ alert('Ingresa una cantidad mayor a 0 para simular.'); return; }
+
+  const dispersion = calcDispersionST(cantidad, key);
+  const bancaria = getBancariaST(key);
+  const total = bancaria + dispersion;
+  const saldoTerceroDespues = cantidad - bancaria - dispersion;
+  const referencia = document.getElementById('referencia_st').value || '—';
+
+  const cajaAntes = cajaActualST;
+  const deudaAntes = deudaActualST;
+  const cupoAntes = cupoDe(deudaAntes);
+
+  if(m.pasaCaja) cajaActualST = cajaActualST + cantidad;
+  if(m.compensaBanco) deudaActualST = deudaActualST - cantidad;
+
+  const cajaDespues = cajaActualST;
+  const deudaDespues = deudaActualST;
+  const cupoDespues = cupoDe(deudaDespues);
+
+  // ---- Saldos acumulados por tercero ----
+  const totalTercerosAntes = Object.values(saldosTercerosST).reduce((a,b)=>a+b,0);
+
+  const lenderAntes = saldosTercerosST[tercero] || 0;
+  const lenderDespues = lenderAntes + saldoTerceroDespues;
+  saldosTercerosST[tercero] = lenderDespues;
+
+  let receptorNombre = null, receptorAntes = null, receptorDespues = null;
+  if(m.needsAccount){
+    receptorNombre = document.getElementById('cuentaDestino_st').value;
+    receptorAntes = saldosTercerosST[receptorNombre] || 0;
+    receptorDespues = receptorAntes - cantidad;
+    saldosTercerosST[receptorNombre] = receptorDespues;
+  } else if(m.needsCorresponsal){
+    receptorNombre = document.getElementById('corresponsalDestino_st').value;
+    receptorAntes = saldosTercerosST[receptorNombre] || 0;
+    receptorDespues = receptorAntes - cantidad;
+    saldosTercerosST[receptorNombre] = receptorDespues;
+  }
+
+  const totalTercerosDespues = Object.values(saldosTercerosST).reduce((a,b)=>a+b,0);
+
+  pintarEstadoST();
+
+  contadorST++;
+  const item = {
+    n: contadorST,
+    metodo: m.label,
+    tercero, cantidad, referencia,
+    bancaria, dispersion, total,
+    saldoTerceroDespues,
+    needsAccount: m.needsAccount,
+    cuentaDestino: m.needsAccount ? document.getElementById('cuentaDestino_st').value : null,
+    needsCorresponsal: m.needsCorresponsal,
+    corresponsalDestino: m.needsCorresponsal ? document.getElementById('corresponsalDestino_st').value : null,
+    pasaCaja: m.pasaCaja,
+    compensaBanco: m.compensaBanco,
+    cajaAntes, cajaDespues, deudaAntes, deudaDespues, cupoAntes, cupoDespues,
+    lenderAntes, lenderDespues, receptorNombre, receptorAntes, receptorDespues,
+    totalTercerosAntes, totalTercerosDespues,
+  };
+  historialST.unshift(item);
+  renderHistorialST();
+  mostrarResumenMovimiento(item);
+  document.getElementById('referencia_st').value='';
+}
+
+function renderHistorialST(){
+  const cont = document.getElementById('historial_st');
+  if(historialST.length===0){
+    cont.innerHTML = '<div class="empty-log">Aún no hay simulaciones registradas. Llena el formulario de arriba y da clic en "Registrar movimiento".</div>';
+    return;
+  }
+  cont.innerHTML = historialST.map(it=>{
+
+    const estadoBox = `<div class="box estado-box">
+      <h4>Estado del corresponsal</h4>
+      <table class="estado-table">
+        <tr><th></th><th>Caja</th><th>Banco</th><th>Cupo</th><th>Terceros (total)</th></tr>
+        <tr><td>Antes</td><td>${fmt(it.cajaAntes)}</td><td>${fmt(it.deudaAntes)}</td><td>${fmt(it.cupoAntes)}</td><td>${fmt(it.totalTercerosAntes)}</td></tr>
+        <tr><td>Después</td><td>${fmt(it.cajaDespues)}</td><td>${fmt(it.deudaDespues)}</td><td>${fmt(it.cupoDespues)}</td><td>${fmt(it.totalTercerosDespues)}</td></tr>
+      </table>
+      ${it.pasaCaja ? `<div class="hint" style="margin-top:6px;">Caja sube porque el préstamo fue en efectivo (entra directo, sin pasar a otro tercero).</div>` : ''}
+      ${it.compensaBanco ? `<div class="hint" style="margin-top:6px;">Deuda al banco baja porque se compensó directamente contra el propio CB.</div>` : ''}
+    </div>`;
+
+    let boxes = '';
+
+    boxes += `<div class="box">
+      <h4>Tercero que envía · ${it.tercero}</h4>
+      <div class="kv"><span class="a">Antes</span><span>${fmtSaldoTercero(it.lenderAntes)}</span></div>
+      <div class="kv"><span class="a">Después</span><span>${fmtSaldoTercero(it.lenderDespues)}</span></div>
+    </div>`;
+
+    if(it.needsAccount){
+      boxes += `<div class="box">
+        <h4>Tercero que recibe · ${it.cuentaDestino}</h4>
+        <div class="kv"><span class="a">Antes</span><span>${fmtSaldoTercero(it.receptorAntes)}</span></div>
+        <div class="kv"><span class="a">Después</span><span>${fmtSaldoTercero(it.receptorDespues)}</span></div>
+      </div>`;
+    }
+
+    if(it.needsCorresponsal){
+      boxes += `<div class="box">
+        <h4>Tercero que recibe · ${it.corresponsalDestino}</h4>
+        <div class="kv"><span class="a">Antes</span><span>${fmtSaldoTercero(it.receptorAntes)}</span></div>
+        <div class="kv"><span class="a">Después</span><span>${fmtSaldoTercero(it.receptorDespues)}</span></div>
+      </div>`;
+    }
+
+    boxes += `<div class="box commission-box">
+      <h4>Comisiones generadas</h4>
+      <div class="kv"><span class="a">Bancaria</span><span class="v">${fmt(it.bancaria)}</span></div>
+      <div class="kv"><span class="a">Dispersión</span><span class="v">${fmt(it.dispersion)}</span></div>
+      <div class="kv"><span class="a">Total</span><span class="v">${fmt(it.total)}</span></div>
+    </div>`;
+
+    return `<div class="log-card">
+      <div class="log-head">
+        <div class="titlebox">
+          <span class="num">#${it.n}</span>
+          <span class="metodo">${it.metodo}</span>
+          <span class="monto">${fmt(it.cantidad)}</span>
+          <span class="badge ${it.pasaCaja ? 'badge-amber':'badge-green'}">${it.pasaCaja? '1 movimiento · entra a caja':'1 movimiento · no pasa por caja'}</span>
+        </div>
+        <button class="del" onclick="borrarUnoST(${it.n})">Eliminar ✕</button>
+      </div>
+      <div class="log-grid-full">${estadoBox}</div>
+      <div class="log-grid">${boxes}</div>
+    </div>`;
+  }).join('');
+}
+
+function borrarUnoST(n){
+  historialST = historialST.filter(it=>it.n!==n);
+  renderHistorialST();
+}
+
+function borrarHistorialST(){
+  if(historialST.length && !confirm('¿Borrar todas las simulaciones del historial?')) return;
+  historialST = [];
+  renderHistorialST();
+}
+
+function descargarCSVST(){
+  if(historialST.length===0){ alert('No hay simulaciones para descargar.'); return; }
+  const headers = ['#','Metodo','Tercero','Cantidad','SaldoTerceroDespues','CuentaDestino','CorresponsalDestino','PasaCaja','CompensaBanco','ComisionBancaria','Dispersion','TotalComision','CajaAntes','CajaDespues','DeudaAntes','DeudaDespues','CupoAntes','CupoDespues'];
+  const rows = historialST.map(it=>[
+    it.n, it.metodo, it.tercero, it.cantidad, it.saldoTerceroDespues, it.cuentaDestino||'', it.corresponsalDestino||'',
+    it.pasaCaja?'SI':'NO', it.compensaBanco?'SI':'NO', it.bancaria, it.dispersion, it.total,
+    it.cajaAntes, it.cajaDespues, it.deudaAntes, it.deudaDespues, it.cupoAntes, it.cupoDespues
+  ]);
+  let csv = headers.join(';') + '\n' + rows.map(r=>r.join(';')).join('\n');
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'simulaciones_terceros_st.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+renderHistorialST();
+
+
+// ================= TAB 4: Depósitos - Caja o Tercero =================
+
+let destinoDeposito = 'caja';
+let categoriaDeposito = 'Depósitos';
+let terceroSeleccionado = null;
+let historialDepositos = [];
+let contadorDepositos = 0;
+
+const NOMBRE_CB = 'CB BARRIO CENTENARIO';
+const NOMBRE_CAJA = 'CAJA2-YOHANA';
+
+const TIPOS_POR_CATEGORIA = {
+  'Depósitos':      ['Consignación','Pago Cartera','Pago Tarjeta Crédito','Recarga Nequi','Recaudos'],
+  'Retiros':        ['Avance Tarjeta de Crédito','Retiro en Efectivo','Retiro Nequi','Retiro Tarjeta Débito','Otros Retiros'],
+  'Otros':          ['Saldo','Transferencia'],
+  'Terceros':       [],
+  'Compensación':   ['Compensación'],
+  'Transferencias': ['Transferencia entre cajero'],
+};
+
+const NECESITA_DESTINO = {
+  'Depósitos': true, 'Retiros': true,
+  'Otros': false, 'Terceros': false, 'Compensación': false, 'Transferencias': false,
+};
+
+function prepararCategoria(cat){
+  categoriaDeposito = cat;
+  document.querySelectorAll('#categoriaPills .pill-btn').forEach(b=>{
+    b.classList.toggle('active', b.dataset.cat===cat);
+  });
+  document.getElementById('movModalBar').textContent = `${cat} en el corresponsal ${NOMBRE_CB} - ${NOMBRE_CAJA}`;
+  document.getElementById('cantidadDeposito').value = '$ 0';
+  document.getElementById('buscarTercero').value = '';
+  terceroSeleccionado = null;
+
+  const sel = document.getElementById('tipoDeposito');
+  sel.innerHTML = TIPOS_POR_CATEGORIA[cat].map(t=>`<option>${t}</option>`).join('');
+  sel.onchange = actualizarDeposito;
+
+  const needsDestino = NECESITA_DESTINO[cat];
+  document.getElementById('destinoWrap').style.display = needsDestino ? 'block' : 'none';
+  setDestino('caja');
+  actualizarDeposito();
+}
+
+function abrirCategoria(cat){
+  if(cat === 'Terceros'){
+    document.querySelectorAll('#categoriaPills .pill-btn').forEach(b=>{
+      b.classList.toggle('active', b.dataset.cat===cat);
+    });
+    abrirTerceroModal();
+    return;
+  }
+  prepararCategoria(cat);
+  document.getElementById('depositoModalOverlay').classList.add('show');
+}
+
+function cerrarDepositoModal(){
+  document.getElementById('depositoModalOverlay').classList.remove('show');
+}
+
+function pintarEstadoPOS(){
+  const dashCaja = document.getElementById('dashCaja');
+  if(dashCaja){
+    dashCaja.textContent = fmt(cajaActual);
+    document.getElementById('dashBanco').textContent = fmt(deudaActual);
+    document.getElementById('dashCupo').textContent = fmt(cupoDe(deudaActual));
+  }
+  const posCaja = document.getElementById('posCaja');
+  if(posCaja){
+    posCaja.textContent = fmt(cajaActual);
+    document.getElementById('posBanco').textContent = fmt(deudaActual);
+    document.getElementById('posCupo').textContent = fmt(cupoDe(deudaActual));
+  }
+  renderVerificacionContable();
+}
+
+function renderVerificacionContable(){
+  const el = document.getElementById('vcCaja');
+  if(!el) return;
+  const sumaSaldoFavor = TERCEROS_DEMO.reduce((acc,t)=>acc+(t.saldoFavor||0), 0);
+  const sumaCxC = TERCEROS_DEMO.reduce((acc,t)=>acc+(t.cxc||0), 0);
+  const sumaComisiones = TERCEROS_DEMO.reduce((acc,t)=>acc+(t.comisionGenerada||0), 0);
+  const totalEsperado = cajaActual + sumaCxC - sumaSaldoFavor - sumaComisiones;
+
+  document.getElementById('vcCaja').textContent = fmt(cajaActual);
+  document.getElementById('vcCxC').textContent = fmt(sumaCxC);
+  document.getElementById('vcSaldoFavor').textContent = fmt(sumaSaldoFavor);
+  document.getElementById('vcComisiones').textContent = fmt(sumaComisiones);
+  document.getElementById('vcTotal').textContent = fmt(totalEsperado);
+  document.getElementById('vcDeuda').textContent = fmt(deudaActual);
+
+  const cxcRows = TERCEROS_DEMO.filter(t=>t.cxc>0).map(t=>`<div class="fila"><span>${t.nombre}</span><span>${fmt(t.cxc)}</span></div>`).join('');
+  document.getElementById('vcCxCDetalle').innerHTML = cxcRows || '<div class="fila"><span>Sin terceros con CxC</span><span>$0</span></div>';
+
+  const cxpRows = TERCEROS_DEMO.filter(t=>t.saldoFavor>0).map(t=>`<div class="fila"><span>${t.nombre}</span><span>${fmt(t.saldoFavor)}</span></div>`).join('');
+  document.getElementById('vcCxPDetalle').innerHTML = cxpRows || '<div class="fila"><span>Sin terceros con CxP</span><span>$0</span></div>';
+
+  const comisionRows = TERCEROS_DEMO.filter(t=>t.comisionGenerada>0).map(t=>`<div class="fila"><span>${t.nombre}</span><span>${fmt(t.comisionGenerada)}</span></div>`).join('');
+  document.getElementById('vcComisionesDetalle').innerHTML = comisionRows || '<div class="fila"><span>Sin comisiones generadas</span><span>$0</span></div>';
+
+  // Pilar 3: Deuda al Banco — se resalta si queda negativa (el banco le debería al CB)
+  const pilarBanco = document.getElementById('vcPilarBanco');
+  const bancoNota = document.getElementById('vcBancoNota');
+  if(deudaActual < 0){
+    pilarBanco.classList.add('banco-negativo');
+    bancoNota.style.display = 'block';
+    bancoNota.textContent = 'La deuda al banco es negativa: en este momento sería el banco quien le debe al corresponsal.';
+  } else {
+    pilarBanco.classList.remove('banco-negativo');
+    bancoNota.style.display = 'none';
+  }
+
+  const resultado = document.getElementById('vcResultado');
+  if(totalEsperado === deudaActual){
+    resultado.style.background = 'var(--green-bg)';
+    resultado.innerHTML = `<span class="icon">✅</span><div class="txt"><strong>¡Cuadrado!</strong><span>El total esperado coincide con la deuda al banco.</span></div><div class="dif"><span class="lbl">Diferencia</span><span class="val" style="color:var(--green);">$0</span></div>`;
+  } else {
+    resultado.style.background = 'var(--red-bg)';
+    resultado.innerHTML = `<span class="icon">⚠️</span><div class="txt"><strong>No cuadra</strong><span>El total esperado no coincide con la deuda al banco.</span></div><div class="dif"><span class="lbl">Diferencia</span><span class="val" style="color:var(--red);">${fmt(Math.abs(totalEsperado-deudaActual))}</span></div>`;
+  }
+}
+
+function setDestino(val){
+  destinoDeposito = val;
+  document.querySelectorAll('#destinoToggle .segmented-btn').forEach(b=>{
+    b.classList.toggle('active', b.dataset.value===val);
+  });
+  document.getElementById('terceroPickerWrap').style.display = (val==='tercero') ? 'block' : 'none';
+  if(val==='caja'){ terceroSeleccionado = null; }
+  renderTerceroList();
+  actualizarDeposito();
+}
+
+function elegible(t, cantidad){
+  // El movimiento no puede superar ni la deuda del CB con ese tercero (saldo a favor)
+  // ni su cupo de crédito disponible, y el tercero debe estar habilitado para datáfono.
+  return t.datafono && ((t.saldoFavor >= cantidad) || (t.cupo >= cantidad));
+}
+
+function renderTerceroList(){
+  const cont = document.getElementById('terceroList');
+  const q = (document.getElementById('buscarTercero').value||'').toLowerCase();
+  const cantidad = readMoney('cantidadDeposito');
+  const filtrados = TERCEROS_DEMO.filter(t=>t.nombre.toLowerCase().includes(q));
+
+  const elegibles = filtrados.filter(t=>elegible(t, cantidad)).sort((a,b)=>a.nombre.localeCompare(b.nombre));
+  const noElegibles = filtrados.filter(t=>!elegible(t, cantidad)).sort((a,b)=>a.nombre.localeCompare(b.nombre));
+  const ordenados = [...elegibles, ...noElegibles].slice(0,10);
+
+  if(ordenados.length===0){
+    cont.innerHTML = '<div class="tercero-empty">No se encontraron terceros con ese nombre.</div>';
+    return;
+  }
+  cont.innerHTML = ordenados.map(t=>{
+    const ok = elegible(t, cantidad);
+    let estado;
+    if(!t.datafono) estado = `<span style="color:var(--muted);">No habilitado para datáfono</span>`;
+    else if(t.saldoFavor>0) estado = `<span style="color:var(--green);">CB le debe ${fmt(t.saldoFavor)}</span>`;
+    else if(t.cxc>0) estado = `<span style="color:var(--red);">Debe al CB (CxC) ${fmt(t.cxc)}</span>`;
+    else if(t.cupo>0) estado = `Sin saldo a favor`;
+    else estado = `Sin saldo ni cupo`;
+    if(ok){
+      return `<div class="tercero-row ${terceroSeleccionado===t.id?'selected':''}" onclick="seleccionarTercero(${t.id})">
+        <div>
+          <div class="nom">${t.nombre} [Saldo: ${fmt(t.saldoFavor - t.cxc)} - Crédito: ${fmt(t.cupo)}]</div>
+          <div class="meta">${estado} · Cupo: ${fmt(t.cupo)}</div>
+        </div>
+        <span class="elig" style="background:var(--green-bg);color:var(--green);">Seleccionar</span>
+      </div>`;
+    }
+    return `<div class="tercero-row tercero-disabled">
+      <div>
+        <div class="nom">${t.nombre} [Saldo: ${fmt(t.saldoFavor - t.cxc)} - Crédito: ${fmt(t.cupo)}]</div>
+        <div class="meta">${estado}${t.datafono ? ' · Cupo: ' + fmt(t.cupo) : ''}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function seleccionarTercero(id){
+  terceroSeleccionado = id;
+  renderTerceroList();
+  actualizarDeposito();
+}
+
+function actualizarDeposito(){
+  const cantidadInput = document.getElementById('cantidadDeposito');
+  const tipoSel = document.getElementById('tipoDeposito');
+  const esConsultaSaldo = categoriaDeposito==='Otros' && tipoSel && tipoSel.value==='Saldo';
+
+  if(esConsultaSaldo){
+    cantidadInput.disabled = true;
+    cantidadInput.value = '$ 0';
+  } else {
+    cantidadInput.disabled = false;
+  }
+
+  const cantidad = readMoney('cantidadDeposito');
+  const t = TERCEROS_DEMO.find(x=>x.id===terceroSeleccionado);
+  const esDeposito = categoriaDeposito==='Depósitos';
+  const esRetiro = categoriaDeposito==='Retiros';
+  const esCompensacion = categoriaDeposito==='Compensación';
+
+  let habilitado = true;
+  const warnBox = document.getElementById('terceroWarning');
+  warnBox.style.display = 'none';
+
+  function warn(texto){
+    habilitado = false;
+    warnBox.style.display = 'block';
+    warnBox.textContent = texto;
+  }
+
+  if(esConsultaSaldo){
+    // Es solo consulta, no transaccional: siempre habilitado, sin validaciones de monto.
+  } else if(categoriaDeposito==='Transferencias'){
+    warn('Transferencias aún no se valida en este ejercicio.');
+  } else if(esDeposito && cantidad > 3000000){
+    warn('Esta transacción no existe, verifique el monto (máximo $3.000.000 por el datáfono).');
+  } else if(esRetiro && (destinoDeposito==='caja' || !t) && cantidad > cajaActual){
+    warn('No hay fondos suficientes en caja para este movimiento.');
+  } else if(esRetiro && destinoDeposito==='tercero' && t && cantidad > cajaActual){
+    warn('No hay fondos suficientes en caja para este movimiento.');
+  } else if(esCompensacion && cantidad > cajaActual){
+    warn('No hay fondos suficientes en caja para este movimiento.');
+  } else if(esDeposito && cantidad > cupoDe(deudaActual)){
+    warn('No hay cupo disponible en este momento, intente más tarde.');
+  } else if(destinoDeposito==='tercero'){
+    if(!t){
+      habilitado = false;
+    } else if(elegible(t, cantidad)){
+      habilitado = true;
+    } else {
+      warn(`${t.nombre} no tiene cupo suficiente ni saldo a favor: esta operación NO SE PUEDE REALIZAR.`);
+    }
+  }
+
+  document.getElementById('btnRegistrarDeposito').disabled = !habilitado;
+}
+
+function limpiarDeposito(){
+  document.getElementById('cantidadDeposito').value = '$ 0';
+  document.getElementById('buscarTercero').value = '';
+  setDestino('caja');
+}
+
+const MOVIMIENTOS_SEED = [
+  {fecha:'04-07-2026 09:04 pm', tipo:'Saldo', valor:0, efectivo:4000000, nota:'Consulta'},
+];
+
+function registrarDeposito(){
+  const tipo = document.getElementById('tipoDeposito').value;
+  const esConsultaSaldo = categoriaDeposito==='Otros' && tipo==='Saldo';
+
+  if(esConsultaSaldo){
+    contadorDepositos++;
+    const ahora = new Date();
+    const fechaTxt = ahora.toLocaleDateString('es-CO') + ' ' + ahora.toLocaleTimeString('es-CO', {hour:'2-digit',minute:'2-digit'});
+    historialDepositos.unshift({
+      n:contadorDepositos, fecha:fechaTxt, tipo, valor:0, efectivo: cajaActual,
+      nota:'Consulta', destino:null, tercero:null,
+      cajaDelta:0, deudaDelta:0, terceroRef:null, saldoFavorDelta:0, cxcDelta:0, cupoDelta:0,
+    });
+    renderMovimientosTabla();
+    cerrarDepositoModal();
+    mostrarResumenGenerico(`<strong>[Saldo]</strong> Consulta realizada. No afecta caja, banco ni cupo.`);
+    return;
+  }
+
+  const cantidad = readMoney('cantidadDeposito');
+  if(cantidad<=0){ alert('Ingresa una cantidad mayor a 0.'); return; }
+  if(categoriaDeposito==='Transferencias'){ alert('Transferencias aún no se valida en este ejercicio.'); return; }
+  const t = TERCEROS_DEMO.find(x=>x.id===terceroSeleccionado);
+  const cajaAntes = cajaActual, deudaAntes = deudaActual, cupoAntes = cupoDe(deudaActual);
+  const lenderAntes = t ? ((t.saldoFavor||0) - (t.cxc||0)) : 0;
+  const esDeposito = categoriaDeposito==='Depósitos';
+  const esRetiro = categoriaDeposito==='Retiros';
+  const esCompensacion = categoriaDeposito==='Compensación';
+
+  // Validaciones (por seguridad, además del botón ya deshabilitado)
+  if(esDeposito && cantidad > 3000000){
+    alert('Esta transacción no existe, verifique el monto (máximo $3.000.000 por el datáfono).');
+    return;
+  }
+  if(esRetiro && cantidad > cajaActual){
+    alert('No hay fondos suficientes en caja para este movimiento.');
+    return;
+  }
+  if(esCompensacion && cantidad > cajaActual){
+    alert('No hay fondos suficientes en caja para este movimiento.');
+    return;
+  }
+  if(esDeposito && cantidad > cupoDe(deudaActual)){
+    alert('No hay cupo disponible en este momento, intente más tarde.');
+    return;
+  }
+  if(destinoDeposito==='tercero' && t && !elegible(t, cantidad)){
+    alert(`${t.nombre} no tiene cupo suficiente ni saldo a favor: esta operación NO SE PUEDE REALIZAR.`);
+    return;
+  }
+
+  let msg;
+  let bancaria = 0, dispersion = 0, comisionTotal = 0;
+  let cajaDelta = 0, deudaDelta = 0, saldoFavorDelta = 0, cxcDelta = 0, cupoDelta = 0;
+
+  if(destinoDeposito==='caja' || !t){
+    // Caja del cajero se afecta directo, igual que hoy
+    if(esDeposito){ cajaDelta = cantidad; deudaDelta = cantidad; }
+    else if(esRetiro){ cajaDelta = -cantidad; deudaDelta = -cantidad; }
+    else if(esCompensacion){ cajaDelta = -cantidad; deudaDelta = -cantidad; }
+    cajaActual += cajaDelta; deudaActual += deudaDelta;
+    if(esDeposito || esRetiro || esCompensacion) pintarEstado();
+    msg = esCompensacion
+      ? `<strong>[${tipo}]</strong> por ${fmt(cantidad)} compensado correctamente contra la deuda del CB con el banco.`
+      : `<strong>[${tipo}]</strong> por ${fmt(cantidad)} registrado correctamente en caja.`;
+  } else {
+    // Con cargo a un tercero: la caja solo se mueve en Retiros (se entrega efectivo),
+    // en Depósitos la caja no se toca (el dinero se descuenta del saldo del tercero).
+    // La deuda al banco se mueve siempre por categoría (Depósito sube, Retiro baja),
+    // ya que sigue siendo un movimiento de corresponsalía con el banco.
+    if(esDeposito){
+      deudaDelta = cantidad;
+    } else if(esRetiro){
+      cajaDelta = -cantidad;
+      deudaDelta = -cantidad;
+    }
+    cajaActual += cajaDelta; deudaActual += deudaDelta;
+    if(esDeposito || esRetiro) pintarEstado();
+
+    // Los movimientos de Depósito/Retiro solicitados por un tercero NO generan comisión:
+    // solo disminuyen la deuda del corresponsal con el tercero (saldo a favor) o su cupo asignado.
+    // La comisión (bancaria + dispersión) solo aplica al Préstamo de Tercero (modal de Terceros).
+
+    if(t.saldoFavor>0 && cantidad<=t.saldoFavor){
+      const nuevoSaldo = Math.max(0, t.saldoFavor - cantidad);
+      saldoFavorDelta = t.saldoFavor - nuevoSaldo;
+      t.saldoFavor = nuevoSaldo;
+      msg = esRetiro
+        ? `<strong>[${tipo}]</strong> por ${fmt(cantidad)} entregado en efectivo y descontado correctamente del saldo a favor de <strong>${t.nombre}</strong>, quedando el CB debiéndole ${fmt(nuevoSaldo)}.`
+        : `<strong>[${tipo}]</strong> por ${fmt(cantidad)} descontado correctamente del saldo a favor de <strong>${t.nombre}</strong>, quedando el CB debiéndole ${fmt(nuevoSaldo)}.`;
+    } else {
+      // Se aplica contra el cupo del tercero: ahora el tercero le queda debiendo (CxC) al CB
+      cxcDelta = cantidad;
+      cupoDelta = -cantidad;
+      t.cxc = (t.cxc||0) + cxcDelta;
+      t.cupo = Math.max(0, t.cupo + cupoDelta);
+      msg = esRetiro
+        ? `<strong>[${tipo}]</strong> por ${fmt(cantidad)} entregado en efectivo con cargo al cupo de <strong>${t.nombre}</strong>, que ahora le debe al CB ${fmt(t.cxc)}.`
+        : `<strong>[${tipo}]</strong> por ${fmt(cantidad)} aplicado correctamente contra el cupo de <strong>${t.nombre}</strong>, que ahora le debe al CB ${fmt(t.cxc)}.`;
+    }
+    renderVerificacionContable();
+  }
+
+  contadorDepositos++;
+  const ahora = new Date();
+  const fechaTxt = ahora.toLocaleDateString('es-CO') + ' ' + ahora.toLocaleTimeString('es-CO', {hour:'2-digit',minute:'2-digit'});
+  historialDepositos.unshift({
+    n:contadorDepositos, fecha:fechaTxt, tipo, valor:cantidad,
+    efectivo: cajaActual,
+    nota: t ? t.nombre : '-', destino:destinoDeposito, tercero: t?t.nombre:null,
+    cajaDelta, deudaDelta, terceroRef: t||null, saldoFavorDelta, cxcDelta, cupoDelta,
+    esTercero: (destinoDeposito==='tercero' && !!t),
+    metodo: tipo,
+    cajaAntes, cajaDespues: cajaActual, deudaAntes, deudaDespues: deudaActual,
+    cupoAntes, cupoDespues: cupoDe(deudaActual),
+    lenderAntes, lenderDespues: t ? ((t.saldoFavor||0) - (t.cxc||0)) : 0,
+    bancaria, dispersion, comisionTotal,
+  });
+  renderMovimientosTabla();
+  renderHistorialTercerosTM();
+  cerrarDepositoModal();
+  mostrarResumenGenerico(msg);
+}
+
+function renderMovimientosTabla(){
+  const body = document.getElementById('movimientosTablaBody');
+  const filas = [...historialDepositos, ...MOVIMIENTOS_SEED];
+  body.innerHTML = filas.map((it, idx)=>`
+    <tr>
+      <td>${it.fecha}</td>
+      <td>${it.tipo}</td>
+      <td>${fmt(it.valor)}</td>
+      <td>${fmt(it.efectivo)}</td>
+      <td>${it.nota}</td>
+      <td><button class="mov-eliminar" onclick="eliminarMovimiento(${idx})">🗑 ELIMINAR</button></td>
+    </tr>`).join('');
+  const total = filas.length;
+  document.getElementById('movMostrando').textContent = `Mostrando 1 - ${total} de ${total}`;
+}
+
+function eliminarMovimiento(idx){
+  if(idx < historialDepositos.length){
+    const item = historialDepositos[idx];
+    cajaActual -= (item.cajaDelta||0);
+    deudaActual -= (item.deudaDelta||0);
+    if(item.terceroRef){
+      if(item.saldoFavorDelta) item.terceroRef.saldoFavor += item.saldoFavorDelta;
+      if(item.cxcDelta) item.terceroRef.cxc = Math.max(0, (item.terceroRef.cxc||0) - item.cxcDelta);
+      if(item.cupoDelta) item.terceroRef.cupo -= item.cupoDelta;
+      if(item.comisionDelta) item.terceroRef.comisionGenerada = Math.max(0, (item.terceroRef.comisionGenerada||0) - item.comisionDelta);
+    }
+    if(item.receptorRef && item.receptorCxcDelta){
+      item.receptorRef.cxc = Math.max(0, (item.receptorRef.cxc||0) - item.receptorCxcDelta);
+    }
+    pintarEstado();
+    if(item.esTercero) renderVerificacionContable();
+    historialDepositos.splice(idx, 1);
+  }
+  renderMovimientosTabla();
+  renderHistorialTercerosTM();
+}
+
+function mostrarResumenGenerico(msgHtml){
+  document.getElementById('modalMsg').innerHTML = msgHtml;
+  document.getElementById('modalOverlay').classList.add('show');
+}
+
+// ================= TAB 8: Modal de Terceros dentro del Simulador Cajero =================
+// Funciona igual que el popup "Registrar movimiento" de la pestaña Terceros,
+// pero sus movimientos afectan el mismo estado (caja/banco/cupo) y quedan
+// registrados en la misma tabla de Movimientos del dashboard del cajero.
+
+const selMetodoTM = document.getElementById('metodo_tm');
+if(selMetodoTM){
+  Object.entries(METODOS).forEach(([key,m])=>{
+    const opt = document.createElement('option');
+    opt.value = key; opt.textContent = m.label;
+    selMetodoTM.appendChild(opt);
+  });
+  selMetodoTM.addEventListener('change', actualizarUITM);
+}
+
+function actualizarTipoTransaccionTM(){
+  const val = document.getElementById('tipoTransaccion_tm').value;
+  const esPrestamoTercero = (val === 'prestamo_tercero');
+  document.querySelectorAll('.campos-prestamo-tm').forEach(el=>{
+    el.style.display = esPrestamoTercero ? 'block' : 'none';
+  });
+  document.getElementById('tipoPendienteNote_tm').style.display = esPrestamoTercero ? 'none' : 'block';
+  actualizarPreviewTM();
+}
+
+function actualizarUITM(){
+  const key = selMetodoTM.value;
+  const m = METODOS[key];
+  document.getElementById('cuentaDestinoWrap_tm').style.display = (m && m.needsAccount) ? 'block' : 'none';
+  document.getElementById('corresponsalDestinoWrap_tm').style.display = (m && m.needsCorresponsal) ? 'block' : 'none';
+  document.getElementById('compensaNote_tm').style.display = (m && m.compensaBanco) ? 'block' : 'none';
+  actualizarPreviewTM();
+}
+
+function pintarEstadoTM(){
+  document.getElementById('tmCaja').textContent = fmt(cajaActual);
+  document.getElementById('tmBanco').textContent = fmt(deudaActual);
+  document.getElementById('tmCupo').textContent = fmt(cupoDe(deudaActual));
+}
+
+function actualizarPreviewTM(){
+  const tipo = document.getElementById('tipoTransaccion_tm').value;
+  const key = selMetodoTM.value;
+  const m = METODOS[key];
+  const cantidad = readMoney('cantidad_tm');
+  const warnBox = document.getElementById('terceroModalWarning');
+  let habilitado = true;
+  let texto = '';
+
+  if(tipo !== 'prestamo_tercero'){
+    habilitado = false;
+  } else if(!m){
+    habilitado = false;
+  } else if(cantidad<=0){
+    habilitado = false;
+  }
+
+  warnBox.style.display = texto ? 'block' : 'none';
+  warnBox.textContent = texto;
+  const btn = document.getElementById('btnRegistrarTM');
+  if(btn) btn.disabled = !habilitado;
+}
+
+function abrirTerceroModal(){
+  const nombreNormalizado = normalizarNombre(document.getElementById('terceroNombre_st').value || 'Mauricio Chará');
+  document.getElementById('tercero_tm').innerHTML = `<option value="${nombreNormalizado}">${nombreNormalizado}</option>`;
+  document.getElementById('tipoTransaccion_tm').value = 'prestamo_tercero';
+  document.getElementById('referencia_tm').value = '';
+  document.getElementById('cantidad_tm').value = '$ 0';
+  selMetodoTM.value = '';
+  pintarEstadoTM();
+  actualizarTipoTransaccionTM();
+  actualizarUITM();
+  document.getElementById('terceroModalOverlay').classList.add('show');
+}
+
+function cerrarTerceroModal(){
+  document.getElementById('terceroModalOverlay').classList.remove('show');
+}
+
+// ================= Estado de Terceros (en vivo, dentro del Simulador Dashboard Cajero) =================
+function abrirEstadoTercerosDashModal(){
+  document.getElementById('buscarEstadoTercerosDash').value = '';
+  renderEstadoTercerosDash();
+  document.getElementById('estadoTercerosModalOverlay').classList.add('show');
+}
+function cerrarEstadoTercerosDashModal(){
+  document.getElementById('estadoTercerosModalOverlay').classList.remove('show');
+}
+function renderEstadoTercerosDash(){
+  const q = (document.getElementById('buscarEstadoTercerosDash').value||'').toLowerCase();
+  const ordenado = [...TERCEROS_DEMO]
+    .filter(t=>t.nombre.toLowerCase().includes(q))
+    .map(t=>({nombre:t.nombre, neto:(t.saldoFavor||0)-(t.cxc||0)}))
+    .filter(t=>t.neto!==0)
+    .sort((a,b)=>a.nombre.localeCompare(b.nombre));
+  const cont = document.getElementById('listaEstadoTercerosDash');
+  if(ordenado.length===0){
+    cont.innerHTML = '<div class="tercero-empty">No se encontraron terceros con ese nombre.</div>';
+    return;
+  }
+  cont.innerHTML = ordenado.map(t=>{
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);">
+      <span style="font-size:13.5px;">${t.nombre}</span>
+      <span class="mono" style="font-size:13.5px;${t.neto<0?'color:var(--red);':'color:var(--text);'}">${fmt(Math.abs(t.neto))}</span>
+    </div>`;
+  }).join('');
+}
+
+// ================= Comisiones de Terceros (en vivo, ventana del Cambio 5 de Rol Cajero) =================
+// Datos de ejemplo (setup del demo) tal como se definieron en Cambio 5 de Rol Cajero.
+// Se combinan con el tercero real del simulador (Mauricio Chará) si ya generó comisión desde un Préstamo de Tercero.
+// Igual que el Detalle de la Conciliación, arranca en ceros: solo aparecen terceros aquí
+// una vez que un Préstamo de Tercero les haya generado comisión en esta simulación.
+
+function generarMovimientosTercero(t){
+  const saldo = t.valor || 0;
+  const n = Math.min(Math.max(t.movimientos || 1, 1), 4);
+  const tiposIngreso = ['Préstamo de Terceros', 'Pago de Terceros'];
+  const tiposEgreso = ['Pago a Tercero', 'Préstamo a Tercero'];
+  const cajerosDemo = ['Soraya Monterrosa', 'Yohana Monterrosa', 'Anyela Urrutia'];
+  const filas = [];
+  let acumulado = 0;
+  const base = Math.round(saldo / n) || 50000;
+  for(let i = 0; i < n; i++){
+    const esUltimo = i === n - 1;
+    const mov = esUltimo ? (saldo - acumulado) : base;
+    acumulado += mov;
+    const dia = 26 - i;
+    const hora = 9 + i * 2;
+    const min = (i * 17) % 60;
+    const tipo = mov >= 0 ? tiposIngreso[i % tiposIngreso.length] : tiposEgreso[i % tiposEgreso.length];
+    filas.push({
+      fechaHora: `${dia}/06/2026 ${hora}:${min < 10 ? '0' : ''}${min} ${hora < 12 ? 'a.m.' : 'p.m.'}`,
+      tipo: tipo,
+      referencia: `37180809${i}${i}`,
+      cajero: cajerosDemo[i % cajerosDemo.length],
+      ingreso: mov > 0 ? mov : null,
+      egreso: mov < 0 ? Math.abs(mov) : null,
+      saldo: acumulado
+    });
+  }
+  return filas;
+}
+
+function renderMovimientosTerceroUI(t, p, incluirCajero){
+  const tituloEl = document.getElementById(p + 'Titulo');
+  if(tituloEl) tituloEl.textContent = 'Movimientos de ' + t.nombre;
+  const tituloBar = document.getElementById(p + 'TituloBar');
+  if(tituloBar) tituloBar.textContent = `Movimientos de ${t.nombre} - CB [12029]`;
+
+  const saldo = t.valor || 0;
+  const labelSaldo = document.getElementById(p + 'LabelSaldo');
+  if(labelSaldo) labelSaldo.textContent = saldo >= 0 ? 'Saldo actual (CB le debe)' : 'Saldo actual (le debe al CB)';
+  const valorSaldo = document.getElementById(p + 'ValorSaldo');
+  valorSaldo.textContent = fmt(saldo);
+  valorSaldo.style.color = saldo < 0 ? 'var(--red)' : '';
+  const iconoSaldo = document.getElementById(p + 'IconoSaldo');
+  if(iconoSaldo) iconoSaldo.className = 'resumen-icon ' + (saldo < 0 ? 'ic-orange' : 'ic-green');
+
+  document.getElementById(p + 'ValorCupo').textContent = fmt(t.cupo || 0);
+  document.getElementById(p + 'ValorComision').textContent = fmt((t.comisionBancaria || 0) + (t.comisionDispersion || 0));
+
+  const filas = generarMovimientosTercero(t);
+  const tabla = document.getElementById(p + 'Tabla');
+  const colCajero = incluirCajero ? '<th>Cajero</th>' : '';
+  tabla.innerHTML = `<tr><th>Fecha y hora</th><th>Tipo de mov</th><th>Referencia</th>${colCajero}<th style="text-align:right;">Ingreso</th><th style="text-align:right;">Egreso</th><th style="text-align:right;">Saldo</th></tr>`
+    + filas.map(f => `<tr>
+        <td>${f.fechaHora}</td>
+        <td>${f.tipo}</td>
+        <td>${f.referencia}</td>
+        ${incluirCajero ? `<td>${f.cajero}</td>` : ''}
+        <td style="text-align:right;color:#1e6b3a;">${f.ingreso !== null ? fmt(f.ingreso) : '—'}</td>
+        <td style="text-align:right;color:#c0392b;">${f.egreso !== null ? fmt(f.egreso) : '—'}</td>
+        <td style="text-align:right;font-weight:700;">${fmt(f.saldo)}</td>
+      </tr>`).join('');
+}
+
+function poblarSelectorMovimientos(selectorId, seleccionActual){
+  const sel = document.getElementById(selectorId);
+  const ordenados = [...tercerosCD].sort((a,b) => a.nombre.localeCompare(b.nombre));
+  sel.innerHTML = '<option value="">-- Selecciona un tercero --</option>' + ordenados.map(t => `<option value="${t.nombre}">${t.nombre}</option>`).join('');
+  if(tercerosCD.some(t => t.nombre === seleccionActual)) sel.value = seleccionActual;
+}
+
+let terceroActualMovCajeroDash = null;
+function abrirMovimientosTerceroDashModal(){
+  poblarSelectorMovimientos('mvCajeroDashSelector', 'Jose Ramirez');
+  seleccionarTerceroMovCajeroDash('Jose Ramirez');
+  document.getElementById('movimientosTerceroDashModalOverlay').classList.add('show');
+}
+function cerrarMovimientosTerceroDashModal(){
+  document.getElementById('movimientosTerceroDashModalOverlay').classList.remove('show');
+}
+function seleccionarTerceroMovCajeroDash(nombre){
+  const t = tercerosCD.find(x => x.nombre === nombre);
+  if(!t) return;
+  terceroActualMovCajeroDash = t;
+  renderMovimientosTerceroUI(t, 'mvCajeroDash');
+}
+function buscarMovimientosCajeroDash(){
+  if(terceroActualMovCajeroDash) renderMovimientosTerceroUI(terceroActualMovCajeroDash, 'mvCajeroDash');
+}
+function limpiarMovimientosCajeroDash(){
+  document.getElementById('mvCajeroDashDesde').value = '2026-06-01';
+  document.getElementById('mvCajeroDashHasta').value = '2026-06-30';
+  if(terceroActualMovCajeroDash) renderMovimientosTerceroUI(terceroActualMovCajeroDash, 'mvCajeroDash');
+}
+
+function abrirComisionesTercerosModal(){
+  document.getElementById('buscarComisionesDash').value = '';
+  renderComisionesTercerosDash();
+  document.getElementById('comisionesTercerosModalOverlay').classList.add('show');
+}
+function cerrarComisionesTercerosModal(){
+  document.getElementById('comisionesTercerosModalOverlay').classList.remove('show');
+}
+function retirarComisionMauricioDash(){
+  const t = TERCEROS_DEMO.find(x=>x.id===1);
+  if(t) t.comisionGenerada = 0;
+  renderComisionesTercerosDash();
+}
+function renderComisionesTercerosDash(){
+  const q = (document.getElementById('buscarComisionesDash').value||'').toLowerCase();
+
+  let filas = [];
+  const t = TERCEROS_DEMO.find(x=>x.id===1);
+  if(t && (t.comisionGenerada||0) > 0){
+    filas.push({nombre:t.nombre, valor:t.comisionGenerada, fecha: t.ultimaComisionFecha || '—'});
+  }
+
+  filas = filas.filter(it=>it.nombre.toLowerCase().includes(q)).sort((a,b)=>a.nombre.localeCompare(b.nombre));
+
+  const cont = document.getElementById('tablaComisionesDash');
+  if(filas.length===0){
+    cont.innerHTML = '<div class="tercero-empty">No hay comisiones pendientes.</div>';
+  } else {
+    cont.innerHTML = `<table class="setup-table">
+      <tr><th>Nombre del tercero</th><th style="text-align:right;">Comisión acumulada</th><th>Última actualización</th><th style="text-align:right;">Acción</th></tr>
+      ${filas.map(it=>`<tr><td>${it.nombre}</td><td class="mono" style="text-align:right;">${fmt(it.valor)}</td><td>${it.fecha}</td><td style="text-align:right;"><button class="btn-dark-small" onclick="retirarComisionMauricioDash()">Retirar comisión</button></td></tr>`).join('')}
+    </table>`;
+  }
+
+  const total = filas.reduce((acc,it)=>acc+it.valor, 0);
+  document.getElementById('comisionesDashConteo').textContent = filas.length;
+  document.getElementById('comisionesDashTotal').textContent = fmt(total);
+}
+
+function registrarTerceroModal(){
+  const tipo = document.getElementById('tipoTransaccion_tm').value;
+  if(tipo !== 'prestamo_tercero'){
+    alert('La lógica de este tipo de transacción todavía no se ha definido en el simulador.');
+    return;
+  }
+  const key = selMetodoTM.value;
+  const m = METODOS[key];
+  if(!m){ alert('Selecciona un método de envío para registrar.'); return; }
+  const cantidad = readMoney('cantidad_tm');
+  if(cantidad<=0){ alert('Ingresa una cantidad mayor a 0.'); return; }
+
+  const t = TERCEROS_DEMO.find(x=>x.id===1); // Mauricio Chará
+  const nombreTercero = document.getElementById('tercero_tm').value || (t ? t.nombre : 'Tercero');
+  const referencia = document.getElementById('referencia_tm').value || '—';
+
+  // Comisión bancaria y dispersión: se heredan de la configuración del formulario
+  // de creación de tercero (pestaña Terceros), igual que en ese simulador.
+  const cfg = terceroConfigST();
+  const bancaria = m.bancaria ? cfg.bancaria : 0;
+  const mult = cfg.dispersion[key] || 0;
+  const dispersion = Math.ceil((cantidad*mult/1000)/1000)*1000;
+  const comisionTotal = bancaria + dispersion;
+  const saldoNeto = cantidad - comisionTotal;
+
+  const cajaAntes = cajaActual, deudaAntes = deudaActual, cupoAntes = cupoDe(deudaActual);
+  const lenderAntes = t ? ((t.saldoFavor||0) - (t.cxc||0)) : 0;
+
+  let cajaDelta = 0, deudaDelta = 0, saldoFavorDelta = 0;
+
+  if(m.pasaCaja){ cajaDelta = cantidad; deudaDelta = cantidad; }
+  if(m.compensaBanco){ deudaDelta = -cantidad; }
+  cajaActual += cajaDelta;
+  deudaActual += deudaDelta;
+  pintarEstado();
+
+  let receptorTxt = '';
+  let receptorNombre = null, receptorRef = null, receptorAntes = null, receptorDespues = null, receptorCxcDelta = 0;
+
+  if(t){
+    // El préstamo primero salda la deuda que el tercero tuviera con el CB (cxc, por cupo usado
+    // en depósitos/retiros anteriores), y solo el remanente se suma como saldo a favor.
+    const netoAntes = (t.saldoFavor||0) - (t.cxc||0);
+    const netoDespues = netoAntes + saldoNeto;
+    if(netoDespues >= 0){
+      t.saldoFavor = netoDespues;
+      t.cxc = 0;
+    } else {
+      t.saldoFavor = 0;
+      t.cxc = -netoDespues;
+    }
+    t.comisionGenerada = (t.comisionGenerada||0) + comisionTotal;
+    if(comisionTotal > 0){
+      const ahoraComision = new Date();
+      t.ultimaComisionFecha = ahoraComision.toLocaleDateString('es-CO') + ' ' + ahoraComision.toLocaleTimeString('es-CO', {hour:'2-digit',minute:'2-digit'});
+    }
+    saldoFavorDelta = netoDespues - netoAntes;
+  }
+  if(m.needsAccount || m.needsCorresponsal){
+    receptorNombre = m.needsAccount
+      ? document.getElementById('cuentaDestino_tm').value
+      : document.getElementById('corresponsalDestino_tm').value;
+    receptorRef = TERCEROS_DEMO.find(x=>x.nombre===receptorNombre);
+    if(receptorRef){
+      receptorAntes = receptorRef.cxc||0;
+      receptorRef.cxc = receptorAntes + cantidad;
+      receptorDespues = receptorRef.cxc;
+      receptorCxcDelta = cantidad;
+    }
+    receptorTxt = m.needsAccount
+      ? ` y quedó reflejado como deuda de <strong>${receptorNombre}</strong> con el CB.`
+      : ` y quedó reflejado como deuda de <strong>${receptorNombre}</strong> (corresponsal externo) con el CB.`;
+  }
+
+  renderVerificacionContable();
+
+  contadorDepositos++;
+  const ahora = new Date();
+  const fechaTxt = ahora.toLocaleDateString('es-CO') + ' ' + ahora.toLocaleTimeString('es-CO', {hour:'2-digit',minute:'2-digit'});
+  historialDepositos.unshift({
+    n:contadorDepositos, fecha:fechaTxt, tipo: `Préstamo de Tercero (${m.label})`, valor:cantidad,
+    efectivo: cajaActual, nota: nombreTercero, destino:'tercero', tercero: nombreTercero,
+    cajaDelta, deudaDelta, terceroRef: t||null, saldoFavorDelta: -saldoFavorDelta, cxcDelta:0, cupoDelta:0,
+    comisionDelta: comisionTotal, esTercero:true, metodo: m.label, referencia,
+    bancaria, dispersion, comisionTotal,
+    cajaAntes, cajaDespues: cajaActual, deudaAntes, deudaDespues: deudaActual, cupoAntes, cupoDespues: cupoDe(deudaActual),
+    lenderAntes, lenderDespues: t ? ((t.saldoFavor||0) - (t.cxc||0)) : 0,
+    receptorNombre, receptorRef, receptorAntes, receptorDespues, receptorCxcDelta,
+  });
+  renderMovimientosTabla();
+  renderHistorialTercerosTM();
+  cerrarTerceroModal();
+  mostrarResumenGenerico(`<strong>[Préstamo de Tercero — ${m.label}]</strong> por ${fmt(cantidad)} de <strong>${nombreTercero}</strong>, sumado a su estado de cuenta${receptorTxt} Comisión generada: ${fmt(comisionTotal)} (bancaria ${fmt(bancaria)} + dispersión ${fmt(dispersion)}).`);
+}
+
+function renderHistorialTercerosTM(){
+  const cont = document.getElementById('historialTercerosTM');
+  if(!cont) return;
+  const items = historialDepositos.filter(it=>it.esTercero);
+  if(items.length===0){
+    cont.innerHTML = '<div class="empty-log">Aún no hay préstamos de terceros registrados desde este dashboard. Ábrelos con el botón "Terceros" de Movimientos.</div>';
+    return;
+  }
+  cont.innerHTML = items.map(it=>{
+    const idx = historialDepositos.findIndex(x=>x.n===it.n);
+
+    const estadoBox = `<div class="box estado-box">
+      <h4>Estado del corresponsal</h4>
+      <table class="estado-table">
+        <tr><th></th><th>Caja</th><th>Banco</th><th>Cupo</th></tr>
+        <tr><td>Antes</td><td>${fmt(it.cajaAntes)}</td><td>${fmt(it.deudaAntes)}</td><td>${fmt(it.cupoAntes)}</td></tr>
+        <tr><td>Después</td><td>${fmt(it.cajaDespues)}</td><td>${fmt(it.deudaDespues)}</td><td>${fmt(it.cupoDespues)}</td></tr>
+      </table>
+    </div>`;
+
+    let boxes = '';
+    boxes += `<div class="box">
+      <h4>Tercero que envía · ${it.tercero}</h4>
+      <div class="kv"><span class="a">Antes</span><span>${fmtSaldoTercero(it.lenderAntes)}</span></div>
+      <div class="kv"><span class="a">Después</span><span>${fmtSaldoTercero(it.lenderDespues)}</span></div>
+    </div>`;
+
+    if(it.receptorNombre){
+      boxes += `<div class="box">
+        <h4>Tercero que recibe · ${it.receptorNombre}</h4>
+        <div class="kv"><span class="a">Antes</span><span>${fmtSaldoTercero(-(it.receptorAntes||0))}</span></div>
+        <div class="kv"><span class="a">Después</span><span>${fmtSaldoTercero(-(it.receptorDespues||0))}</span></div>
+      </div>`;
+    }
+
+    boxes += `<div class="box commission-box">
+      <h4>Comisiones generadas</h4>
+      <div class="kv"><span class="a">Bancaria</span><span class="v">${fmt(it.bancaria)}</span></div>
+      <div class="kv"><span class="a">Dispersión</span><span class="v">${fmt(it.dispersion)}</span></div>
+      <div class="kv"><span class="a">Total (va a "Comisiones por pagar")</span><span class="v">${fmt(it.comisionTotal)}</span></div>
+    </div>`;
+
+    return `<div class="log-card">
+      <div class="log-head">
+        <div class="titlebox">
+          <span class="num">#${it.n}</span>
+          <span class="metodo">${it.metodo}</span>
+          <span class="monto">${fmt(it.valor)}</span>
+          <span class="badge ${it.cajaDelta ? 'badge-amber':'badge-green'}">${it.cajaDelta ? '1 movimiento · entra a caja':'1 movimiento · no pasa por caja'}</span>
+        </div>
+        <button class="del" onclick="eliminarMovimiento(${idx})">Eliminar ✕</button>
+      </div>
+      <div class="log-grid-full">${estadoBox}</div>
+      <div class="log-grid">${boxes}</div>
+    </div>`;
+  }).join('');
+}
+
+renderTerceroList();
+actualizarDeposito();
+renderMovimientosTabla();
+renderHistorialTercerosTM();
+prepararCategoria('Depósitos');
+pintarEstadoPOS();
+
+// ================= TAB 9: Informe de Conciliación Diaria (independiente) =================
+const CAJEROS_CD = ['Anyela Urrutia', 'Salome Garcia', 'Soraya Monterrosa', 'Yohana Monterrosa'];
+const CAJEROS_CD_DEFAULT = [150000, 250000, 800000, 2800000];
+
+let tercerosCD = [
+  { nombre: 'Mauricio Chará', valor: 3000000, cupo: 0, comisionBancaria: 17000, comisionDispersion: 2000, movimientos: 3 },
+  { nombre: 'Lucía López', valor: 1000000, cupo: 0, comisionBancaria: 15500, comisionDispersion: 1200, movimientos: 2 },
+  { nombre: 'Cta Nequi CB', valor: -2000000, cupo: 0, comisionBancaria: 0, comisionDispersion: 4000, movimientos: 2 },
+  { nombre: 'Luz Dary Gómez', valor: 500000, cupo: 2000000, comisionBancaria: 0, comisionDispersion: 15000, movimientos: 1 },
+  { nombre: 'Jose Ramirez', valor: -500000, cupo: 1000000, comisionBancaria: 0, comisionDispersion: 1000, movimientos: 1 },
+  { nombre: 'Cta Bancolombia CB', valor: -700000, cupo: 0, comisionBancaria: 0, comisionDispersion: 1400, movimientos: 1 },
+  { nombre: 'Carlos Gaviria', valor: 700000, cupo: 500000, comisionBancaria: 8500, comisionDispersion: 700, movimientos: 1 },
+  { nombre: '66174- Barrio Pajonal', valor: 0, cupo: 0, comisionBancaria: 0, comisionDispersion: 0, movimientos: 0 },
+  { nombre: 'Daviplata *5678', valor: 0, cupo: 0, comisionBancaria: 0, comisionDispersion: 0, movimientos: 0 },
+];
+let expandidoCD = false;
+let expandidoCajaCD = false;
+let contadorTerceroCD = tercerosCD.length;
+
+function formatMoneyInputSigned(el){
+  const negativo = el.value.trim().startsWith('-');
+  let raw = el.value.replace(/[^0-9]/g,'');
+  if(raw===''){ el.value = negativo ? '-' : ''; el.style.color = negativo ? 'var(--red)' : ''; return; }
+  raw = raw.replace(/^0+(?=\d)/,'');
+  const n = parseInt(raw,10)||0;
+  el.value = (negativo?'-':'') + '$ ' + n.toLocaleString('es-CO');
+  el.style.color = negativo ? 'var(--red)' : '';
+}
+
+function renderSetupCD(){
+  const cajerasCont = document.getElementById('cajerasSetupCD');
+  if(!cajerasCont) return;
+  cajerasCont.innerHTML = CAJEROS_CD.map((nombre, i) => `
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span style="font-size:13px;flex:1;">${nombre}</span>
+      <input type="text" inputmode="numeric" id="cajaValorCD_${i}" value="$ ${CAJEROS_CD_DEFAULT[i].toLocaleString('es-CO')}" style="width:120px;text-align:right;flex-shrink:0;" oninput="formatMoneyInput(this); renderConciliacionCD();">
+    </div>`).join('');
+
+  renderTercerosSetupCD();
+  renderConciliacionCD();
+}
+
+function renderTercerosSetupCD(){
+  const cont = document.getElementById('tercerosSetupCD');
+  if(!cont) return;
+  cont.innerHTML = tercerosCD.map((t, i) => `
+    <div style="display:flex;align-items:center;gap:6px;">
+      <input type="text" id="terceroNombreCD_${i}" value="${t.nombre}" style="flex:1;" oninput="tercerosCD[${i}].nombre=this.value; renderConciliacionCD();">
+      <input type="text" inputmode="numeric" id="terceroValorCD_${i}" value="${(t.valor<0?'-':'')}$ ${Math.abs(t.valor).toLocaleString('es-CO')}" style="width:110px;text-align:right;flex-shrink:0;${t.valor<0?'color:var(--red);':''}" oninput="formatMoneyInputSigned(this); tercerosCD[${i}].valor=readMoneySigned(this.id); renderConciliacionCD();">
+      <button class="btn-ghost btn-small" onclick="eliminarTerceroCD(${i})" title="Eliminar" style="flex-shrink:0;padding:4px 8px;">✕</button>
+    </div>`).join('');
+}
+
+function readMoneySigned(id){
+  const el = document.getElementById(id);
+  if(!el) return 0;
+  const negativo = String(el.value).trim().startsWith('-');
+  const raw = String(el.value).replace(/[^0-9]/g,'');
+  const n = raw ? parseInt(raw,10) : 0;
+  return negativo ? -n : n;
+}
+
+function agregarTerceroCD(){
+  contadorTerceroCD++;
+  tercerosCD.push({ nombre: 'Nuevo tercero ' + contadorTerceroCD, valor: 0, cupo: 0, comisionBancaria: 0, comisionDispersion: 0, movimientos: 0 });
+  renderTercerosSetupCD();
+  renderConciliacionCD();
+  if(typeof renderReporteComisionesRC === 'function') renderReporteComisionesRC();
+  if(typeof poblarSelectorTerceroEC === 'function') poblarSelectorTerceroEC();
+}
+
+function eliminarTerceroCD(idx){
+  tercerosCD.splice(idx, 1);
+  renderTercerosSetupCD();
+  renderConciliacionCD();
+  if(typeof poblarSelectorTerceroEC === 'function') poblarSelectorTerceroEC();
+}
+
+function toggleExpandirCD(){
+  expandidoCD = !expandidoCD;
+  renderConciliacionCD();
+}
+
+function toggleExpandirCajaCD(){
+  expandidoCajaCD = !expandidoCajaCD;
+  renderConciliacionCD();
+}
+
+function filaTablaCD(nombre, valor, colorearPorSigno){
+  const color = (colorearPorSigno && valor < 0) ? 'color:var(--red);' : '';
+  return `<tr><td style="padding:3px 0;white-space:nowrap;">${nombre}</td><td style="padding:3px 0;text-align:right;white-space:nowrap;${color}" class="mono">${fmt(valor)}</td></tr>`;
+}
+
+function renderConciliacionCD(){
+  const cajaListaCD = document.getElementById('cajaListaCD');
+  if(!cajaListaCD) return;
+
+  const cajasOrdenadas = CAJEROS_CD.map((nombre, i) => ({ nombre, valor: readMoney('cajaValorCD_'+i) }));
+  let cajaTotal = 0;
+  cajasOrdenadas.forEach(c => cajaTotal += c.valor);
+  const cajasVisibles = expandidoCajaCD ? cajasOrdenadas : cajasOrdenadas.slice(0, 3);
+  cajaListaCD.innerHTML = cajasVisibles.map(c => filaTablaCD(c.nombre, c.valor, false)).join('');
+  document.getElementById('saldoCajaCD').textContent = fmt(cajaTotal);
+  const btnExpandirCaja = document.getElementById('btnExpandirCajaCD');
+  if(cajasOrdenadas.length > 3){
+    btnExpandirCaja.style.visibility = 'visible';
+    btnExpandirCaja.textContent = expandidoCajaCD ? 'Ver menos' : `Ver todos (${cajasOrdenadas.length})`;
+  } else {
+    btnExpandirCaja.style.visibility = 'hidden';
+  }
+
+  let tercerosTotal = 0;
+  tercerosCD.forEach(t => tercerosTotal += (t.valor||0));
+  const tercerosOrdenados = [...tercerosCD].sort((a,b)=>a.nombre.localeCompare(b.nombre));
+  const listaVisible = expandidoCD ? tercerosOrdenados : tercerosOrdenados.slice(0, 3);
+  const tercerosListaCD = document.getElementById('tercerosListaCD');
+  tercerosListaCD.innerHTML = listaVisible.map(t => filaTablaCD(t.nombre, t.valor, true)).join('');
+  document.getElementById('saldoTercerosCD').textContent = fmt(tercerosTotal);
+  const btnExpandir = document.getElementById('btnExpandirCD');
+  if(tercerosCD.length > 3){
+    btnExpandir.style.visibility = 'visible';
+    btnExpandir.textContent = expandidoCD ? 'Ver menos' : `Ver todos (${tercerosCD.length})`;
+  } else {
+    btnExpandir.style.visibility = 'hidden';
+  }
+
+  const deudaBanco = readMoneySigned('deudaBancoCD');
+  document.getElementById('bancoListaCD').innerHTML = filaTablaCD('Saldo', deudaBanco, true);
+  const saldoBancoEl = document.getElementById('saldoBancoCD');
+  saldoBancoEl.textContent = fmt(deudaBanco);
+  saldoBancoEl.style.color = deudaBanco < 0 ? 'var(--red)' : '';
+
+  const balCaja = -cajaTotal;
+  const balTerceros = tercerosTotal;
+  const balBanco = deudaBanco;
+  const colorSigno = v => v < 0 ? 'color:var(--red);' : '';
+  document.getElementById('balCajaCD').innerHTML = `<span style="${colorSigno(balCaja)}">${fmt(balCaja)}</span>`;
+  document.getElementById('balTercerosCD').innerHTML = `<span style="${colorSigno(balTerceros)}">${fmt(balTerceros)}</span>`;
+  document.getElementById('balBancoCD').innerHTML = `<span style="${colorSigno(balBanco)}">${fmt(balBanco)}</span>`;
+
+  const saldoFinal = balCaja + balTerceros + balBanco;
+  document.getElementById('saldoFinalCD').textContent = fmt(saldoFinal);
+  document.getElementById('iconoFinalCD').textContent = saldoFinal === 0 ? '✅' : '⚠️';
+  document.getElementById('alertaCD').style.display = saldoFinal === 0 ? 'none' : 'block';
+
+  if(typeof renderInformeFinancieroIF === 'function') renderInformeFinancieroIF();
+  if(typeof renderReporteComisionesRC === 'function') renderReporteComisionesRC();
+}
+
+renderSetupCD();
+
+// ================= TAB 9: Informe Financiero (independiente, reutiliza datos de la Conciliación Diaria) =================
+function renderInformeFinancieroIF(){
+  const ifCaja = document.getElementById('ifCaja');
+  if(!ifCaja) return;
+
+  let cajaTotal = 0;
+  CAJEROS_CD.forEach((nombre, i) => cajaTotal += readMoney('cajaValorCD_'+i));
+
+  let tercerosTotal = 0;
+  tercerosCD.forEach(t => tercerosTotal += (t.valor||0));
+
+  const deudaBanco = readMoneySigned('deudaBancoCD');
+  const cupoDisponible = CUPO_ASIGNADO - deudaBanco;
+
+  document.getElementById('ifCaja').textContent = fmt(cajaTotal);
+  document.getElementById('ifTerceros').textContent = fmt(tercerosTotal);
+  document.getElementById('ifBanco').textContent = fmt(deudaBanco);
+  document.getElementById('ifCupo').textContent = fmt(cupoDisponible);
+
+  const balCaja = -cajaTotal;
+  const balTerceros = tercerosTotal;
+  const balBanco = deudaBanco;
+  const colorSigno = v => v < 0 ? 'color:var(--red);' : '';
+  document.getElementById('ifBalCaja').innerHTML = `<span style="${colorSigno(balCaja)}">${fmt(balCaja)}</span>`;
+  document.getElementById('ifBalTerceros').innerHTML = `<span style="${colorSigno(balTerceros)}">${fmt(balTerceros)}</span>`;
+  document.getElementById('ifBalBanco').innerHTML = `<span style="${colorSigno(balBanco)}">${fmt(balBanco)}</span>`;
+
+  const saldoFinal = balCaja + balTerceros + balBanco;
+  document.getElementById('ifSaldoFinal').textContent = fmt(saldoFinal);
+  document.getElementById('ifIconoFinal').textContent = saldoFinal === 0 ? '✅' : '⚠️';
+  document.getElementById('ifAlerta').style.display = saldoFinal === 0 ? 'none' : 'block';
+
+  document.getElementById('ifSegunAppSaldo').textContent = fmt(deudaBanco);
+  document.getElementById('ifSegunAppCupo').textContent = fmt(cupoDisponible);
+
+  compararSomosBancolombiaIF();
+}
+
+function compararSomosBancolombiaIF(){
+  const deudaBanco = readMoneySigned('deudaBancoCD');
+  const cupoDisponible = CUPO_ASIGNADO - deudaBanco;
+
+  const compararFila = (inputId, estadoId, valorApp) => {
+    const input = document.getElementById(inputId);
+    const estado = document.getElementById(estadoId);
+    if(!input.value.trim() || input.value.trim() === '-'){
+      estado.textContent = '–';
+      return;
+    }
+    const valorBanco = readMoneySigned(inputId);
+    estado.innerHTML = (valorBanco === valorApp) ? '✅' : '⚠️';
+  };
+  compararFila('ifBancoSaldo', 'ifEstadoSaldo', deudaBanco);
+  compararFila('ifBancoCupo', 'ifEstadoCupo', cupoDisponible);
+}
+
+function cerrarInformeFinancieroIF(){
+  document.getElementById('panelInformeFinancieroIF').style.display = 'none';
+}
+
+renderInformeFinancieroIF();
+
+// ================= TAB 9: Estado de Terceros (independiente) =================
+let expandidoET = false;
+
+function filaTerceroET(nombre, saldo, atenuado){
+  const colorSaldo = atenuado ? 'var(--muted)' : (saldo < 0 ? 'var(--red)' : 'var(--text)');
+  const colorNombre = atenuado ? 'var(--muted)' : 'var(--text)';
+  return `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);">
+    <span style="font-size:13.5px;color:${colorNombre};">${nombre}</span>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <span class="mono" style="font-size:13.5px;color:${colorSaldo};">${fmt(saldo)}</span>
+      <button class="btn-ghost btn-small" onclick="seleccionarReporteGR('estado_detallado'); verDetalleTerceroET('${nombre.replace(/'/g,"\\'")}')">Ver detalle</button>
+    </div>
+  </div>`;
+}
+
+function toggleVerMasET(){
+  expandidoET = !expandidoET;
+  renderEstadoTercerosET();
+}
+
+let terceroActualEC = null;
+
+function poblarSelectorTerceroEC(){
+  const selectorEC = document.getElementById('terceroSelectorEC');
+  if(!selectorEC) return;
+  const seleccionActual = selectorEC.value;
+  const ordenados = [...tercerosCD].sort((a,b)=>a.nombre.localeCompare(b.nombre));
+  selectorEC.innerHTML = '<option value="">-- Selecciona un tercero --</option>' +
+    ordenados.map(t=>`<option value="${t.nombre}">${t.nombre}</option>`).join('');
+  if(tercerosCD.some(t=>t.nombre===seleccionActual)) selectorEC.value = seleccionActual;
+}
+
+function verDetalleTerceroET(nombre){
+  const t = tercerosCD.find(x => x.nombre === nombre);
+  if(!t) return;
+  terceroActualEC = t;
+
+  document.getElementById('barraTituloEC').textContent = `Estado de Cuentas - ${t.nombre} - CB [12029]`;
+  const selectorEC = document.getElementById('terceroSelectorEC');
+  if(selectorEC) selectorEC.value = t.nombre;
+
+  const saldo = t.valor||0;
+  const labelSaldo = document.getElementById('labelSaldoEC');
+  const valorSaldo = document.getElementById('valorSaldoEC');
+  const iconoSaldo = document.getElementById('iconoSaldoEC');
+  labelSaldo.textContent = saldo >= 0 ? 'Saldo actual (CB le debe)' : 'Saldo actual (le debe al CB)';
+  valorSaldo.textContent = fmt(saldo);
+  valorSaldo.style.color = saldo < 0 ? 'var(--red)' : '';
+  iconoSaldo.className = 'resumen-icon ' + (saldo < 0 ? 'ic-orange' : 'ic-green');
+
+  document.getElementById('valorCupoEC').textContent = fmt(t.cupo||0);
+  document.getElementById('valorComisionEC').textContent = fmt((t.comisionBancaria||0)+(t.comisionDispersion||0));
+
+  renderMovimientosEC(t);
+
+  const panel = document.getElementById('panelEstadoCuentaEC');
+  panel.style.display = 'block';
+}
+
+function renderMovimientosEC(t){
+  const tabla = document.getElementById('tablaMovimientosEC');
+  const saldo = t.valor||0;
+  const valorMovimiento = Math.max(Math.abs(saldo), 100000);
+  const dispersion = -Math.round(valorMovimiento*0.002/1000)*1000;
+  tabla.innerHTML = `
+    <tr><th>Fecha</th><th>Descripción</th><th>Referencia 1</th><th>Referencia 2</th><th>Valor</th><th>Comisión bancaria</th><th>Dispersión</th><th>Saldo</th></tr>
+    <tr>
+      <td>26/06/2026</td>
+      <td>Préstamo de terceros</td>
+      <td>Transferencia</td>
+      <td>3718080900</td>
+      <td>${fmt(valorMovimiento)}</td>
+      <td>${fmt(t.comisionBancaria||0)}</td>
+      <td>${fmt(dispersion)}</td>
+      <td>${fmt(saldo)}</td>
+    </tr>`;
+}
+
+function buscarMovimientosEC(){
+  if(terceroActualEC) renderMovimientosEC(terceroActualEC);
+}
+
+function limpiarConsultaEC(){
+  document.getElementById('desdeEC').value = '2026-06-01';
+  document.getElementById('hastaEC').value = '2026-06-30';
+  if(terceroActualEC) renderMovimientosEC(terceroActualEC);
+}
+
+function cerrarEstadoCuentaEC(){
+  document.getElementById('panelEstadoCuentaEC').style.display = 'none';
+}
+
+function renderEstadoTercerosET(){
+  const cont = document.getElementById('listaActivosET');
+  if(!cont) return;
+  const q = (document.getElementById('buscarTerceroET').value || '').toLowerCase();
+
+  const conSaldo = tercerosCD
+    .map(t => ({ nombre: t.nombre, saldo: t.valor||0 }))
+    .filter(t => t.nombre.toLowerCase().includes(q));
+
+  const activos = conSaldo.filter(t => t.saldo !== 0).sort((a,b)=>a.nombre.localeCompare(b.nombre));
+  const enCeros = conSaldo.filter(t => t.saldo === 0).sort((a,b)=>a.nombre.localeCompare(b.nombre));
+
+  cont.innerHTML = activos.map(t => filaTerceroET(t.nombre, t.saldo, false)).join('');
+
+  const btnVerMas = document.getElementById('btnVerMasET');
+  const listaCeros = document.getElementById('listaCerosET');
+  if(enCeros.length === 0){
+    btnVerMas.style.display = 'none';
+    listaCeros.style.display = 'none';
+  } else {
+    btnVerMas.style.display = 'block';
+    btnVerMas.textContent = expandidoET ? 'Ver menos' : `Ver más (${enCeros.length} en ceros)`;
+    listaCeros.style.display = expandidoET ? 'block' : 'none';
+    listaCeros.innerHTML = enCeros.map(t => filaTerceroET(t.nombre, t.saldo, true)).join('');
+  }
+
+  document.getElementById('sinResultadosET').style.display = (activos.length===0 && enCeros.length===0) ? 'block' : 'none';
+}
+
+renderEstadoTercerosET();
+poblarSelectorTerceroEC();
+
+// ================= TAB 9: Reporte de Comisiones (interactivo, reutiliza tercerosCD) =================
+function renderReporteComisionesRC(){
+  const tabla = document.getElementById('tablaComisionesRC');
+  if(!tabla) return;
+
+  const orden = document.getElementById('ordenarRC').value;
+  let filas = tercerosCD
+    .map(t => ({
+      nombre: t.nombre,
+      movimientos: t.movimientos||0,
+      bancaria: t.comisionBancaria||0,
+      dispersion: t.comisionDispersion||0,
+      total: (t.comisionBancaria||0) + (t.comisionDispersion||0),
+    }))
+    .filter(f => f.total > 0);
+
+  if(orden === 'alfabetico'){
+    filas.sort((a,b)=>a.nombre.localeCompare(b.nombre));
+  } else {
+    filas.sort((a,b)=>b.total - a.total);
+  }
+
+  let sumaBancaria = 0, sumaDispersion = 0, sumaTotal = 0;
+  filas.forEach(f => { sumaBancaria += f.bancaria; sumaDispersion += f.dispersion; sumaTotal += f.total; });
+
+  document.getElementById('rcTotalBancaria').textContent = fmt(sumaBancaria);
+  document.getElementById('rcTotalDispersion').textContent = fmt(sumaDispersion);
+  document.getElementById('rcTotalGeneral').textContent = fmt(sumaTotal);
+
+  tabla.innerHTML = '<tr><th>Tercero</th><th style="text-align:right;">Movimientos</th><th style="text-align:right;">Comisión bancaria</th><th style="text-align:right;">Comisión dispersión</th><th style="text-align:right;">Comisión total</th></tr>' +
+    (filas.length
+      ? filas.map(f => `<tr><td>${f.nombre}</td><td style="text-align:right;">${f.movimientos}</td><td class="mono" style="text-align:right;">${fmt(f.bancaria)}</td><td class="mono" style="text-align:right;">${fmt(f.dispersion)}</td><td class="mono" style="text-align:right;">${fmt(f.total)}</td></tr>`).join('')
+      : '<tr><td colspan="5" style="text-align:center;color:var(--muted);">Ningún tercero generó comisiones en el periodo.</td></tr>');
+}
+
+function cerrarReporteComisionesRC(){
+  document.getElementById('panelReporteComisionesRC').style.display = 'none';
+}
+
+renderReporteComisionesRC();
+
+// ================= TAB 11: Reporte Diario de Caja (datos fijos) =================
+const TERCEROS_RDC = [
+  {
+    tipo: 'Compensación (2)', valor: -10000000, detalleCols: ['Hora','Tercero','Valor'],
+    detalle: [
+      ['9:15 am', 'Cta Nequi CB', -6000000],
+      ['2:40 pm', 'Cta Bancolombia CB', -4000000],
+    ],
+  },
+  {
+    tipo: 'Pago de Tercero', valor: 2500000, detalleCols: ['Hora','Tercero','Valor'],
+    detalle: [
+      ['9:00 am', 'Mauricio Chará', 1500000],
+      ['11:20 am', 'Lucía López', 1000000],
+    ],
+  },
+  {
+    tipo: 'Pago a Tercero', valor: -1600000, detalleCols: ['Hora','Tercero','Valor'],
+    detalle: [
+      ['10:45 am', 'Carlos Gaviria', -1600000],
+    ],
+  },
+  { tipo: 'Préstamo a Tercero', valor: 0, detalle: null },
+  { tipo: 'Entrada de Efectivo', valor: 0, detalle: null },
+  {
+    tipo: 'Transferencia de Efectivo', valor: -267220, detalleCols: ['Hora','Caja destino','Valor'],
+    detalle: [
+      ['4:10 pm', 'Yohana Monterrosa', -267220],
+    ],
+  },
+];
+
+function renderReporteDiarioRDC(){
+  const tabla = document.getElementById('tablaTercerosRDC');
+  if(!tabla) return;
+
+  let filas = '<tr><th>Tipo</th><th style="text-align:right;">Valor</th><th></th></tr>';
+  TERCEROS_RDC.forEach((item, i) => {
+    const color = item.valor < 0 ? 'color:var(--red);' : '';
+    const boton = item.detalle
+      ? `<button class="btn-ghost btn-small" onclick="toggleDetalleRDC(${i})" id="btnDetRDC_${i}">+ Detalles</button>`
+      : '';
+    filas += `<tr><td>${item.tipo}</td><td class="mono" style="text-align:right;${color}">${fmt(item.valor)}</td><td style="text-align:right;">${boton}</td></tr>`;
+    if(item.detalle){
+      const filasDetalle = item.detalle.map(d => `<tr><td>${d[0]}</td><td>${d[1]}</td><td class="mono" style="text-align:right;">${fmt(d[2])}</td></tr>`).join('');
+      filas += `<tr id="detRDC_${i}" style="display:none;background:#fafafe;"><td colspan="3" style="padding:8px 10px;">
+        <table style="width:100%;border-collapse:collapse;font-size:12px;">
+          <tr style="color:var(--muted);"><td>${item.detalleCols[0]}</td><td>${item.detalleCols[1]}</td><td style="text-align:right;">${item.detalleCols[2]}</td></tr>
+          ${filasDetalle}
+        </table>
+      </td></tr>`;
+    }
+  });
+
+  const totalTerceros = TERCEROS_RDC.reduce((acc, it) => acc + it.valor, 0);
+  filas += `<tr class="row-new"><td><strong>Saldo de terceros y compensaciones</strong></td><td class="mono" style="text-align:right;color:var(--red);"><strong>${fmt(totalTerceros)}</strong></td><td></td></tr>`;
+
+  tabla.innerHTML = filas;
+}
+
+function toggleDetalleRDC(i){
+  const fila = document.getElementById('detRDC_'+i);
+  const btn = document.getElementById('btnDetRDC_'+i);
+  const abierto = fila.style.display === 'table-row';
+  fila.style.display = abierto ? 'none' : 'table-row';
+  btn.textContent = abierto ? '+ Detalles' : '- Ocultar';
+}
+
+function cerrarReporteDiarioRDC(){
+  const panel = document.querySelector('#tab11 .pos-modal-like');
+  if(panel) panel.style.display = 'none';
+}
+
+const fechaConsultaEl = document.getElementById('fechaConsultaRDC');
+if(fechaConsultaEl) fechaConsultaEl.value = '29 de junio de 2026 - 05:51 pm';
+
+renderReporteDiarioRDC();
+
+// ================= TAB 9: Reporte de Cierres de Caja (Admin, datos fijos) =================
+const CIERRES_RCA = {
+  'Soraya Monterrosa': {
+    saldoInicial: 1850000,
+    entradas: [
+      ['Consignación', 10, 14817683], ['Recarga Nequi', 8, 11100000], ['Recaudos', 7, 10729537],
+      ['Pago de Cartera', 0, 0], ['Pago Tarjeta de Crédito', 0, 0],
+    ],
+    totalEntradas: [25, 36647220],
+    salidas: [
+      ['Avance Tarjeta de Crédito', 0, 0], ['Retiro Tarjeta Débito', 4, 11385000], ['Retiro Nequi', 2, 1745000],
+      ['Retiro en Efectivo', 0, 0], ['Otros Retiros', 0, 0],
+    ],
+    totalSalidas: [6, 13130000],
+    netoTotal: 23517220,
+    terceros: [
+      { tipo: 'Compensación (2)', valor: -10000000, cols: ['Hora','Tercero','Valor'], detalle: [['9:15 am','Cta Nequi CB',-6000000], ['2:40 pm','Cta Bancolombia CB',-4000000]] },
+      { tipo: 'Pago de Tercero', valor: 2500000, cols: ['Hora','Tercero','Valor'], detalle: [['9:00 am','Mauricio Chará',1500000], ['11:20 am','Lucía López',1000000]] },
+      { tipo: 'Pago a Tercero', valor: -1600000, cols: ['Hora','Tercero','Valor'], detalle: [['10:45 am','Carlos Gaviria',-1600000]] },
+      { tipo: 'Préstamo a Tercero', valor: 0, cols: null, detalle: null },
+      { tipo: 'Entrada de Efectivo', valor: 0, cols: null, detalle: null },
+      { tipo: 'Transferencia de Efectivo', valor: -267220, cols: ['Hora','Caja destino','Valor'], detalle: [['4:10 pm','Yohana Monterrosa',-267220]] },
+    ],
+    saldoTerceros: -9367220,
+    cajaActual: 16000000,
+  },
+  'Yohana Monterrosa': {
+    saldoInicial: 500000,
+    entradas: [
+      ['Consignación', 5, 6000000], ['Recarga Nequi', 3, 2700000], ['Recaudos', 1, 500000],
+      ['Pago de Cartera', 0, 0], ['Pago Tarjeta de Crédito', 0, 0],
+    ],
+    totalEntradas: [9, 9200000],
+    salidas: [
+      ['Avance Tarjeta de Crédito', 0, 0], ['Retiro Tarjeta Débito', 2, 2000000], ['Retiro Nequi', 1, 600000],
+      ['Retiro en Efectivo', 0, 0], ['Otros Retiros', 1, 500000],
+    ],
+    totalSalidas: [4, 3100000],
+    netoTotal: 6100000,
+    terceros: [
+      { tipo: 'Compensación (1)', valor: -1000000, cols: ['Hora','Tercero','Valor'], detalle: [['9:20 am','Cta Nequi CB',-1000000]] },
+      { tipo: 'Pago de Tercero', valor: 300000, cols: ['Hora','Tercero','Valor'], detalle: [['10:15 am','Luz Dary Gómez',300000]] },
+      { tipo: 'Pago a Tercero', valor: -200000, cols: ['Hora','Tercero','Valor'], detalle: [['1:05 pm','Jose Ramirez',-200000]] },
+      { tipo: 'Préstamo a Tercero', valor: 0, cols: null, detalle: null },
+      { tipo: 'Entrada de Efectivo', valor: 0, cols: null, detalle: null },
+      { tipo: 'Transferencia de Efectivo', valor: -600000, cols: ['Hora','Caja destino','Valor'], detalle: [['3:30 pm','Salome Garcia',-600000]] },
+    ],
+    saldoTerceros: -1500000,
+    cajaActual: 5100000,
+  },
+  'Salome Garcia': {
+    saldoInicial: 300000,
+    entradas: [
+      ['Consignación', 3, 3000000], ['Recarga Nequi', 2, 1000000], ['Recaudos', 1, 500000],
+      ['Pago de Cartera', 0, 0], ['Pago Tarjeta de Crédito', 0, 0],
+    ],
+    totalEntradas: [6, 4500000],
+    salidas: [
+      ['Avance Tarjeta de Crédito', 0, 0], ['Retiro Tarjeta Débito', 1, 1500000], ['Retiro Nequi', 1, 500000],
+      ['Retiro en Efectivo', 0, 0], ['Otros Retiros', 0, 0],
+    ],
+    totalSalidas: [2, 2000000],
+    netoTotal: 2500000,
+    terceros: [
+      { tipo: 'Compensación (1)', valor: -500000, cols: ['Hora','Tercero','Valor'], detalle: [['9:40 am','Cta Bancolombia CB',-500000]] },
+      { tipo: 'Pago de Tercero', valor: 100000, cols: ['Hora','Tercero','Valor'], detalle: [['11:00 am','Carlos Gaviria',100000]] },
+      { tipo: 'Pago a Tercero', valor: -100000, cols: ['Hora','Tercero','Valor'], detalle: [['12:30 pm','Lucía López',-100000]] },
+      { tipo: 'Préstamo a Tercero', valor: 0, cols: null, detalle: null },
+      { tipo: 'Entrada de Efectivo', valor: 0, cols: null, detalle: null },
+      { tipo: 'Transferencia de Efectivo', valor: -300000, cols: ['Hora','Caja destino','Valor'], detalle: [['2:15 pm','Anyela Urrutia',-300000]] },
+    ],
+    saldoTerceros: -800000,
+    cajaActual: 2000000,
+  },
+  'Anyela Urrutia': {
+    saldoInicial: 200000,
+    entradas: [
+      ['Consignación', 2, 2000000], ['Recarga Nequi', 1, 700000], ['Recaudos', 1, 300000],
+      ['Pago de Cartera', 0, 0], ['Pago Tarjeta de Crédito', 0, 0],
+    ],
+    totalEntradas: [4, 3000000],
+    salidas: [
+      ['Avance Tarjeta de Crédito', 0, 0], ['Retiro Tarjeta Débito', 1, 900000], ['Retiro Nequi', 1, 300000],
+      ['Retiro en Efectivo', 0, 0], ['Otros Retiros', 0, 0],
+    ],
+    totalSalidas: [2, 1200000],
+    netoTotal: 1800000,
+    terceros: [
+      { tipo: 'Compensación (1)', valor: -300000, cols: ['Hora','Tercero','Valor'], detalle: [['9:50 am','Cta Nequi CB',-300000]] },
+      { tipo: 'Pago de Tercero', valor: 50000, cols: ['Hora','Tercero','Valor'], detalle: [['10:40 am','Mauricio Chará',50000]] },
+      { tipo: 'Pago a Tercero', valor: -50000, cols: ['Hora','Tercero','Valor'], detalle: [['1:20 pm','Jose Ramirez',-50000]] },
+      { tipo: 'Préstamo a Tercero', valor: 0, cols: null, detalle: null },
+      { tipo: 'Entrada de Efectivo', valor: 0, cols: null, detalle: null },
+      { tipo: 'Transferencia de Efectivo', valor: -200000, cols: ['Hora','Caja destino','Valor'], detalle: [['3:00 pm','Soraya Monterrosa',-200000]] },
+    ],
+    saldoTerceros: -500000,
+    cajaActual: 1500000,
+  },
+};
+
+function renderTicketCajaRCA(nombre){
+  const c = CIERRES_RCA[nombre];
+  const filaTabla = (t, cant, valor) => `<tr><td>${t}</td><td style="text-align:center;">${cant}</td><td class="mono" style="text-align:right;">${fmt(valor)}</td></tr>`;
+  return `
+    <div style="text-align:center;margin-bottom:16px;">
+      <div style="font-size:14px;font-weight:700;">REPORTE DIARIO DE CAJA</div>
+      <div style="font-size:13px;color:var(--muted);">CB [12029] BARRIO CENTENARIO</div>
+      <div style="font-size:13px;color:var(--muted);">Caja: ${nombre}</div>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:14px;">
+      <span style="color:var(--muted);">Saldo inicial</span>
+      <span class="mono">${fmt(c.saldoInicial)}</span>
+    </div>
+    <div style="font-size:13px;font-weight:700;margin-bottom:6px;">Transacciones de entrada</div>
+    <table class="setup-table" style="margin-bottom:16px;">
+      <tr><th>Tipo</th><th style="text-align:center;">Cant.</th><th style="text-align:right;">Valor</th></tr>
+      ${c.entradas.map(e=>filaTabla(e[0],e[1],e[2])).join('')}
+      <tr class="row-new"><td><strong>Total entradas</strong></td><td style="text-align:center;"><strong>${c.totalEntradas[0]}</strong></td><td class="mono" style="text-align:right;"><strong>${fmt(c.totalEntradas[1])}</strong></td></tr>
+    </table>
+    <div style="font-size:13px;font-weight:700;margin-bottom:6px;">Transacciones de salida</div>
+    <table class="setup-table" style="margin-bottom:16px;">
+      <tr><th>Tipo</th><th style="text-align:center;">Cant.</th><th style="text-align:right;">Valor</th></tr>
+      ${c.salidas.map(e=>filaTabla(e[0],e[1],e[2])).join('')}
+      <tr class="row-new"><td><strong>Total salidas</strong></td><td style="text-align:center;"><strong>${c.totalSalidas[0]}</strong></td><td class="mono" style="text-align:right;"><strong>${fmt(c.totalSalidas[1])}</strong></td></tr>
+    </table>
+    <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;margin-bottom:16px;">
+      <span>Neto total</span><span class="mono">${fmt(c.netoTotal)}</span>
+    </div>
+    <div style="font-size:13px;font-weight:700;margin-bottom:6px;">Transacciones de terceros y compensaciones</div>
+    <table class="setup-table">
+      <tr><th>Tipo</th><th style="text-align:right;">Valor</th><th></th></tr>
+      ${c.terceros.map((t,i)=>{
+        const color = t.valor<0 ? 'color:var(--red);' : '';
+        const boton = t.detalle
+          ? `<button class="btn-ghost btn-small" onclick="toggleDetalleRCA(${i})" id="btnDetRCA_${i}">+ Detalles</button>`
+          : '';
+        let fila = `<tr><td>${t.tipo}</td><td class="mono" style="text-align:right;${color}">${fmt(t.valor)}</td><td style="text-align:right;">${boton}</td></tr>`;
+        if(t.detalle){
+          const filasDetalle = t.detalle.map(d => `<tr><td>${d[0]}</td><td>${d[1]}</td><td class="mono" style="text-align:right;">${fmt(d[2])}</td></tr>`).join('');
+          fila += `<tr id="detRCA_${i}" style="display:none;background:#fafafe;"><td colspan="3" style="padding:8px 10px;">
+            <table style="width:100%;border-collapse:collapse;font-size:12px;">
+              <tr style="color:var(--muted);"><td>${t.cols[0]}</td><td>${t.cols[1]}</td><td style="text-align:right;">${t.cols[2]}</td></tr>
+              ${filasDetalle}
+            </table>
+          </td></tr>`;
+        }
+        return fila;
+      }).join('')}
+      <tr class="row-new"><td><strong>Saldo de terceros y compensaciones</strong></td><td class="mono" style="text-align:right;color:var(--red);"><strong>${fmt(c.saldoTerceros)}</strong></td><td></td></tr>
+    </table>
+    <div style="border-top:1px solid var(--border);margin-top:16px;padding-top:10px;display:flex;justify-content:space-between;">
+      <span style="font-size:14px;font-weight:700;">Caja actual</span>
+      <span class="mono" style="font-size:16px;font-weight:700;">${fmt(c.cajaActual)}</span>
+    </div>`;
+}
+
+function renderResumenTodasLasCajasRCA(){
+  const nombres = Object.keys(CIERRES_RCA);
+  const totales = { saldoInicial:0, entradas:0, salidas:0, neto:0, terceros:0, cajaActual:0 };
+  const filas = nombres.map(n=>{
+    const c = CIERRES_RCA[n];
+    totales.saldoInicial += c.saldoInicial;
+    totales.entradas += c.totalEntradas[1];
+    totales.salidas += c.totalSalidas[1];
+    totales.neto += c.netoTotal;
+    totales.terceros += c.saldoTerceros;
+    totales.cajaActual += c.cajaActual;
+    return `<tr>
+      <td>${n}</td>
+      <td class="mono" style="text-align:right;">${fmt(c.saldoInicial)}</td>
+      <td class="mono" style="text-align:right;">${fmt(c.totalEntradas[1])}</td>
+      <td class="mono" style="text-align:right;">${fmt(c.totalSalidas[1])}</td>
+      <td class="mono" style="text-align:right;">${fmt(c.netoTotal)}</td>
+      <td class="mono" style="text-align:right;color:var(--red);">${fmt(c.saldoTerceros)}</td>
+      <td class="mono" style="text-align:right;"><strong>${fmt(c.cajaActual)}</strong></td>
+    </tr>`;
+  }).join('');
+
+  return `
+    <div style="text-align:center;margin-bottom:16px;">
+      <div style="font-size:14px;font-weight:700;">REPORTE DIARIO DE CAJA — TODAS LAS CAJAS</div>
+      <div style="font-size:13px;color:var(--muted);">CB [12029] BARRIO CENTENARIO</div>
+    </div>
+    <div style="overflow-x:auto;">
+    <table class="setup-table" style="min-width:640px;">
+      <tr>
+        <th>Caja</th><th style="text-align:right;">Saldo inicial</th><th style="text-align:right;">Entradas</th>
+        <th style="text-align:right;">Salidas</th><th style="text-align:right;">Neto</th>
+        <th style="text-align:right;">Terceros</th><th style="text-align:right;">Caja actual</th>
+      </tr>
+      ${filas}
+      <tr class="row-new">
+        <td><strong>Total</strong></td>
+        <td class="mono" style="text-align:right;"><strong>${fmt(totales.saldoInicial)}</strong></td>
+        <td class="mono" style="text-align:right;"><strong>${fmt(totales.entradas)}</strong></td>
+        <td class="mono" style="text-align:right;"><strong>${fmt(totales.salidas)}</strong></td>
+        <td class="mono" style="text-align:right;"><strong>${fmt(totales.neto)}</strong></td>
+        <td class="mono" style="text-align:right;color:var(--red);"><strong>${fmt(totales.terceros)}</strong></td>
+        <td class="mono" style="text-align:right;"><strong>${fmt(totales.cajaActual)}</strong></td>
+      </tr>
+    </table>
+    </div>
+    <div class="setup-note" style="margin-top:14px;">Total Caja actual = suma de las 4 cajas — este es el mismo dato que se ve como "Caja" en el Informe Financiero.</div>`;
+}
+
+function toggleDetalleRCA(i){
+  const fila = document.getElementById('detRCA_'+i);
+  const btn = document.getElementById('btnDetRCA_'+i);
+  const abierto = fila.style.display === 'table-row';
+  fila.style.display = abierto ? 'none' : 'table-row';
+  btn.textContent = abierto ? '+ Detalles' : '- Ocultar';
+}
+
+function renderCierreCajaRCA(){
+  const cont = document.getElementById('contenidoCierreRCA');
+  if(!cont) return;
+  const seleccion = document.getElementById('selectorCajaRCA').value;
+  const panel = document.getElementById('panelCierreCajaRCA');
+  if(seleccion === 'todos'){
+    panel.style.maxWidth = '960px';
+    cont.innerHTML = renderResumenTodasLasCajasRCA();
+  } else {
+    panel.style.maxWidth = '560px';
+    cont.innerHTML = renderTicketCajaRCA(seleccion);
+  }
+}
+
+function cerrarCierreCajaRCA(){
+  document.getElementById('panelCierreCajaRCA').style.display = 'none';
+}
+
+renderCierreCajaRCA();
+
+// ================= TAB 13: Checklist General (con memoria en localStorage) =================
+const CHECKLIST_STORAGE_KEY = 'coban365_checklist_v1';
+
+const CHECKLIST_ITEMS = [
+  // Rol SuperAdmin (tab5)
+  { id: 'sa-1', seccion: 'Rol SuperAdmin', texto: '1. Menú Gestionar Transacciones — bloqueo de ediciones, categorización, renombres, altas/bajas de transacciones', tipo: 'CONTEXTO', tab: 'tab5' },
+  { id: 'sa-2', seccion: 'Rol SuperAdmin', texto: '2. Menú Gestionar Usuarios — teléfono obligatorio, normalización de nombre y correo', tipo: 'A PROGRAMAR', tab: 'tab5' },
+  { id: 'sa-3', seccion: 'Rol SuperAdmin', texto: '3. Menú Gestionar Corresponsales — normalización, tipos de transacción agrupados, valores por defecto', tipo: 'A PROGRAMAR', tab: 'tab5' },
+  { id: 'sa-4', seccion: 'Rol SuperAdmin', texto: '4. Menú: Gestionar Mis Corresponsales — este menú desaparece porque el SuperAdmin no debe tener ningún corresponsal asignado', tipo: 'A PROGRAMAR', tab: 'tab5' },
+  { id: 'sa-5', seccion: 'Rol SuperAdmin', texto: '5. Menú Parámetros del sistema — nueva pantalla para editar sin tocar código valores hoy quemados (días de Freemium, avisos previos, etc.)', tipo: 'A PROGRAMAR', tab: 'tab5' },
+  { id: 'sa-bug1', seccion: 'Rol SuperAdmin', texto: 'Bug 1: Error SMTP al activar/desactivar Premium (el cambio sí se guarda, solo falla el correo)', tipo: 'BUG', tab: 'tab5' },
+
+  // Rol Admin (tab1)
+  { id: 'ad-1', seccion: 'Rol Admin', texto: '1. Menú Gestionar mis corresponsales → Mis Terceros — contexto de comisión bancaria y dispersión', tipo: 'CONTEXTO', tab: 'tab1' },
+  { id: 'ad-c1', seccion: 'Rol Admin', texto: 'Cambio 1: Nuevo método de envío "Compensación a otro CB"', tipo: 'CAMBIO EN CÓDIGO', tab: 'tab1' },
+  { id: 'ad-c2', seccion: 'Rol Admin', texto: 'Cambio 2: Comisión bancaria por método de envío', tipo: 'YA EN CÓDIGO', tab: 'tab1' },
+  { id: 'ad-c3', seccion: 'Rol Admin', texto: 'Cambio 3: Dispersión por método de envío', tipo: 'AJUSTE REQUERIDO', tab: 'tab1' },
+  { id: 'ad-c4', seccion: 'Rol Admin', texto: 'Cambio 4: Rediseño del formulario de creación de tercero (2 columnas, comisión y dispersión)', tipo: 'A PROGRAMAR', tab: 'tab1' },
+  { id: 'ad-2', seccion: 'Rol Admin', texto: '2. Sub Menú Mis Cajeros — normalizar mayúsculas/minúsculas en el nombre', tipo: 'AJUSTE REQUERIDO', tab: 'tab1' },
+  { id: 'ad-3', seccion: 'Rol Admin', texto: '3. Sub Menú Mis Cajas — listar solo cajeros del corresponsal actual (hoy salen todos)', tipo: 'BUG / AJUSTE', tab: 'tab1' },
+  { id: 'ad-bug1', seccion: 'Rol Admin', texto: 'Bug 1: Saldo inicial mal condicionado al crédito disponible al crear un tercero', tipo: 'BUG', tab: 'tab1' },
+  { id: 'ad-bug2', seccion: 'Rol Admin', texto: 'Bug 2: Terceros creados sin contraseña asignada (no pueden ver su estado de cuenta)', tipo: 'BUG', tab: 'tab1' },
+
+  // Rol Cajero (tab6)
+  { id: 'ca-1', seccion: 'Rol Cajero', texto: '1. Menú Gestionar Caja — contexto del dashboard e íconos de acciones rápidas', tipo: 'CONTEXTO', tab: 'tab6' },
+  { id: 'ca-c1', seccion: 'Rol Cajero', texto: 'Cambio 1: Tooltips faltantes en los íconos del dashboard', tipo: 'A PROGRAMAR', tab: 'tab6' },
+  { id: 'ca-c2', seccion: 'Rol Cajero', texto: 'Cambio 2: Nuevo Reporte Diario de Caja para datáfonos Wompi (vs. Redeban)', tipo: 'A PROGRAMAR', tab: 'tab6' },
+  { id: 'ca-c3', seccion: 'Rol Cajero', texto: 'Cambio 3: Cierre de Caja — nueva lógica con causas del catálogo, cierre automático, y demo interactivo (Efectivo vs Coban365, Datáfono vs Neto Total)', tipo: 'A PROGRAMAR', tab: 'tab6' },
+  { id: 'ca-c4', seccion: 'Rol Cajero', texto: 'Cambio 4: Rediseño del modal Resumen de Terceros (solo nombre, balance y cupo)', tipo: 'A PROGRAMAR', tab: 'tab6' },
+  { id: 'ca-c5', seccion: 'Rol Cajero', texto: 'Cambio 5: Comisiones de Terceros — quitar filtros y columna innecesarios', tipo: 'AJUSTE REQUERIDO', tab: 'tab6' },
+  { id: 'ca-c6', seccion: 'Rol Cajero', texto: 'Cambio 6: Sección de Filtros — formato numérico y opciones de paginación', tipo: 'AJUSTE REQUERIDO', tab: 'tab6' },
+  { id: 'ca-bug1', seccion: 'Rol Cajero', texto: 'Bug 1: Filtro por categoría no funciona para algunas categorías', tipo: 'BUG', tab: 'tab6' },
+  { id: 'ca-bug2', seccion: 'Rol Cajero', texto: 'Bug 2: Botón sin función identificada junto al nombre del cajero (ícono Compartir)', tipo: 'POR REVISAR', tab: 'tab6' },
+
+  // Terceros (tab7)
+  { id: 'te-1', seccion: 'Terceros', texto: '1. Título de la ventana — simplificar a "TERCEROS - [Código] - Corresponsal - Cajero"', tipo: 'AJUSTE REQUERIDO', tab: 'tab7' },
+  { id: 'te-2', seccion: 'Terceros', texto: '2. Información de Terceros — mostrar Balance y Cupo en vez de identificación', tipo: 'AJUSTE REQUERIDO', tab: 'tab7' },
+  { id: 'te-3', seccion: 'Terceros', texto: '3. Lógica de "Préstamo de Tercero" según método de envío (7 casos, incluye Compensación a otro CB)', tipo: 'A PROGRAMAR', tab: 'tab7' },
+
+  // Reportes SuperAdmin (tab12)
+  { id: 'rsa-1', seccion: 'Reportes SuperAdmin', texto: '1. Listado de Corresponsales (con Días con uso real, Plan y Estado)', tipo: 'PROPUESTA NUEVA', tab: 'tab12' },
+  { id: 'rsa-2', seccion: 'Reportes SuperAdmin', texto: '2. Resumen de Adopción (sin movimiento reciente / freemium por vencer, con botón WhatsApp)', tipo: 'PROPUESTA NUEVA', tab: 'tab12' },
+
+  // Reportes Admin (tab9)
+  { id: 'rad-1', seccion: 'Reportes Admin', texto: '1. Informe de Conciliación Diaria (esquema de 3 columnas: Caja | Banco | Terceros, alineadas y con orden alfabético en ambas listas, Caja + Terceros + Banco = $0)', tipo: 'PROPUESTA NUEVA', tab: 'tab9' },
+  { id: 'rad-2', seccion: 'Reportes Admin', texto: '2. Estado de Terceros (listado alfabético con saldo, buscador, colapsa los que están en ceros, encabezados de columna Tercero / Estado de cuenta)', tipo: 'PROPUESTA NUEVA', tab: 'tab9' },
+  { id: 'rad-7', seccion: 'Reportes Admin', texto: '7. Diferencias de cierre (tabla consolidada de todos los cajeros + Resumen del período con 5 indicadores y filtro por cajero, con avance de estado Pendiente → En seguimiento → Conciliado)', tipo: 'PROPUESTA NUEVA', tab: 'tab9' },
+  { id: 'ad-parametros', seccion: 'Rol Admin', texto: 'Nuevo menú: Parámetros — activar/desactivar causas del catálogo global (solo para su CB, todas activas por defecto)', tipo: 'A PROGRAMAR', tab: 'tab1' },
+  { id: 'rad-3', seccion: 'Reportes Admin', texto: '3. Estado de Cuentas por Tercero (histórico individual, filtro de fechas, movimientos)', tipo: 'PROPUESTA NUEVA', tab: 'tab9' },
+  { id: 'rad-4', seccion: 'Reportes Admin', texto: '4. Informe Financiero (Caja/Terceros/Banco/Cupo + comparación contra Somos Bancolombia)', tipo: 'PROPUESTA NUEVA', tab: 'tab9' },
+  { id: 'rad-5', seccion: 'Reportes Admin', texto: '5. Comisiones generadas por terceros (bancaria + dispersión, ordenable)', tipo: 'PROPUESTA NUEVA', tab: 'tab9' },
+  { id: 'rad-6', seccion: 'Reportes Admin', texto: '6. Reporte de Cierres de Caja (individual y consolidado de todas las cajas)', tipo: 'PROPUESTA NUEVA', tab: 'tab9' },
+
+  // Reportes Cajero (tab11)
+  { id: 'rca-1', seccion: 'Reportes Cajero', texto: '1. Reporte Diario de Caja (mismo orden del cierre físico, con detalle expandible de terceros)', tipo: 'PROPUESTA NUEVA', tab: 'tab11' },
+
+  // Pendientes de definir (mencionados en conversación, aún sin diseño cerrado)
+  { id: 'pend-1', seccion: 'Pendientes por definir', texto: 'Anular en vez de borrar movimientos (con motivo y fecha de anulación)', tipo: 'PENDIENTE', tab: null },
+  { id: 'pend-2', seccion: 'Pendientes por definir', texto: 'Conciliación con el banco por categoría y día (no por movimiento individual)', tipo: 'PENDIENTE', tab: null },
+  { id: 'pend-3', seccion: 'Pendientes por definir', texto: 'Ventana de espera configurable por tipo de transacción (pendiente vs. vencido)', tipo: 'PENDIENTE', tab: null },
+  { id: 'pend-4', seccion: 'Pendientes por definir', texto: 'Pantalla de reconfirmación de Caja/Terceros tras varios días de inactividad', tipo: 'PENDIENTE', tab: null },
+  { id: 'pend-5', seccion: 'Pendientes por definir', texto: 'Downgrade automático Premium → Freemium (avisos previos + sugerencia de cajero/tercero a conservar)', tipo: 'PENDIENTE', tab: null },
+];
+
+function cargarEstadoChecklist(){
+  try {
+    return JSON.parse(localStorage.getItem(CHECKLIST_STORAGE_KEY)) || {};
+  } catch(e) {
+    return {};
+  }
+}
+
+function guardarEstadoChecklist(estado){
+  try {
+    localStorage.setItem(CHECKLIST_STORAGE_KEY, JSON.stringify(estado));
+  } catch(e) { /* localStorage no disponible; el check seguirá funcionando solo en esta sesión */ }
+}
+
+function toggleChecklistItem(id){
+  const estado = cargarEstadoChecklist();
+  estado[id] = !estado[id];
+  guardarEstadoChecklist(estado);
+  actualizarResumenChecklist();
+}
+
+function reiniciarChecklist(){
+  if(!confirm('¿Reiniciar el checklist? Se desmarcarán todos los ítems.')) return;
+  guardarEstadoChecklist({});
+  renderChecklist();
+}
+
+function actualizarResumenChecklist(){
+  const estado = cargarEstadoChecklist();
+  const total = CHECKLIST_ITEMS.length;
+  const completados = CHECKLIST_ITEMS.filter(it => estado[it.id]).length;
+  const pct = total ? Math.round((completados/total)*100) : 0;
+  document.getElementById('checklistResumenTexto').textContent = `${completados} de ${total} completados`;
+  document.getElementById('checklistResumenPct').textContent = pct + '%';
+  document.getElementById('checklistBarra').style.width = pct + '%';
+}
+
+function renderChecklist(){
+  const cont = document.getElementById('checklistContenedor');
+  if(!cont) return;
+  const estado = cargarEstadoChecklist();
+
+  const secciones = [];
+  CHECKLIST_ITEMS.forEach(it => {
+    if(!secciones.includes(it.seccion)) secciones.push(it.seccion);
+  });
+
+  cont.innerHTML = secciones.map(seccion => {
+    const items = CHECKLIST_ITEMS.filter(it => it.seccion === seccion);
+    const filas = items.map(it => {
+      const marcado = !!estado[it.id];
+      const irABoton = it.tab ? `<button class="btn-ghost btn-small" onclick="goTab('${it.tab}')">Ir a</button>` : '';
+      return `<div style="display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);">
+        <input type="checkbox" id="chk_${it.id}" ${marcado?'checked':''} onchange="toggleChecklistItem('${it.id}')" style="width:18px;height:18px;margin-top:2px;flex-shrink:0;">
+        <label for="chk_${it.id}" style="flex:1;font-size:13.5px;line-height:1.5;${marcado?'text-decoration:line-through;color:var(--muted);':''}cursor:pointer;">
+          ${it.texto} <span class="tag" style="margin-left:4px;">${it.tipo}</span>
+        </label>
+        ${irABoton}
+      </div>`;
+    }).join('');
+
+    return `<div class="card">
+      <h2>${seccion}</h2>
+      <div>${filas}</div>
+    </div>`;
+  }).join('');
+
+  actualizarResumenChecklist();
+}
+
+renderChecklist();
+
+// ================= TAB 1: Gestión de Terceros — nueva propuesta (interactivo) =================
+const TERCEROS_GT = [
+  { nombre: 'Pedro Perez', celular: '433434343', credito: 0, saldoInicial: 0, comision: 17000, activo: true,
+    dispersion: { 'Transferencia':1, 'Compensación':1, 'Compensación a otro CB':1, 'Consignación sucursal':2, 'Consignación cajero':2, 'Consignación CB':2, 'Entrega en efectivo':2 } },
+  { nombre: 'Mauricio Chará', celular: '3157774638', credito: 0, saldoInicial: 3000000, comision: 17000, activo: true,
+    dispersion: { 'Transferencia':1, 'Compensación':1, 'Compensación a otro CB':1, 'Consignación sucursal':2, 'Consignación cajero':2, 'Consignación CB':2, 'Entrega en efectivo':2 } },
+  { nombre: 'Lucía López', celular: '3009988776', credito: 500000, saldoInicial: 1000000, comision: 17000, activo: true,
+    dispersion: { 'Transferencia':1, 'Compensación':1, 'Compensación a otro CB':1, 'Consignación sucursal':1, 'Consignación cajero':2, 'Consignación CB':2, 'Entrega en efectivo':1 } },
+  { nombre: 'Carlos Gaviria', celular: '3201234567', credito: 500000, saldoInicial: 700000, comision: 17000, activo: true,
+    dispersion: { 'Transferencia':1, 'Compensación':1, 'Compensación a otro CB':1, 'Consignación sucursal':2, 'Consignación cajero':1, 'Consignación CB':2, 'Entrega en efectivo':2 } },
+  { nombre: 'Luz Dary Gómez', celular: '3112223344', credito: 2000000, saldoInicial: 500000, comision: 17000, activo: true,
+    dispersion: { 'Transferencia':2, 'Compensación':1, 'Compensación a otro CB':1, 'Consignación sucursal':2, 'Consignación cajero':2, 'Consignación CB':2, 'Entrega en efectivo':2 } },
+  { nombre: 'Jose Ramirez', celular: '3145556677', credito: 1000000, saldoInicial: 500000, comision: 17000, activo: true,
+    dispersion: { 'Transferencia':1, 'Compensación':1, 'Compensación a otro CB':1, 'Consignación sucursal':2, 'Consignación cajero':2, 'Consignación CB':2, 'Entrega en efectivo':2 } },
+  { nombre: 'Ana Torres', celular: '3018889900', credito: 0, saldoInicial: 0, comision: 17000, activo: false,
+    dispersion: { 'Transferencia':1, 'Compensación':1, 'Compensación a otro CB':1, 'Consignación sucursal':2, 'Consignación cajero':2, 'Consignación CB':2, 'Entrega en efectivo':2 } },
+];
+let expandidoGT = -1;
+
+function toggleDispersionGT(idx){
+  expandidoGT = (expandidoGT === idx) ? -1 : idx;
+  renderListaTercerosGT();
+}
+
+function renderListaTercerosGT(){
+  const cont = document.getElementById('listaTercerosGT');
+  if(!cont) return;
+  const q = (document.getElementById('buscarTerceroGT').value || '').trim().toLowerCase();
+
+  let filtrados = TERCEROS_GT.slice();
+  if(q.length >= 3){
+    filtrados = filtrados.filter(t => t.nombre.toLowerCase().includes(q));
+  }
+  filtrados.sort((a,b) => a.nombre.localeCompare(b.nombre));
+
+  document.getElementById('resultadosGT').textContent = `Resultados encontrados: ${filtrados.length} de ${TERCEROS_GT.length}`;
+
+  if(filtrados.length === 0){
+    cont.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:16px;">No se encontraron terceros con ese nombre.</td></tr>';
+    return;
+  }
+
+  const iconoWhatsApp = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-3px;"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12.031 21.786a9.71 9.71 0 0 1-4.951-1.357l-.354-.21-3.68.966.98-3.586-.23-.367a9.71 9.71 0 0 1-1.49-5.176c0-5.365 4.365-9.73 9.73-9.73 2.598 0 5.04 1.014 6.878 2.852a9.66 9.66 0 0 1 2.85 6.883c-.004 5.365-4.369 9.725-9.733 9.725zm8.283-18.02A11.815 11.815 0 0 0 12.03 0C5.463 0 .12 5.343.117 11.913c0 2.1.548 4.15 1.588 5.958L.019 24l6.264-1.643a11.88 11.88 0 0 0 5.744 1.464h.005c6.567 0 11.913-5.344 11.917-11.913a11.86 11.86 0 0 0-3.49-8.414z"/></svg>';
+
+  cont.innerHTML = filtrados.map((t) => {
+    const idxReal = TERCEROS_GT.indexOf(t);
+    const abierto = expandidoGT === idxReal;
+    const numeroWa = '57' + t.celular;
+    let filas = `<tr>
+      <td>${t.nombre}</td>
+      <td style="white-space:nowrap;">${t.celular} <a href="https://wa.me/${numeroWa}" target="_blank" rel="noopener" title="Contactar por WhatsApp" style="color:#25D366;text-decoration:none;margin-left:6px;">${iconoWhatsApp}</a></td>
+      <td class="mono" style="text-align:right;">${fmt(t.credito)}</td>
+      <td class="mono" style="text-align:right;color:var(--green);">${t.saldoInicial>0?'+':''}${fmt(t.saldoInicial)}</td>
+      <td class="mono" style="text-align:right;">${fmt(t.comision)}</td>
+      <td><button class="btn-ghost btn-small" onclick="toggleDispersionGT(${idxReal})">7 métodos ${abierto?'▲':'▼'}</button></td>
+      <td>${t.activo ? '<span class="badge badge-green">✅ Activo</span>' : '<span class="badge">Inactivo</span>'}</td>
+      <td>✏️</td>
+    </tr>`;
+    if(abierto){
+      const items = Object.entries(t.dispersion).map(([metodo,val]) => `
+        <div><span style="color:var(--muted);font-size:11.5px;">${metodo}</span><br><strong>${val} x1000</strong></div>`).join('');
+      filas += `<tr style="background:#fafafe;"><td colspan="8" style="padding:10px 14px;">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px 16px;font-size:12px;">${items}</div>
+      </td></tr>`;
+    }
+    return filas;
+  }).join('');
+}
+
+renderListaTercerosGT();
